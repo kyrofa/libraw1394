@@ -17,7 +17,7 @@ dnl
 dnl AC_LIB_RAW1394_HEADERS([ACTION_IF_FOUND[,ACTION_IF_NOT_FOUND]])
 dnl
 AC_DEFUN(AC_LIB_RAW1394_HEADERS, [
-AC_REQUIRE(AC_LIB_RAW1394_FLAGS)
+AC_REQUIRE([AC_LIB_RAW1394_FLAGS])
 
 ac_libraw1394_save_cppflags=$CPPFLAGS
 CPPFLAGS="$LIBRAW1394_CPPFLAGS $CPPFLAGS"
@@ -27,7 +27,11 @@ AC_CHECK_HEADER(libraw1394/raw1394.h, ac_libraw1394_headers=yes)
 
 CPPFLAGS=$ac_libraw1394_save_cppflags
 
-if test $ac_libraw1394_headers = yes ; then $1; else $2; fi
+if test $ac_libraw1394_headers = yes ; then
+	ifelse([$1], , :, $1)
+else
+	ifelse([$2], , :, $2)
+fi
 ])
 
 
@@ -35,7 +39,8 @@ dnl
 dnl AC_LIB_RAW1394_LIBVERSION(MINIMUMVERSION[,ACTION_IF_FOUND[,ACTION_IF_NOT_FOUND]])
 dnl
 AC_DEFUN(AC_LIB_RAW1394_LIBVERSION, [
-AC_REQUIRE(AC_LIB_RAW1394_HEADERS)
+AC_REQUIRE([AC_PROG_CC])
+AC_REQUIRE([AC_LIB_RAW1394_FLAGS])
 
 ac_libraw1394_save_cppflags=$CPPFLAGS
 ac_libraw1394_save_cflags=$CFLAGS
@@ -45,7 +50,7 @@ CFLAGS="$LIBRAW1394_CFLAGS $CFLAGS"
 LIBS="$LIBRAW1394_LIBS $LIBS"
 
 ac_libraw1394_versiontest_success=no
-ac_libraw1394_ver_symbol=`echo __libraw1394_version_$0 | sed 's/\./_/g'`
+ac_libraw1394_ver_symbol=`echo __libraw1394_version_$1 | sed 's/\./_/g'`
 
 AC_TRY_LINK([], [{
 	extern char $ac_libraw1394_ver_symbol;
@@ -56,7 +61,11 @@ CPPFLAGS=$ac_libraw1394_save_cppflags
 CFLAGS=$ac_libraw1394_save_cflags
 LIBS=$ac_libraw1394_save_libs
 
-if test $ac_libraw1394_versiontest_success = yes; then $1; else $2; fi
+if test $ac_libraw1394_versiontest_success = yes; then
+	ifelse([$2], , :, $2)
+else
+	ifelse([$3], , :, $3)
+fi
 ])
 
 
@@ -64,15 +73,12 @@ dnl
 dnl AC_LIB_RAW1394_RUNTEST(MINIMUMVERSION[,ACTION_IF_FOUND
 dnl                        [,ACTION_IF_NOT_FOUND[,ACTION_IF_CROSS_COMPILING]]])
 AC_DEFUN(AC_LIB_RAW1394_RUNTEST, [
-AC_REQUIRE(AC_LIB_RAW1394_HEADERS)
-
 ac_libraw1394_save_cppflags=$CPPFLAGS
 ac_libraw1394_save_cflags=$CFLAGS
 ac_libraw1394_save_libs=$LIBS
 CPPFLAGS="$LIBRAW1394_CPPFLAGS $CPPFLAGS"
 CFLAGS="$LIBRAW1394_CFLAGS $CFLAGS"
 LIBS="$LIBRAW1394_LIBS $LIBS"
-
 
 dnl This program compares two version strings and returns with code 0 if
 dnl req_ver <= lib_ver, returns 1 otherwise.
@@ -113,12 +119,12 @@ CFLAGS=$ac_libraw1394_save_cflags
 LIBS=$ac_libraw1394_save_libs
 
 if test $ac_libraw1394_run = yes; then
-	$2
+	ifelse([$2], , :, $2)
 elif test $ac_libraw1394_run = no; then
-	$3
+	ifelse([$3], , :, $3)
 else
 	ifelse([$4], ,
-               AC_MSG_ERROR([$0 called without directions for cross compiling]),
+               AC_MSG_ERROR([no default for cross compiling in libraw1394 runtest macro]),
                [$4])
 fi
 ])
@@ -132,7 +138,7 @@ dnl
 AC_DEFUN(AC_LIB_RAW1394, [
 
 AC_LIB_RAW1394_FLAGS
-AC_LIB_RAW1394_HEADERS(ac_libraw1394_found=yes, ac_libraw1394_found=no
+AC_LIB_RAW1394_HEADERS(ac_libraw1394_found=yes, ac_libraw1394_found=no)
 
 if test $ac_libraw1394_found = yes ; then
 
