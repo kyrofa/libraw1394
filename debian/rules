@@ -31,6 +31,7 @@ build-stamp:
 	./configure $(confflags) --prefix=/usr --mandir=\$${prefix}/share/man \
 		--infodir=\$${prefix}/share/info
 	$(MAKE)
+	$(MAKE) -C doc libraw1394.pdf
 
 	touch build-stamp
 
