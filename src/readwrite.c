@@ -110,7 +110,7 @@ int raw1394_start_write(struct raw1394_handle *handle, nodeid_t node,
 
 
 /**
- * raw1394_start_read - initiate a lock transaction
+ * raw1394_start_lock - initiate a lock transaction
  * @node: target node
  * @addr: address to read from
  * @extcode: extended transaction code determining the lock operation

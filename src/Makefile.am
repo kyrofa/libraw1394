@@ -11,8 +11,9 @@ libraw1394_la_SOURCES =   \
 	errors.c          \
 	readwrite.c       \
 	iso.c             \
+	iso-legacy.c      \
 	fcp.c             \
-	arm.c             \	      
+	arm.c             \
 	version.c         \
 	kernel-raw1394.h  \
 	raw1394_private.h

@@ -65,17 +65,8 @@ int raw1394_loop_iterate(struct raw1394_handle *handle)
                 break;
 
         case RAW1394_REQ_ISO_RECEIVE:
-                channel = (handle->buffer[0] >> 8) & 0x3f;
-#ifndef WORDS_BIGENDIAN
-                handle->buffer[0] = bswap_32(handle->buffer[0]);
-#endif
-
-                if (handle->iso_handler[channel]) {
-                        retval = handle->iso_handler[channel](handle, channel,
-                                                              req->length,
-                                                              handle->buffer);
-                }
-                break;
+		/* obsolete API, not used anymore */
+		break;
 
         case RAW1394_REQ_FCP_REQUEST:
                 if (handle->fcp_handler) {
@@ -166,39 +157,6 @@ arm_tag_handler_t raw1394_set_arm_tag_handler(struct raw1394_handle *handle,
         handle->arm_tag_handler = new;
 
         return old;
-}
-
-
-/**
- * raw1394_set_iso_handler - set isochronous packet handler
- * @new_h: pointer to new handler
- *
- * Sets the handler to be called when an isochronous packet is received to
- * @new_h and returns the old handler.  The default handler does nothing.
- *
- * In order to actually get iso packet events, receiving on a specific channel
- * first has to be enabled with raw1394_start_iso_rcv() and can be stopped again
- * with raw1394_stop_iso_rcv().
- **/
-iso_handler_t raw1394_set_iso_handler(struct raw1394_handle *handle,
-                                      unsigned int channel, iso_handler_t new)
-{
-        if (channel >= 64) {
-                return (iso_handler_t)-1;
-        }
-
-        if (new == NULL) {
-                iso_handler_t old = handle->iso_handler[channel];
-                handle->iso_handler[channel] = NULL;
-                return old;
-        }
-
-        if (handle->iso_handler[channel] != NULL) {
-                return (iso_handler_t)-1;
-        }
-
-        handle->iso_handler[channel] = new;
-        return NULL;
 }
 
 /**

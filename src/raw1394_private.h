@@ -1,4 +1,3 @@
-
 #ifndef _RAW1394_PRIVATE_H
 #define _RAW1394_PRIVATE_H
 
@@ -21,8 +20,7 @@ struct raw1394_handle {
         tag_handler_t     tag_handler;
         arm_tag_handler_t arm_tag_handler;
         fcp_handler_t     fcp_handler;
-        iso_handler_t     iso_handler[64];
-
+       
 	/* new ISO API */
 
 	/* memory mapping of the DMA buffer */
@@ -30,7 +28,7 @@ struct raw1394_handle {
 
 	/* iso XMIT only: */
 	unsigned int iso_buf_stride; /* offset between successive packets */
-	unsigned int next_packet; /* index of next packet to be transmitted */
+	unsigned int next_packet; /* buffer index of next packet to be transmitted */
 
 	/* status buffer, updated from _raw1394_iso_iterate() */
 	struct raw1394_iso_status iso_status;
@@ -40,6 +38,10 @@ struct raw1394_handle {
 	raw1394_iso_xmit_handler_t iso_xmit_handler;
 	raw1394_iso_recv_handler_t iso_recv_handler;
 
+	/* legacy ISO API emulation */
+	int               legacy_iso_active; /* 1 if we are in legacy emulation mode */
+	iso_handler_t     iso_handler[64];
+	
         struct raw1394_request req;
         quadlet_t buffer[HBUF_SIZE/4]; /* 2048 */
 };
