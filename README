@@ -46,5 +46,9 @@ Simply use separate handles for each thread in which you need to use libraw1394.
 bug reports and fixes to andreas.bombe@munich.netsurf.de.  See the file AUTHORS
 for a complete list of contributors to libraw1394.
 
+	You can get updates through this project's homepage on SourceForge, see
+http://sourceforge.net/project/?group_id=2514 for more information.  You can
+also submit bugs through this page.
 
-1999-11-23  Andreas Bombe
+
+2000-03-18  Andreas Bombe
