@@ -116,24 +116,7 @@ typedef struct arm_request_response {
 } *arm_request_response_t;
 
 /* rawiso API */
-
-/* ioctls */
-#define RAW1394_ISO_XMIT_INIT               1  /* arg: raw1394_iso_status* */
-#define RAW1394_ISO_RECV_INIT               2  /* arg: raw1394_iso_status* */
-#define RAW1394_ISO_RECV_START              3  /* arg: int[3], { starting cycle, tag, sync } */
-#define RAW1394_ISO_XMIT_START              8  /* arg: int[2], { starting cycle, prebuffer } */
-#define RAW1394_ISO_XMIT_RECV_STOP          4
-#define RAW1394_ISO_GET_STATUS              5  /* arg: raw1394_iso_status* */
-#define RAW1394_ISO_PRODUCE_CONSUME         6  /* no longer used */
-#define RAW1394_ISO_SHUTDOWN                7
-#define RAW1394_ISO_QUEUE_ACTIVITY          9
-#define RAW1394_ISO_RECV_LISTEN_CHANNEL     10 /* arg: channel number */
-#define RAW1394_ISO_RECV_UNLISTEN_CHANNEL   11 /* arg: channel number */
-#define RAW1394_ISO_RECV_SET_CHANNEL_MASK   12 /* arg: pointer to 64-bit mask */
-#define RAW1394_ISO_RECV_PACKETS            13 /* arg: struct raw1394_iso_packets* */
-#define RAW1394_ISO_RECV_RELEASE_PACKETS    14 /* arg: int n_packets */
-#define RAW1394_ISO_XMIT_PACKETS            15 /* arg: struct raw1394_iso_packets* */
-#define RAW1394_ISO_XMIT_SYNC               16
+#include "ieee1394-ioctl.h"
 
 /* per-packet metadata embedded in the ringbuffer */
 /* must be identical to hpsb_iso_packet_info in iso.h! */
