@@ -1,7 +1,7 @@
 # process this file with autoconf to get a configure script
 
 AC_INIT(Makefile.am)
-AM_INIT_AUTOMAKE(libraw1394, 0.9.0)
+AM_INIT_AUTOMAKE(libraw1394, 1.0.0)
 AM_CONFIG_HEADER(config.h)
 
 AC_PROG_CC
@@ -22,7 +22,7 @@ AC_SUBST(lt_revision)
 AC_SUBST(lt_age)
 
 
-CFLAGS="$CFLAGS -Wall -Wunused"
+CFLAGS=${CFLAGS:-"-Wall -O2"}
 AC_OUTPUT([
 Makefile
 src/Makefile
