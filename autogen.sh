@@ -29,6 +29,13 @@ DIE=0
         DIE=1
 }
 
+(libtoolize --version) < /dev/null > /dev/null 2>&1 || {
+        echo
+        echo "You must have libtool installed to compile $PROJECT."
+        echo "Visit http://www.gnu.org/software/libtool/ for more information."
+        DIE=1
+}
+
 if test "$DIE" -eq 1; then
         exit 1
 fi
@@ -49,10 +56,12 @@ esac
 
 aclocal $ACLOCAL_FLAGS
 
+libtoolize --force --copy
+
 # optionally feature autoheader
 (autoheader --version)  < /dev/null > /dev/null 2>&1 && autoheader
 
-automake -a $am_opt
+automake -a $am_opt --copy
 autoconf
 cd $ORIGDIR
 
