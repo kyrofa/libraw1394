@@ -204,6 +204,11 @@ int raw1394_get_port_info(struct raw1394_handle *handle,
         CLEAR_REQ(&req);
         req.type = RAW1394_REQ_LIST_CARDS;
         req.generation = handle->generation;
+        /* IMPORTANT: raw1394 will be writing directly into the memory you
+           provide in pinf. The viability of this approach assumes that the 
+           structure of libraw1394's raw1394_portinfo and the kernel's 
+           raw1394_khost_list structs are the same!!
+        */
         req.recvb = ptr2int(pinf);
         req.length = sizeof(struct raw1394_portinfo) * maxports;
 
