@@ -25,7 +25,7 @@ AC_SUBST(lt_revision)
 AC_SUBST(lt_age)
 
 
-CFLAGS=${CFLAGS:-"-Wall -O2"}
+#CFLAGS=${CFLAGS:-"-Wall"}
 AC_OUTPUT([
 Makefile
 libraw1394.pc
