@@ -2,6 +2,8 @@
 Version 0.6:
 
 - FCP monitoring added
+- not really libraw1394 news: the subsystem doesn't swap data anymore,
+  everything is to be kept big endian now on all architectures
 
 Version 0.5:
 
