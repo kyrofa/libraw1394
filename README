@@ -1,0 +1,50 @@
+
+				   libraw1394
+				   ==========
+
+1. About libraw1394
+
+	libraw1394 is the only supported interface to the kernel side raw1394 of
+the Linux IEEE-1394 subsystem, which provides direct access to the connected
+1394 buses to user space.  Through libraw1394/raw1394, applications can directly
+send to and receive from other nodes without requiring a kernel driver for the
+protocol in question.
+
+	The reason for making a library the interface to the kernel is to avoid
+a program dependancy on the kernel version, which would hinder development and
+optimization of raw1394.  If development changed the protocol and made it
+incompatible with previous versions only the libraw1394 has to be upgraded to
+match the kernel version (instead of all applications).
+
+
+2. Copyleft
+
+	libraw1394 itself is licensed under the Lesser General Public License
+(short LGPL, see file COPYING.LIB in the source distribution).  Other files in
+the source archives not belonging to but being part of the build procedure of
+libraw1394 are under their own licenses, as stated at the top of the individual
+files.
+
+
+3. API documentation
+
+	There is currently no external document describing the library functions,
+but you can find documentation for all functions in the header file raw1394.h.
+
+
+4. Multithreading
+
+	This library should be multithreadable with the restriction that one
+raw1394handle_t may be used only within a single thread.  Multiple threads
+operating on the same handle would royally mess up the kernel-user protocol.
+Simply use separate handles for each thread in which you need to use libraw1394.
+
+
+5. Maintainer
+
+	Maintainer of libraw1394 is currently Andreas Bombe.  Send suggestions,
+bug reports and fixes to andreas.bombe@munich.netsurf.de.  See the file AUTHORS
+for a complete list of contributors to libraw1394.
+
+
+1999-11-23  Andreas Bombe
