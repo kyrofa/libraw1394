@@ -66,6 +66,7 @@ int raw1394_start_lock(struct raw1394_handle *handle, nodeid_t node,
         req->address = ((u_int64_t)node << 48) | addr;
         req->sendb = sendbuf;
         req->recvb = result;
+        req->misc = extcode;
 
         switch (extcode) {
         case 3: /* EXTCODE_FETCH_ADD */
