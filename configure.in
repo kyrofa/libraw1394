@@ -26,7 +26,10 @@ CFLAGS="$CFLAGS -Wall -Wunused"
 AC_OUTPUT([
 Makefile
 src/Makefile
+tools/Makefile
 doc/Makefile
 doc/testlibraw.1
+doc/sendiso.1
+doc/dumpiso.1
 debian/Makefile
 ])

@@ -18,7 +18,3 @@ libraw1394_la_SOURCES =   \
 
 # headers to be installed
 pkginclude_HEADERS = raw1394.h csr.h ieee1394.h
-
-# testlibraw
-bin_PROGRAMS = testlibraw
-testlibraw_LDADD = libraw1394.la

@@ -1,7 +1,8 @@
-EXTRA_DIST = testlibraw.1.in libraw1394.sgml libraw1394 libraw1394.ps
+EXTRA_DIST = testlibraw.1.in sendiso.1.in dumpiso.1.in \
+	libraw1394.sgml libraw1394 libraw1394.ps
 
 # man files for testlibraw
-man_MANS = testlibraw.1
+man_MANS = testlibraw.1 sendiso.1 dumpiso.1
 
 # libraw1394 docbook documentation
 

@@ -13,8 +13,8 @@
 #include <string.h>
 #include <sys/poll.h>
 
-#include "raw1394.h"
-#include "csr.h"
+#include "../src/raw1394.h"
+#include "../src/csr.h"
 
 
 #define TESTADDR (CSR_REGISTER_BASE + CSR_CYCLE_TIME)

@@ -1,6 +1,6 @@
 # process this file with automake to create a Makefile.in
 
-SUBDIRS = src doc debian
+SUBDIRS = src tools doc debian
 
 aclocaldir = @datadir@/aclocal
 aclocal_DATA = libraw1394.m4
