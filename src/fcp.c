@@ -22,17 +22,17 @@ static int do_fcp_listen(struct raw1394_handle *handle, int startstop)
         struct sync_cb_data sd = { 0, 0 };
         struct raw1394_reqhandle rh = { (req_callback_t)_raw1394_sync_cb, &sd };
         int err;
-        struct raw1394_request *req = &handle->req;
+        struct raw1394_request req;
 
-        CLEAR_REQ(req);
-        req->type = RAW1394_REQ_FCP_LISTEN;
-        req->generation = handle->generation;
-        req->misc = startstop;
-        req->tag = ptr2int(&rh);
-        req->recvb = ptr2int(handle->buffer);
-        req->length = 512;
+        CLEAR_REQ(&req);
+        req.type = RAW1394_REQ_FCP_LISTEN;
+        req.generation = handle->generation;
+        req.misc = startstop;
+        req.tag = ptr2int(&rh);
+        req.recvb = ptr2int(handle->buffer);
+        req.length = 512;
 
-        err = write(handle->fd, req, sizeof(*req));
+        err = write(handle->fd, &req, sizeof(req));
         while (!sd.done) {
                 if (err < 0) return err;
                 err = raw1394_loop_iterate(handle);

@@ -40,27 +40,27 @@
  **/
 int raw1394_loop_iterate(struct raw1394_handle *handle)
 {
-        struct raw1394_request *req = &handle->req;
+        struct raw1394_request req;
         int retval = 0, channel;
 
-        if (read(handle->fd, req, sizeof(*req)) < 0) {
+        if (read(handle->fd, &req, sizeof(req)) < 0) {
                 return -1;
         }
 
-        switch (req->type) {
+        switch (req.type) {
         case RAW1394_REQ_BUS_RESET:
                 if (handle->protocol_version == 3) {
-                        handle->num_of_nodes = req->misc & 0xffff;
-                        handle->local_id = req->misc >> 16;
+                        handle->num_of_nodes = req.misc & 0xffff;
+                        handle->local_id = req.misc >> 16;
                 } else {
-                        handle->num_of_nodes = req->misc & 0xff;
-                        handle->irm_id = ((req->misc >> 8) & 0xff) | 0xffc0;
-                        handle->local_id = req->misc >> 16;
+                        handle->num_of_nodes = req.misc & 0xff;
+                        handle->irm_id = ((req.misc >> 8) & 0xff) | 0xffc0;
+                        handle->local_id = req.misc >> 16;
                 }
 
                 if (handle->bus_reset_handler) {
                         retval = handle->bus_reset_handler(handle,
-                                                           req->generation);
+                                                           req.generation);
                 }
                 break;
 
@@ -72,31 +72,31 @@ int raw1394_loop_iterate(struct raw1394_handle *handle)
 
                 if (handle->iso_handler[channel]) {
                         retval = handle->iso_handler[channel](handle, channel,
-                                                              req->length,
+                                                              req.length,
                                                               handle->buffer);
                 }
                 break;
 
         case RAW1394_REQ_FCP_REQUEST:
                 if (handle->fcp_handler) {
-                        retval = handle->fcp_handler(handle, req->misc & 0xffff,
-                                                     req->misc >> 16,
-                                                     req->length,
+                        retval = handle->fcp_handler(handle, req.misc & 0xffff,
+                                                     req.misc >> 16,
+                                                     req.length,
                                                      (char *)handle->buffer);
                 }
                 break;
 
         case RAW1394_REQ_ARM:
                 if (handle->arm_tag_handler) {
-                        retval = handle->arm_tag_handler(handle, req->tag,
-                                 (req->misc & (0xFF)), 
-                                 ((req->misc >> 16) & (0xFFFF)),
-                                 int2ptr(req->recvb));
+                        retval = handle->arm_tag_handler(handle, req.tag,
+                                 (req.misc & (0xFF)), 
+                                 ((req.misc >> 16) & (0xFFFF)),
+                                 int2ptr(req.recvb));
                 } 
                 break;
                 
         case RAW1394_REQ_ECHO:
-                retval=req->misc;
+                retval=req.misc;
                 break;
 
         case RAW1394_REQ_RAWISO_ACTIVITY:
@@ -105,8 +105,8 @@ int raw1394_loop_iterate(struct raw1394_handle *handle)
         
         default:
                 if (handle->tag_handler) {
-                        retval = handle->tag_handler(handle, req->tag,
-                                                     req->error);
+                        retval = handle->tag_handler(handle, req.tag,
+                                                     req.error);
                 }
                 break;
         }

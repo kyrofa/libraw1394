@@ -42,7 +42,6 @@ struct raw1394_handle {
 	raw1394_iso_xmit_handler_t iso_xmit_handler;
 	raw1394_iso_recv_handler_t iso_recv_handler;
 
-        struct raw1394_request req;
         quadlet_t buffer[HBUF_SIZE/4]; /* 2048 */
 };
 

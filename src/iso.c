@@ -29,17 +29,17 @@ static int do_iso_listen(struct raw1394_handle *handle, int channel)
         struct sync_cb_data sd = { 0, 0 };
         struct raw1394_reqhandle rh = { (req_callback_t)_raw1394_sync_cb, &sd };
         int err;
-        struct raw1394_request *req = &handle->req;
+        struct raw1394_request req;
 
-        CLEAR_REQ(req);
-        req->type = RAW1394_REQ_ISO_LISTEN;
-        req->generation = handle->generation;
-        req->misc = channel;
-        req->tag = ptr2int(&rh);
-        req->recvb = ptr2int(handle->buffer);
-        req->length = HBUF_SIZE;
+        CLEAR_REQ(&req);
+        req.type = RAW1394_REQ_ISO_LISTEN;
+        req.generation = handle->generation;
+        req.misc = channel;
+        req.tag = ptr2int(&rh);
+        req.recvb = ptr2int(handle->buffer);
+        req.length = HBUF_SIZE;
 
-        err = write(handle->fd, req, sizeof(*req));
+        err = write(handle->fd, &req, sizeof(req));
         while (!sd.done) {
                 if (err < 0) return err;
                 err = raw1394_loop_iterate(handle);

@@ -84,28 +84,28 @@ int _raw1394_sync_cb(struct raw1394_handle *unused, struct sync_cb_data *data,
 
 static unsigned int init_rawdevice(struct raw1394_handle *h)
 {
-        struct raw1394_request *req = &h->req;
+        struct raw1394_request req;
 
-        CLEAR_REQ(req);
-        req->type = RAW1394_REQ_INITIALIZE;
-        req->misc = RAW1394_KERNELAPI_VERSION;
+        CLEAR_REQ(&req);
+        req.type = RAW1394_REQ_INITIALIZE;
+        req.misc = RAW1394_KERNELAPI_VERSION;
         h->protocol_version = RAW1394_KERNELAPI_VERSION;
 
-        if (write(h->fd, req, sizeof(*req)) < 0) return -1;
-        if (read(h->fd, req, sizeof(*req)) < 0) return -1;
+        if (write(h->fd, &req, sizeof(req)) < 0) return -1;
+        if (read(h->fd, &req, sizeof(req)) < 0) return -1;
 
-        if (req->error == RAW1394_ERROR_COMPAT && req->misc == 3) {
+        if (req.error == RAW1394_ERROR_COMPAT && req.misc == 3) {
                 h->protocol_version = 3;
-                if (write(h->fd, req, sizeof(*req)) < 0) return -1;
-                if (read(h->fd, req, sizeof(*req)) < 0) return -1;
+                if (write(h->fd, &req, sizeof(req)) < 0) return -1;
+                if (read(h->fd, &req, sizeof(req)) < 0) return -1;
         }
 
-        if (req->error) {
+        if (req.error) {
                 errno = 0;
                 return -1;
         }
 
-        return req->generation;
+        return req.generation;
 }
 
 
@@ -308,36 +308,36 @@ int raw1394_get_port_info(struct raw1394_handle *handle,
                           struct raw1394_portinfo *pinf, int maxports)
 {
         int num;
-        struct raw1394_request *req = &handle->req;
+        struct raw1394_request req;
         struct raw1394_khost_list *khl;
 
-        CLEAR_REQ(req);
-        req->type = RAW1394_REQ_LIST_CARDS;
-        req->generation = handle->generation;
-        req->recvb = ptr2int(handle->buffer);
-        req->length = HBUF_SIZE;
+        CLEAR_REQ(&req);
+        req.type = RAW1394_REQ_LIST_CARDS;
+        req.generation = handle->generation;
+        req.recvb = ptr2int(pinf);
+        req.length = sizeof(struct raw1394_portinfo) * maxports;
 
         while (1) {
-                if (write(handle->fd, req, sizeof(*req)) < 0) return -1;
-                if (read(handle->fd, req, sizeof(*req)) < 0) return -1;
+                if (write(handle->fd, &req, sizeof(req)) < 0) return -1;
+                if (read(handle->fd, &req, sizeof(req)) < 0) return -1;
 
-                if (!req->error) break;
+                if (!req.error) break;
 
-                if (req->error == RAW1394_ERROR_GENERATION) {
-                        handle->generation = req->generation;
+                if (req.error == RAW1394_ERROR_GENERATION) {
+                        handle->generation = req.generation;
                         continue;
                 }
 
                 return -1;
         }
 
-        for (num = req->misc, khl = (struct raw1394_khost_list *)handle->buffer;
+        for (num = req.misc, khl = (struct raw1394_khost_list *) int2ptr(req.recvb);
              num && maxports; num--, maxports--, pinf++, khl++) {
                 pinf->nodes = khl->nodes;
                 strcpy(pinf->name, khl->name);
         }
 
-        return req->misc;
+        return req.misc;
 }
 
 
@@ -358,20 +358,20 @@ int raw1394_get_port_info(struct raw1394_handle *handle,
  **/
 int raw1394_set_port(struct raw1394_handle *handle, int port)
 {
-        struct raw1394_request *req = &handle->req;
+        struct raw1394_request req;
 
-        CLEAR_REQ(req);
+        CLEAR_REQ(&req);
 
-        req->type = RAW1394_REQ_SET_CARD;
-        req->generation = handle->generation;
-        req->misc = port;
+        req.type = RAW1394_REQ_SET_CARD;
+        req.generation = handle->generation;
+        req.misc = port;
 
-        if (write(handle->fd, req, sizeof(*req)) < 0) return -1;
-        if (read(handle->fd, req, sizeof(*req)) < 0) return -1;
+        if (write(handle->fd, &req, sizeof(req)) < 0) return -1;
+        if (read(handle->fd, &req, sizeof(req)) < 0) return -1;
 
-        switch (req->error) {
+        switch (req.error) {
         case RAW1394_ERROR_GENERATION:
-                handle->generation = req->generation;
+                handle->generation = req.generation;
                 errno = ESTALE;
                 return -1;
         case RAW1394_ERROR_INVALID_ARG:
@@ -379,14 +379,14 @@ int raw1394_set_port(struct raw1394_handle *handle, int port)
                 return -1;
         case RAW1394_ERROR_NONE:
                 if (handle->protocol_version == 3) {
-                        handle->num_of_nodes = req->misc & 0xffff;
-                        handle->local_id = req->misc >> 16;
+                        handle->num_of_nodes = req.misc & 0xffff;
+                        handle->local_id = req.misc >> 16;
                 } else {
-                        handle->num_of_nodes = req->misc & 0xff;
-                        handle->irm_id = ((req->misc >> 8) & 0xff) | 0xffc0;
-                        handle->local_id = req->misc >> 16;
+                        handle->num_of_nodes = req.misc & 0xff;
+                        handle->irm_id = ((req.misc >> 8) & 0xff) | 0xffc0;
+                        handle->local_id = req.misc >> 16;
                 }
-                handle->generation = req->generation;
+                handle->generation = req.generation;
                 return 0;
         default:
                 errno = 0;
@@ -430,15 +430,15 @@ tryagain:
 
 int raw1394_reset_bus_new(struct raw1394_handle *handle, int type)
 {
-        struct raw1394_request *req = &handle->req;
+        struct raw1394_request req;
 
-        CLEAR_REQ(req);
+        CLEAR_REQ(&req);
 
-        req->type = RAW1394_REQ_RESET_BUS;
-        req->generation = handle->generation;
-        req->misc = type;
+        req.type = RAW1394_REQ_RESET_BUS;
+        req.generation = handle->generation;
+        req.misc = type;
 	
-        if (write(handle->fd, req, sizeof(*req)) < 0) return -1;
+        if (write(handle->fd, &req, sizeof(req)) < 0) return -1;
 
         return 0; /* success */
 }
@@ -461,15 +461,15 @@ int raw1394_reset_bus(struct raw1394_handle *handle)
 int raw1394_busreset_notify (struct raw1394_handle *handle, 
                              int off_on_switch)
 {
-        struct raw1394_request *req = &handle->req;
+        struct raw1394_request req;
 
-        CLEAR_REQ(req);
+        CLEAR_REQ(&req);
 
-        req->type = RAW1394_REQ_RESET_NOTIFY;
-        req->generation = handle->generation;
-        req->misc = off_on_switch;
+        req.type = RAW1394_REQ_RESET_NOTIFY;
+        req.generation = handle->generation;
+        req.misc = off_on_switch;
 
-        if (write(handle->fd, req, sizeof(*req)) < 0) return -1;
+        if (write(handle->fd, &req, sizeof(req)) < 0) return -1;
 
         return 0; /* success */
 }
@@ -477,18 +477,18 @@ int raw1394_busreset_notify (struct raw1394_handle *handle,
 int raw1394_update_config_rom(raw1394handle_t handle, const quadlet_t
         *new_rom, size_t size, unsigned char rom_version)
 {
-        struct raw1394_request *req = &handle->req;
+        struct raw1394_request req;
         int status;
 
-        CLEAR_REQ(req);
+        CLEAR_REQ(&req);
 
-        req->type = RAW1394_REQ_UPDATE_ROM;
-        req->sendb = (unsigned long) new_rom;
-        req->length = size;
-        req->misc = rom_version;
-        req->recvb = (unsigned long) &status;
+        req.type = RAW1394_REQ_UPDATE_ROM;
+        req.sendb = (unsigned long) new_rom;
+        req.length = size;
+        req.misc = rom_version;
+        req.recvb = (unsigned long) &status;
 
-        if (write(handle->fd, req, sizeof(*req)) < 0) return -8;
+        if (write(handle->fd, &req, sizeof(req)) < 0) return -8;
 
         return status;
 }
@@ -496,19 +496,19 @@ int raw1394_update_config_rom(raw1394handle_t handle, const quadlet_t
 int raw1394_get_config_rom(raw1394handle_t handle, quadlet_t *buffer,
         size_t buffersize, size_t *rom_size, unsigned char *rom_version)
 {
-        struct raw1394_request *req = &handle->req;
+        struct raw1394_request req;
         int status;
 
-        CLEAR_REQ(req);
+        CLEAR_REQ(&req);
 
-        req->type = RAW1394_REQ_GET_ROM;
-        req->recvb = (unsigned long) buffer;
-        req->length = buffersize;
-        req->tag = (unsigned long) rom_size;
-        req->address = (unsigned long) rom_version;
-        req->sendb = (unsigned long) &status;
+        req.type = RAW1394_REQ_GET_ROM;
+        req.recvb = (unsigned long) buffer;
+        req.length = buffersize;
+        req.tag = (unsigned long) rom_size;
+        req.address = (unsigned long) rom_version;
+        req.sendb = (unsigned long) &status;
 
-        if (write(handle->fd, req, sizeof(*req)) < 0) return -8;
+        if (write(handle->fd, &req, sizeof(req)) < 0) return -8;
 
         return status;
 }

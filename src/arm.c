@@ -50,25 +50,25 @@ int raw1394_arm_register(struct raw1394_handle *handle, nodeaddr_t start,
                          arm_options_t client_transactions)
 {
         int     retval=0;
-        struct  raw1394_request *req = &(handle->req);
+        struct  raw1394_request req;
 
 	if (((start & ~(0xFFFFFFFFFFFF)) != 0) ||
                 (((start + length) & ~(0xFFFFFFFFFFFF)) != 0)) {
                 errno = EINVAL;
                 return (-1);
 	}
-        CLEAR_REQ(req);
-        req->type = RAW1394_REQ_ARM_REGISTER;
-        req->generation = handle->generation; /* not necessary */
-        req->address = start;
-        req->length = length;
-        req->tag = arm_tag;
-        req->recvb = ptr2int(handle->buffer); /* arm_handle on success */ 
-        req->misc = ((client_transactions & 0x0f) << 8)|((notification_options & 0x0F) << 4)|(access_rights & 0x0F)
+        CLEAR_REQ(&req);
+        req.type = RAW1394_REQ_ARM_REGISTER;
+        req.generation = handle->generation; /* not necessary */
+        req.address = start;
+        req.length = length;
+        req.tag = arm_tag;
+        req.recvb = ptr2int(handle->buffer); /* arm_handle on success */ 
+        req.misc = ((client_transactions & 0x0f) << 8)|((notification_options & 0x0F) << 4)|(access_rights & 0x0F)
                     |((ARM_REC_LENGTH & 0xFFFF) << 16);
-        req->sendb = ptr2int(initial_value); 
-        retval = (int) write(handle->fd, req, sizeof(*req));
-        return (retval == sizeof(*req)) ? 0:-1;
+        req.sendb = ptr2int(initial_value); 
+        retval = (int) write(handle->fd, &req, sizeof(req));
+        return (retval == sizeof(req)) ? 0:-1;
 }
 
 /*
@@ -82,12 +82,12 @@ int raw1394_arm_register(struct raw1394_handle *handle, nodeaddr_t start,
 int raw1394_arm_unregister (struct raw1394_handle *handle, nodeaddr_t start)
 {
         int retval;
-        struct raw1394_request *req = &(handle->req);
+        struct raw1394_request req;
 
-        CLEAR_REQ(req);
-        req->type = RAW1394_REQ_ARM_UNREGISTER;
-        req->generation = handle->generation; /* not necessary */
-        req->address = start;
-        retval = write(handle->fd, req, sizeof(*req));
-        return (retval == sizeof(*req)) ? 0:-1;
+        CLEAR_REQ(&req);
+        req.type = RAW1394_REQ_ARM_UNREGISTER;
+        req.generation = handle->generation; /* not necessary */
+        req.address = start;
+        retval = write(handle->fd, &req, sizeof(req));
+        return (retval == sizeof(req)) ? 0:-1;
 }

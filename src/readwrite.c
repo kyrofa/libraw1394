@@ -54,19 +54,19 @@ int raw1394_start_read(struct raw1394_handle *handle, nodeid_t node,
                        nodeaddr_t addr, size_t length, quadlet_t *buffer,
                        unsigned long tag)
 {
-        struct raw1394_request *req = &handle->req;
+        struct raw1394_request req;
 
-        CLEAR_REQ(req);
+        CLEAR_REQ(&req);
 
-        req->type = RAW1394_REQ_ASYNC_READ;
-        req->generation = handle->generation;
-        req->tag = tag;
+        req.type = RAW1394_REQ_ASYNC_READ;
+        req.generation = handle->generation;
+        req.tag = tag;
 
-        req->address = ((__u64)node << 48) | addr;
-        req->length = length;
-        req->recvb = ptr2int(buffer);
+        req.address = ((__u64)node << 48) | addr;
+        req.length = length;
+        req.recvb = ptr2int(buffer);
 
-        return (int)write(handle->fd, req, sizeof(*req));
+        return (int)write(handle->fd, &req, sizeof(req));
 }
 
 
@@ -93,19 +93,19 @@ int raw1394_start_write(struct raw1394_handle *handle, nodeid_t node,
                         nodeaddr_t addr, size_t length, quadlet_t *data,
                         unsigned long tag)
 {
-        struct raw1394_request *req = &handle->req;
+        struct raw1394_request req;
 
-        CLEAR_REQ(req);
+        CLEAR_REQ(&req);
 
-        req->type = RAW1394_REQ_ASYNC_WRITE;
-        req->generation = handle->generation;
-        req->tag = tag;
+        req.type = RAW1394_REQ_ASYNC_WRITE;
+        req.generation = handle->generation;
+        req.tag = tag;
 
-        req->address = ((__u64)node << 48) | addr;
-        req->length = length;
-        req->sendb = ptr2int(data);
+        req.address = ((__u64)node << 48) | addr;
+        req.length = length;
+        req.sendb = ptr2int(data);
 
-        return (int)write(handle->fd, req, sizeof(*req));
+        return (int)write(handle->fd, &req, sizeof(req));
 }
 
 
@@ -133,7 +133,7 @@ int raw1394_start_lock(struct raw1394_handle *handle, nodeid_t node,
                        nodeaddr_t addr, unsigned int extcode, quadlet_t data,
                        quadlet_t arg, quadlet_t *result, unsigned long tag)
 {
-        struct raw1394_request *req = &handle->req;
+        struct raw1394_request req;
         quadlet_t sendbuf[2];
 
         if ((extcode > 7) || (extcode == 0)) {
@@ -141,37 +141,37 @@ int raw1394_start_lock(struct raw1394_handle *handle, nodeid_t node,
                 return -1;
         }
 
-        CLEAR_REQ(req);
+        CLEAR_REQ(&req);
 
-        req->type = RAW1394_REQ_LOCK;
-        req->generation = handle->generation;
-        req->tag = tag;
+        req.type = RAW1394_REQ_LOCK;
+        req.generation = handle->generation;
+        req.tag = tag;
 
-        req->address = ((__u64)node << 48) | addr;
-        req->sendb = ptr2int(sendbuf);
-        req->recvb = ptr2int(result);
-        req->misc = extcode;
+        req.address = ((__u64)node << 48) | addr;
+        req.sendb = ptr2int(sendbuf);
+        req.recvb = ptr2int(result);
+        req.misc = extcode;
 
         switch (extcode) {
         case 3: /* EXTCODE_FETCH_ADD */
         case 4: /* EXTCODE_LITTLE_ADD */
                 sendbuf[0] = data;
-                req->length = 4;
+                req.length = 4;
                 break;
         default:
                 sendbuf[0] = arg;
                 sendbuf[1] = data;
-                req->length = 8;
+                req.length = 8;
                 break;
         }
-        return (int)write(handle->fd, req, sizeof(*req));
+        return (int)write(handle->fd, &req, sizeof(req));
 }
 
 int raw1394_start_lock64(struct raw1394_handle *handle, nodeid_t node,
                          nodeaddr_t addr, unsigned int extcode, octlet_t data,
                          octlet_t arg, octlet_t *result, unsigned long tag)
 {
-        struct raw1394_request *req = &handle->req;
+        struct raw1394_request req;
         octlet_t sendbuf[2];
 
         if ((extcode > 7) || (extcode == 0)) {
@@ -179,31 +179,31 @@ int raw1394_start_lock64(struct raw1394_handle *handle, nodeid_t node,
                 return -1;
         }
 
-        CLEAR_REQ(req);
+        CLEAR_REQ(&req);
 
-        req->type = RAW1394_REQ_LOCK64;
-        req->generation = handle->generation;
-        req->tag = tag;
+        req.type = RAW1394_REQ_LOCK64;
+        req.generation = handle->generation;
+        req.tag = tag;
 
-        req->address = ((__u64)node << 48) | addr;
-        req->sendb = ptr2int(sendbuf);
-        req->recvb = ptr2int(result);
-        req->misc = extcode;
+        req.address = ((__u64)node << 48) | addr;
+        req.sendb = ptr2int(sendbuf);
+        req.recvb = ptr2int(result);
+        req.misc = extcode;
 
         switch (extcode) {
         case 3: /* EXTCODE_FETCH_ADD */
         case 4: /* EXTCODE_LITTLE_ADD */
                 sendbuf[0] = data;
-                req->length = 8;
+                req.length = 8;
                 break;
         default:
                 sendbuf[0] = arg;
                 sendbuf[1] = data;
-                req->length = 16;
+                req.length = 16;
                 break;
         }
 
-        return (int)write(handle->fd, req, sizeof(*req));
+        return (int)write(handle->fd, &req, sizeof(req));
 }
 
 
@@ -233,39 +233,39 @@ int raw1394_start_iso_write(struct raw1394_handle *handle, unsigned int channel,
                             unsigned int speed, size_t length, quadlet_t *data,
                             unsigned long rawtag)
 {
-        struct raw1394_request *req = &handle->req;
+        struct raw1394_request req;
 
-        CLEAR_REQ(req);
+        CLEAR_REQ(&req);
 
-        req->type = RAW1394_REQ_ISO_SEND;
-        req->generation = handle->generation;
-        req->tag = rawtag;
+        req.type = RAW1394_REQ_ISO_SEND;
+        req.generation = handle->generation;
+        req.tag = rawtag;
 
-        req->address = ((__u64)channel << 48) | speed;
-        req->misc = (tag << 16) | sy;
-        req->length = length;
-        req->sendb = ptr2int(data);
+        req.address = ((__u64)channel << 48) | speed;
+        req.misc = (tag << 16) | sy;
+        req.length = length;
+        req.sendb = ptr2int(data);
 
-        return (int)write(handle->fd, req, sizeof(*req));
+        return (int)write(handle->fd, &req, sizeof(req));
 }
 
 int raw1394_start_async_send(struct raw1394_handle *handle,
                              size_t length, size_t header_length, unsigned int expect_response,
                              quadlet_t *data, unsigned long rawtag)
 {
-        struct raw1394_request *req = &handle->req;
+        struct raw1394_request req;
 
-        CLEAR_REQ(req);
+        CLEAR_REQ(&req);
 
-        req->type = RAW1394_REQ_ASYNC_SEND;
-        req->generation = handle->generation;
-        req->tag = rawtag;
+        req.type = RAW1394_REQ_ASYNC_SEND;
+        req.generation = handle->generation;
+        req.tag = rawtag;
 
-        req->length = length;
-        req->misc = (expect_response << 16) | (header_length & 0xffff);
-        req->sendb = ptr2int(data);
+        req.length = length;
+        req.misc = (expect_response << 16) | (header_length & 0xffff);
+        req.sendb = ptr2int(data);
 
-        return (int)write(handle->fd, req, sizeof(*req));
+        return (int)write(handle->fd, &req, sizeof(req));
 }
 
 
@@ -360,17 +360,17 @@ int raw1394_async_send(struct raw1394_handle *handle               ,
 int raw1394_start_phy_packet_write(struct raw1394_handle *handle, 
 	quadlet_t data, unsigned long tag)
 {
-        struct raw1394_request *req = &handle->req;
+        struct raw1394_request req;
 
-        CLEAR_REQ(req);
+        CLEAR_REQ(&req);
 
-        req->type = RAW1394_REQ_PHYPACKET;
-        req->generation = handle->generation;
-        req->tag = tag;
+        req.type = RAW1394_REQ_PHYPACKET;
+        req.generation = handle->generation;
+        req.tag = tag;
 
-        req->sendb = data;
+        req.sendb = data;
 
-        return (int)write(handle->fd, req, sizeof(*req));
+        return (int)write(handle->fd, &req, sizeof(req));
 }
 
 int raw1394_phy_packet_write (struct raw1394_handle *handle, quadlet_t data)
@@ -384,16 +384,16 @@ int raw1394_phy_packet_write (struct raw1394_handle *handle, quadlet_t data)
 
 int raw1394_echo_request(struct raw1394_handle *handle, quadlet_t data)
 {
-        struct raw1394_request *req = &handle->req;
+        struct raw1394_request req;
         int retval=0;
 
-        CLEAR_REQ(req);
+        CLEAR_REQ(&req);
 
-        req->type = RAW1394_REQ_ECHO;
-        req->misc = data;
+        req.type = RAW1394_REQ_ECHO;
+        req.misc = data;
 
-        retval = (int)write(handle->fd, req, sizeof(*req));
-        if (retval == sizeof(*req)) {
+        retval = (int)write(handle->fd, &req, sizeof(req));
+        if (retval == sizeof(req)) {
                 return 0; /* succcess */
 	}
 	return -1;
