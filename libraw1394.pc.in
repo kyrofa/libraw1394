@@ -7,4 +7,4 @@ Name: libraw1394
 Description: Interface library for the Linux IEEE1394 drivers.
 Version: @VERSION@
 Libs: -L${libdir} -lraw1394
-Cflags: -I${includedir}/libraw1394
+Cflags: -I${includedir}
