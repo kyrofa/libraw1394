@@ -8,7 +8,7 @@ Uploaders: Andreas Bombe <aeb@debian.org>, Ben Collins <bcollins@debian.org>
 
 Package: libraw1394-dev
 Architecture: any
-Section: devel
+Section: libdevel
 Depends: libc6-dev, ${shlibs:Depends}
 Description: library for direct access to IEEE 1394 bus - development files
  libraw1394 is the only supported interface to the kernel side raw1394
