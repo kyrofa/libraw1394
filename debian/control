@@ -2,7 +2,7 @@ Source: libraw1394
 Section: libs
 Priority: optional
 Maintainer: Andreas Bombe <aeb@debian.org>
-Standards-Version: 3.1.1.1
+Standards-Version: 3.5.4.0
 Build-Depends: debhelper
 
 Package: libraw1394-dev
@@ -17,7 +17,8 @@ Description: library for direct access to IEEE 1394 bus - development files
  requiring a kernel driver for the protocol in question.
  .
  This package contains the include files and static library for
- libraw1394, as well as the testlibraw program.
+ libraw1394, as well as the testlibraw program and programmer's
+ documentation.
 
 Package: libraw1394-5
 Architecture: any

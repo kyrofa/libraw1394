@@ -1,3 +1,16 @@
+libraw1394 (0.9.0-1) unstable; urgency=low
+
+  * Maintainer email address changed to my debian.org account.
+  * Changed to debianized source format, using Debian revision.
+  * New release adds testlibraw program (with man page) and programmer's
+    documentation, all in libraw1394-dev.
+  * Moved HTML formatted documentation to libraw1394.html subdir (as
+    opposed to just libraw1394 as in original release).
+  * Made sure that current config.{guess,sub} files are in the sources
+    (closes: #95078).
+
+ -- Andreas Bombe <aeb@debian.org>  Fri, 25 May 2001 00:03:24 +0200
+
 libraw1394 (0.8.2) unstable; urgency=low
 
   * Create device file in /dev instead of / (closes: #81158).

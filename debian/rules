@@ -72,7 +72,8 @@ binary-arch: build install autoclean-files
 	echo >>autoclean-files debian/shlibs.local
 	echo >debian/shlibs.local "libraw1394 $(major) $(libraw) (= $(source-version))"
 
-	dh_installdocs README NEWS
+	dh_installmanpages -plibraw1394-dev
+	dh_installdocs
 	dh_installchangelogs
 	dh_strip
 	dh_compress
