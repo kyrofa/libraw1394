@@ -1,4 +1,12 @@
 
+Version 0.6:
+
+- FCP monitoring added
+
+Version 0.5:
+
+- there are now separate iso handlers for each channel
+
 Version 0.4:
 
 - isochronous receive support
