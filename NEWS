@@ -1,6 +1,7 @@
 
 Version 0.8:
 
+- added libraw1394/ieee1394.h with useful defines (especially ack and rcodes)
 - function to query isochronous resource manager ID
 - functions for isochronous sending
 - new raw1394_reset_bus() function to reset the bus
