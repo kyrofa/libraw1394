@@ -1,7 +1,7 @@
 #!/bin/sh -e
 
 if [ "$1" = "configure" ]; then
-	ldconfig usr/lib/@libname@
+	ldconfig
 
 	if [ ! -c /dev/raw1394 ]; then
 		echo
@@ -9,20 +9,21 @@ if [ "$1" = "configure" ]; then
 		echo "Without it, libraw1394 is quite useless as it can't talk"
 		echo "to the kernel driver."
 		echo
-		echo -n "Should I create it for you? [N/y] "
+		echo -n "Should I create it for you? [Y/n] "
 		read REPLY
 
 		case "$REPLY" in
-		y|yes)
+		y|yes|"")
 			mknod -m600 /dev/raw1394 c 171 0
 			chown root.root /dev/raw1394
 			echo
 			echo "/dev/raw1394 created."
-			echo "It is owned by root with permissions 600.  You may want to fix"
-			echo "the group/permission to something appropriate for you."
-			echo "Note however that anyone who can open raw1394 can access all"
-			echo "devices on all connected 1394 buses unrestricted, including"
-			echo "harddisks and other probably sensitive devices."
+			echo "It is owned by root with read/write permissions for root."
+			echo "You may want to fix the group/permission to something"
+			echo "appropriate for you.  Note however that anyone who can open"
+			echo "raw1394 can access all devices on all connected 1394 buses"
+			echo "unrestricted, including harddisks and other probably"
+			echo "sensitive devices."
 			;;
 		*)
 			echo
