@@ -11,7 +11,7 @@ typedef u_int16_t nodeid_t;
 typedef struct raw1394_handle *raw1394handle_t;
 
 #ifdef __cplusplus
-//extern "C" {
+extern "C" {
 #endif
 
 typedef int raw1394_errcode_t;
