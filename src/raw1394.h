@@ -77,7 +77,7 @@ int raw1394_loop_iterate(raw1394handle_t handle);
  */
 typedef int (*bus_reset_handler_t)(raw1394handle_t);
 bus_reset_handler_t raw1394_set_bus_reset_handler(raw1394handle_t handle,
-                                                  bus_reset_handler_t new);
+                                                  bus_reset_handler_t new_h);
 
 /*
  * Set the handler that will be called when an async read/write/lock returns.
@@ -86,7 +86,7 @@ bus_reset_handler_t raw1394_set_bus_reset_handler(raw1394handle_t handle,
  */
 typedef int (*tag_handler_t)(raw1394handle_t, unsigned long tag, int errcode);
 tag_handler_t raw1394_set_tag_handler(raw1394handle_t handle,
-                                      tag_handler_t new);
+                                      tag_handler_t new_h);
 
 /*
  * Set the handler that will be called when an iso packet arrives (data points
@@ -101,7 +101,8 @@ tag_handler_t raw1394_set_tag_handler(raw1394handle_t handle,
 typedef int (*iso_handler_t)(raw1394handle_t, int channel, size_t length,
                              quadlet_t *data);
 iso_handler_t raw1394_set_iso_handler(raw1394handle_t handle,
-                                      unsigned int channel, iso_handler_t new);
+                                      unsigned int channel,
+                                      iso_handler_t new_h);
 
 
 /*
