@@ -118,7 +118,7 @@ int raw1394_iso_recv_unlisten_channel(raw1394handle_t handle, unsigned char chan
 int raw1394_iso_recv_set_channel_mask(raw1394handle_t handle, u_int64_t mask);
 
 int raw1394_iso_xmit_start(raw1394handle_t handle, int start_on_cycle, int prebuffer_packets);
-int raw1394_iso_recv_start(raw1394handle_t handle, int start_on_cycle);
+int raw1394_iso_recv_start(raw1394handle_t handle, int start_on_cycle, int tag_mask, int sync);
 
 void raw1394_iso_stop(raw1394handle_t handle);
 void raw1394_iso_shutdown(raw1394handle_t handle);

@@ -290,15 +290,23 @@ int raw1394_iso_recv_set_channel_mask(raw1394handle_t handle, u_int64_t mask)
 /**
  * raw1394_iso_recv_start - begin isochronous reception
  * @start_on_cycle: isochronous cycle number on which to start (-1 if you don't care)
+ * @tag_mask: mask of tag fields to match (-1 to receive all packets)
+ * @sync: not used, reserved for future implementation
  **/
-int raw1394_iso_recv_start(raw1394handle_t handle, int start_on_cycle)
+int raw1394_iso_recv_start(raw1394handle_t handle, int start_on_cycle, int tag_mask, int sync)
 {
+	int args[3];
+
 	if(!handle->iso_buffer)
 		return -1;
 	if(!handle->iso_recv_handler)
 		return -1;
 
-	if(ioctl(handle->fd, RAW1394_ISO_RECV_START, start_on_cycle))
+	args[0] = start_on_cycle;
+	args[1] = tag_mask;
+	args[2] = sync;
+
+	if(ioctl(handle->fd, RAW1394_ISO_RECV_START, &args[0]))
 		return -1;
 
 	return 0;

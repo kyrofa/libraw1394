@@ -120,7 +120,7 @@ typedef struct arm_request_response {
 /* ioctls */
 #define RAW1394_ISO_XMIT_INIT               1  /* arg: raw1394_iso_status* */
 #define RAW1394_ISO_RECV_INIT               2  /* arg: raw1394_iso_status* */
-#define RAW1394_ISO_RECV_START              3  /* arg: int, starting cycle */
+#define RAW1394_ISO_RECV_START              3  /* arg: int[3], { starting cycle, tag, sync } */
 #define RAW1394_ISO_XMIT_START              8  /* arg: int[2], { starting cycle, prebuffer } */
 #define RAW1394_ISO_STOP                    4
 #define RAW1394_ISO_GET_STATUS              5  /* arg: raw1394_iso_status* */
