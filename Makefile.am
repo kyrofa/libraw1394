@@ -2,6 +2,8 @@
 
 SUBDIRS = src doc debian
 
+aclocaldir = @datadir@/aclocal
+aclocal_DATA = libraw1394.m4
 
 # make required device file
 dev:
@@ -17,11 +19,11 @@ dev:
 	@echo
 
 install-exec-hook:
-	@if [ ! -c /dev/raw1394 ]; then                                 \
-		echo;                                                   \
-		echo "***********************************************"; \
-		echo "Required /dev/raw1394 special device not found."; \
-		echo "Run 'make dev' to create it.";                    \
-		echo "***********************************************"; \
-		echo;                                                   \
+	@if [ ! -c /dev/raw1394 ]; then                              \
+		echo;                                                \
+		echo "********************************************"; \
+		echo "Required /dev/raw1394 device file not found."; \
+		echo "Run 'make dev' to create it.";                 \
+		echo "********************************************"; \
+		echo;                                                \
 	fi
