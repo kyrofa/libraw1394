@@ -216,7 +216,9 @@
 	In the compare-and-swap case, the data value is written to the target
 	address if the old value is identical to the arg value.  The old value
 	is returned in any case and can be used to find out whether the swap
-	succeeded by repeating the compare locally.  Isochronous resource
+	succeeded by repeating the compare locally.  Compare-and-swap
+	is useful for avoiding race conditions when accessing the same
+	address from multiple nodes.  For example, isochronous resource
 	allocation is done using compare-and-swap, as described below.  Since
 	the old value is always returned, it more efficient to do the first
 	attempt with the reset value of the target register as arg instead of
@@ -327,14 +329,17 @@
       <title>Overview</title>
       
       <para>
-	The 1394 subsystem in Linux is divided into the classical three layers,
-	like most other interface subsystems in Linux.  The subsystem consists
-	of the core, which provides basic services like handling of the 1394
-	protocol (converting the abstract transactions into packets and back),
-	collecting information about bus and nodes and providing some services
-	to the bus that are required to be available for standards conformant
-	node (e.g. CSR registers).  Below that are the hardware drivers, which
-	handle converting packets and bus events to and from hardware accesses.
+	The 1394 subsystem in Linux is divided into the classical
+	three layers, like most other interface subsystems in Linux.
+	The in-kernel subsystem consists of the ieee1394 core, which
+	provides basic services like handling of the 1394 protocol
+	(converting the abstract transactions into packets and back),
+	collecting information about bus and nodes and providing some
+	services to the bus that are required to be available for
+	standards conformant nodes (e.g. CSR registers).  Below that
+	are the hardware drivers, which handle converting packets and
+	bus events to and from hardware accesses on specific 1394
+	chipsets.
       </para>
 
       <para>
@@ -438,14 +443,18 @@
       <title>The Event Loop</title>
 
       <para>
-	All commands in libraw1394 are asynchronous, with some synchronous
-	wrapper functions for some types of transactions.  This means that there
-	are two streams of data, one going into raw1394 and one coming out.
-	With this design you can send out multiple transactions without having
-	to wait for the response before you can continue (sending out other
-	transactions, for example).  The responses and other events (like bus
-	resets and received isochronous packets) are queued, and you can get
-	them with <function>raw1394_loop_iterate()</function>.
+	All commands in libraw1394 are asynchronous, with some
+	synchronous wrapper functions for some types of transactions.
+	This means that there are two streams of data, one going into
+	raw1394 and one coming out.  With this design you can send out
+	multiple transactions without having to wait for the response
+	before you can continue (sending out other transactions, for
+	example).  The responses and other events (like bus resets and
+	received isochronous packets) are queued, and you can get them
+	with <function>raw1394_loop_iterate()</function> or
+	<function>raw1394_loop_iterate_timeout()</function> (which
+	always returns after a user-specified timeout if no
+	raw1394 event has occurred).
       </para>
 
       <para>
@@ -461,20 +470,32 @@
       </para>
 
       <para>
-	Often it is necessary to have multiple event loops and combine them,
-	e.g. if your application uses a GUI toolkit which also has its own event
-	loop.  In that case you can use <function>raw1394_get_fd()</function> to
-	get the file descriptor used for this handle by libraw1394.  The fd can
-	be used to for <function>select()</function> or
-	<function>poll()</function> calls (testing for read availability)
-	together with the other loop's fd, some event loops also allow to add
-	other fds to their own set (GTK's event loop does).  If these trigger on
-	the libraw1394 fd, you can call
-	<function>raw1394_loop_iterate()</function> once and it is guaranteed
-	that it will not block since at the very least one event waits.  After
-	the first call you continue the main event loop.  If more events wait,
-	the <function>select()</function>/<function>poll()</function> will
-	immediately return again.
+	Often it is necessary to have multiple event loops and combine
+	them, e.g. if your application uses a GUI toolkit which also
+	has its own event loop.  In that case you can use
+	<function>raw1394_get_fd()</function> to get the file
+	descriptor used for this handle by libraw1394.  The fd can be
+	used to for <function>select()</function> or
+	<function>poll()</function> calls together with the other
+	loop's fd. (Most toolkits, like GTK and Qt, have special APIs
+	for integrating file descriptors into their own event loops).
+      </para>
+
+      <para>
+        If using <function>poll()</function>, you must test for
+	<symbol>POLLIN</symbol> and <symbol>POLLPRI</symbol>
+	events. If using <function>select()</function>, you must test
+	for both read and exception activity.
+      </para>
+
+      <para> If any of these conditions trigger, you should then call
+        <function>raw1394_loop_iterate()</function> to pick up the
+        event. <function>raw1394_loop_iterate()</function> is
+        guaranteed not to block when called immediately after select()
+        or poll() indicates activity.  After the first call you
+        continue the main event loop.  If more events wait, the
+        <function>select()</function>/<function>poll()</function> will
+        immediately return again.
       </para>
 
       <para>
@@ -513,7 +534,8 @@
 	    <para>bus reset handler (called when a bus reset happens)</para>
 	  </listitem>
 	  <listitem>
-	    <para>iso handler (called when an iso packet is received)</para>
+	    <para>iso handler (called when an iso packet is received)
+	    (deprecated by the new iso API)</para>
 	  </listitem>
 	  <listitem>
 	    <para>fcp handler (called when a FCP command or response is
@@ -600,6 +622,247 @@
 	to the appropriate code.  The raw ack/rcode pair can then still be
 	retrieved using <function>raw1394_get_errcode()</function>.
       </para>
+    </sect1>
+
+  </chapter>
+
+  <chapter id="isochronous">
+    <title>Isochronous Transmission and Reception</title>
+
+    <sect1>
+      <title>Overview</title>
+      <para>
+        Isochronous operations involve sending or receiving a constant
+        stream of packets at a fixed rate of 8KHz. Unlike raw1394's
+        asynchronous API, where you "push" packets to raw1394
+        functions at your leisure, the isochronous API is based around
+        a "pull" model. During isochronous transmission or reception,
+        raw1394 informs your application when a packet must be sent or
+        received. You must fulfill these requests in a timely manner
+        to avoid breaking the constant stream of isochronous packets.
+      </para>
+      <para>
+        A raw1394 handle may be associated with one isochronous
+        stream, either transmitting or receiving (but not both at the
+        same time). To transmit or receive more than one stream
+        simultaneously, you must create more than one raw1394 handle.
+      </para>
+    </sect1>
+
+    <sect1>
+
+      <title>Initialization</title>
+
+        <para>
+	  When a raw1394 handle is first created, no isochronous
+	  stream is assocated with it. To begin isochronous
+	  operations, call either
+	  <function>raw1394_iso_xmit_init()</function> (transmission) or
+	  <function>raw1394_iso_recv_init()</function>
+	  (reception). The parameters to these functions are as follows:
+        </para>
+
+	<para>
+	  <symbol>handler</symbol> is your function for queueing
+	  packets to be sent (transmission) or processing received
+	  packets (reception).
+	</para>
+
+	<para>
+          <symbol>buf_packets</symbol> is the number of packets that
+          will be buffered at the kernel level. A larger packet buffer
+          will be more forgiving of IRQ and application latency,
+          however it will consume more kernel memory. For most
+          applications, it is sufficient to buffer 2000-16000 packets
+          (0.25 seconds to 2.0 seconds maximum latency).
+	</para>
+	
+	<para>
+	  <symbol>max_packet_size</symbol> is the size, in bytes, of
+	  the largest isochronous packet you intend to handle. This
+	  size does not include the isochronous header but it does
+	  include the CIP header specified by many isochronous
+	  protocols.
+	</para>
+
+	<para>
+	  <symbol>channel</symbol> is the isochronous channel on which
+	  you wish to receive or transmit. (currently there is no
+	  facility for multi-channel transmission or reception).
+       </para>
+
+       <para>
+         <symbol>speed</symbol> is the isochronous speed at which you
+         wish to operate. Possible values are
+         <symbol>RAW1394_ISO_SPEED_100</symbol> through
+         <symbol>RAW1394_ISO_SPEED_400</symbol>.
+       </para>
+
+       <para>
+         <symbol>irq_interval</symbol> is the maximum latency of the
+         kernel buffer, in packets. (To avoid excessive IRQ rates, the
+         low-level drivers only trigger an interrupt every
+         irq_interval packets). Pass -1 to receive a default value
+         that should be suitable for most applications.
+       </para>
+
+       <para>
+         If <function>raw1394_iso_xmit/recv_init()</function> retuns
+         successfully, then you may start isochronous operations. You
+         may not call
+         <function>raw1394_iso_xmit/recv_init()</function> again on
+         the same handle without first shutting down the isochronous
+         operation with <function>raw1394_iso_shutdown()</function>.
+       </para>
+
+       <para>
+         Note that <function>raw1394_iso_xmit_init()</function> and
+	 <function>raw1394_iso_recv_init()</function> involve
+	 potentially time-consuming operations like allocating kernel
+	 and device resources. If you intend to transmit or receive
+	 several isochronous streams simultaneously, it is advisable
+	 to initialize all streams before starting any packet
+	 transmission or reception.
+       </para>
+
+    </sect1>
+
+    <sect1>
+
+      <title>Stopping and Starting</title>
+
+        <para>
+	  Once the isochronous operation has been initialized, you may
+	  start and stop packet transmission with
+	  <function>raw1394_iso_xmit/recv_start()</function> and
+	  <function>raw1394_iso_stop()</function>. It is legal to call
+	  these as many times as you want, and it is permissible to
+	  start an already-started stream or stop an already-stopped
+	  stream. Packets that have been queued for transmission or
+	  reception will remain queued when the operation is stopped.
+        </para>
+
+	<para>
+	  <function>raw1394_iso_xmit/recv_start()</function> allow you
+	  to specify on which isochronous cycle number to start
+	  transmitting or receiving packets. Pass -1 to start
+	  immediately. This parameter is ignored if isochronous
+	  transmission or reception is already in progress.
+	</para>
+
+	<para>
+	  <function>raw1394_iso_xmit_start()</function> has an
+	  additional parameter, <symbol>prebuffer_packets</symbol>,
+	  which specifies how many packets to queue up before starting
+	  transmission. Possible values range from zero (start
+	  transmission immediately after the first packet is queued)
+	  up to the total number of packets in the buffer.
+	</para>
+
+	<para>
+	  Once the isochronous operation has started, you must
+	  repeatedly call <function>raw1394_loop_iterate()</function>
+	  as usual to drive packet processing.
+	</para>
+
+    </sect1>
+
+    <sect1>
+
+      <title>Receiving Packets</title>
+
+        <para>
+          Raw1394 maintains a fixed-size ringbuffer of packets in
+	  kernel memory. The buffer is filled by the low-level driver
+	  as it receives packets from the bus. It is your
+	  application's job to process each packet, after which the
+	  buffer space it occupied can be re-used for future packets.
+        </para>
+
+        <para>
+	  The isochronous receive handler you provided will be called
+	  from <function>raw1394_loop_iterate()</function> after each
+	  packet is received. Your handler is passed a pointer to the
+	  first byte of the packet's data payload, plus the packet's
+	  length in bytes (not counting the isochronous header), the
+	  cycle number at which it was received, the channel on which
+	  it was received, and the "tag" and "sy" fields from the
+	  isochronous header. Note that the packet is at this point
+	  still in the kernel's receive buffer, so the data pointer is
+	  only valid until the receive handler returns. You must make
+	  a copy of the packet's data if you want to keep it.
+	</para>
+
+	<para>
+	  The receive handler is also passed a "packet(s) dropped"
+	  flag. If this flag is nonzero, it means that one or more
+	  incoming packets have been dropped since the last call to
+	  your handler (usually this is because the kernel buffer has
+	  completely filled up with packets or a bus reset has
+	  occurred).
+	</para>
+
+    </sect1>
+
+     <sect1>
+
+      <title>Transmitting Packets</title>
+
+        <para>
+          Similar to reception, raw1394 maintains a fixed-size
+	  ringbuffer of packets in kernel memory. The buffer is filled
+	  by your application as it queues packets to be sent. The
+	  buffer is drained by the hardware driver as it transmits
+	  packets on the 1394 bus.
+        </para>
+
+        <para>
+	  The isochronous transmit handler you provided will be called
+	  from <function>raw1394_loop_iterate()</function> whenever
+	  there is space in the buffer to queue another packet. The
+	  handler is passed a pointer to the first byte of the buffer
+	  space for the packet's data payload, pointers to words
+	  containing the data length in bytes (not counting the
+	  isochronous header), "tag" and "sy" fields, and the
+	  isochronous cycle number at which this packet will be
+	  transmitted. The handler must write the packet's data
+	  payload into the supplied buffer space, and set the values
+	  pointed to by "len", "tag", and "sy" to the appropriate
+	  values. The handler is permitted to write any number of data
+	  bytes, up and including to the value of
+	  <symbol>max_packet_size</symbol> passed to
+	  <function>raw1394_iso_xmit_init()</function>.
+	</para>
+
+	<para>
+	 Note: If you passed -1 as the starting cycle to
+	 <function>raw1394_iso_xmit_init()</function>, the cycle
+	 number provided to your handler will be incorrect until after
+	 one buffer's worth of packets have been transmitted.
+	</para>
+
+	<para>
+	  The transmit handler is also passed a "packet(s) dropped"
+	  flag. If this flag is nonzero, it means that one or more
+	  outgoing packets have been dropped since the last call to
+	  your handler (usually this is because the kernel buffer has
+	  gone completely empty or a bus reset has occurred).
+	</para>
+
+    </sect1>
+
+     <sect1>
+
+      <title>Shutting down</title>
+
+        <para>
+	  When the isochronous operation has finished, call
+	  <function>raw1394_iso_shutdown()</function> to release all
+	  associated resources. If you don't call this function
+	  explicitly, it will be called automatically when the raw1394
+	  handle is destroyed.
+	</para>
+
     </sect1>
 
   </chapter>
