@@ -12,14 +12,90 @@
 #include <config.h>
 #include <errno.h>
 #include <unistd.h>
-#include <stdlib.h>
-#include <byteswap.h>
-#include <sys/mman.h>
+#include <string.h>
 #include <sys/ioctl.h>
+#include <sys/mman.h>
 
 #include "raw1394.h"
 #include "kernel-raw1394.h"
 #include "raw1394_private.h"
+
+/* old ISO API - kept for backwards compatibility */
+
+static int do_iso_listen(struct raw1394_handle *handle, int channel)
+{
+        struct sync_cb_data sd = { 0, 0 };
+        struct raw1394_reqhandle rh = { (req_callback_t)_raw1394_sync_cb, &sd };
+        int err;
+        struct raw1394_request *req = &handle->req;
+
+        CLEAR_REQ(req);
+        req->type = RAW1394_REQ_ISO_LISTEN;
+        req->generation = handle->generation;
+        req->misc = channel;
+        req->tag = ptr2int(&rh);
+        req->recvb = ptr2int(handle->buffer);
+        req->length = HBUF_SIZE;
+
+        err = write(handle->fd, req, sizeof(*req));
+        while (!sd.done) {
+                if (err < 0) return err;
+                err = raw1394_loop_iterate(handle);
+        }
+
+        switch (sd.errcode) {
+        case RAW1394_ERROR_ALREADY:
+                errno = EALREADY;
+                return -1;
+
+        case RAW1394_ERROR_INVALID_ARG:
+                errno = EINVAL;
+                return -1;
+
+        default:
+                errno = 0;
+                return sd.errcode;
+        }
+}
+
+/**
+ * raw1394_start_iso_rcv - enable isochronous receiving
+ * @channel: channel number to start receiving on
+ *
+ * Enables the reception of isochronous packets in @channel on @handle.
+ * Isochronous packets are then passed to the callback specified with
+ * raw1394_set_iso_handler().
+ **/
+int raw1394_start_iso_rcv(struct raw1394_handle *handle, unsigned int channel)
+{
+        if (channel > 63) {
+                errno = EINVAL;
+                return -1;
+        }
+
+        return do_iso_listen(handle, channel);
+}
+
+/**
+ * raw1394_stop_iso_rcv - stop isochronous receiving
+ * @channel: channel to stop receiving on
+ *
+ * Stops the reception of isochronous packets in @channel on @handle.
+ **/
+int raw1394_stop_iso_rcv(struct raw1394_handle *handle, unsigned int channel)
+{
+        if (channel > 63) {
+                errno = EINVAL;
+                return -1;
+        }
+
+        return do_iso_listen(handle, ~channel);
+}
+
+
+
+/* new ISO API */
+
 
 /* reset the dropped counter each time it is seen */
 static unsigned int _raw1394_iso_dropped(raw1394handle_t handle)
@@ -28,6 +104,7 @@ static unsigned int _raw1394_iso_dropped(raw1394handle_t handle)
 	handle->iso_packets_dropped = 0;
 	return retval;
 }
+
 
 /* common code for iso_xmit_init and iso_recv_init */
 static int do_iso_init(raw1394handle_t handle,
