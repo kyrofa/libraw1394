@@ -65,4 +65,4 @@ automake -a $am_opt --copy
 autoconf
 cd $ORIGDIR
 
-$srcdir/configure --enable-maintainer-mode "$@"
+rm -rf autom4te.cache
