@@ -47,7 +47,7 @@ int raw1394_start_write(struct raw1394_handle *handle, nodeid_t node,
 
 int raw1394_start_lock(struct raw1394_handle *handle, nodeid_t node,
                        nodeaddr_t addr, unsigned int extcode, quadlet_t data,
-                       quadlet_t arg, unsigned long tag)
+                       quadlet_t arg, quadlet_t *result, unsigned long tag)
 {
         struct raw1394_request *req = &handle->req;
         quadlet_t sendbuf[2];
@@ -65,6 +65,7 @@ int raw1394_start_lock(struct raw1394_handle *handle, nodeid_t node,
 
         req->address = ((u_int64_t)node << 48) | addr;
         req->sendb = sendbuf;
+        req->recvb = result;
 
         switch (extcode) {
         case 3: /* EXTCODE_FETCH_ADD */
@@ -119,11 +120,12 @@ int raw1394_write(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,
 }
 
 int raw1394_lock(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,
-                 unsigned int extcode, quadlet_t data, quadlet_t arg)
+                 unsigned int extcode, quadlet_t data, quadlet_t arg,
+                 quadlet_t *result)
 {
         SYNCFUNC_VARS;
 
-        err = raw1394_start_lock(handle, node, addr, extcode, data, arg,
+        err = raw1394_start_lock(handle, node, addr, extcode, data, arg, result,
                                  (unsigned long)&rh);
 
         SYNCFUNC_BODY;

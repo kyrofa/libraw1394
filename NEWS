@@ -1,6 +1,9 @@
 
 Version 0.7:
 
+- fixed lock transaction to actually return the required response; these
+  functions are actually useful now, prototypes for raw1394_start_lock and
+  raw1394_lock changed
 - a void pointer can now be stored as user data with a handle
 
 Version 0.6:
