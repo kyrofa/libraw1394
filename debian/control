@@ -2,8 +2,8 @@ Source: libraw1394
 Section: libs
 Priority: optional
 Maintainer: Andreas Bombe <aeb@debian.org>
-Standards-Version: 3.5.4.0
-Build-Depends: debhelper
+Standards-Version: 3.5.6.0
+Build-Depends: debhelper (>= 3.0.0)
 
 Package: libraw1394-dev
 Architecture: any
@@ -23,7 +23,7 @@ Description: library for direct access to IEEE 1394 bus - development files
 Package: libraw1394-5
 Architecture: any
 Section: libs
-Depends: ${shlibs:Depends}${makedev-depend}
+Depends: debconf, makedev (>= 2.3.1-49), ${shlibs:Depends}
 Description: library for direct access to IEEE 1394 bus (aka FireWire)
  libraw1394 is the only supported interface to the kernel side raw1394
  of the Linux IEEE-1394 subsystem, which provides direct access to the

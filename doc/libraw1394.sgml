@@ -893,6 +893,73 @@ struct <structname>raw1394_portinfo</structname> {
 	</para>
       </refsect1>
     </refentry>
+
+    <refentry>
+      <refmeta>
+	<refentrytitle>raw1394_get_(local_id|irm_id|nodecount)</refentrytitle>
+	<manvolnum>3</manvolnum>
+      </refmeta>
+
+      <refnamediv>
+	<refname>raw1394_get_local_id</refname>
+	<refname>raw1394_get_irm_id</refname>
+	<refname>raw1394_get_nodecount</refname>
+	<refpurpose>return basic information about the bus</refpurpose>
+      </refnamediv>
+
+      <refsynopsisdiv>
+	<funcsynopsis>
+	  <funcprototype>
+	    <funcdef>nodeid_t <function>raw1394_get_local_id</function></funcdef>
+	    <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+	  </funcprototype>
+	  <funcprototype>
+	    <funcdef>nodeid_t <function>raw1394_get_irm_id</function></funcdef>
+	    <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+	  </funcprototype>
+	  <funcprototype>
+	    <funcdef>int <function>raw1394_get_nodecount</function></funcdef>
+	    <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+	  </funcprototype>
+	</funcsynopsis>
+      </refsynopsisdiv>
+
+      <refsect1>
+	<title>Arguments</title>
+
+	<variablelist>
+	  <varlistentry>
+	    <term><parameter>handle</parameter></term>
+	    <listitem>
+	      <para>handle associated with a 1394 bus</para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </refsect1>
+
+      <refsect1>
+	<title>Description</title>
+
+	<para>
+	  These functions return information about the 1394 bus the handle is
+	  associated with.  The values that can be queried through these
+	  functions can change with every bus reset.
+	</para>
+      </refsect1>
+
+      <refsect1>
+	<title>Return Value</title>
+
+	<para>
+	  <function>raw1394_get_local_id()</function> returns the node ID of the
+	  local node (i.e. the hardware the driver is controlling directly).
+	  <function>raw1394_get_irm_id()</function> returns the node ID of the
+	  node that has become isochronous resource manager.
+	  <function>raw1394_get_nodecount</function> returns the number of nodes
+	  currently on the bus (including the local node).
+	</para>
+      </refsect1>
+    </refentry>
   </chapter>
 
 </book>

@@ -1,37 +1,34 @@
 #!/usr/bin/make -f
 
-export DH_COMPAT=1
-
-potato-build	= no
+export DH_COMPAT=3
 
 majorname	= $(shell grep library_names src/libraw1394.la | cut -d"'" -f 2 | cut -d" " -f 2)
 fullversionname	= $(shell grep library_names src/libraw1394.la | cut -d"'" -f 2 | cut -d" " -f 1)
-major 		= $(shell echo $(majorname) | cut -d"." -f 3)
 
+major 		= 5
 libraw		= libraw1394-$(major)
-source-version	= $(shell dpkg-parsechangelog | grep ^Version | cut -d" " -f 2)
 
-autoclean-files:
-	echo $@ >$@
+# maintainer files for the so package (of the name $(libraw))
+somaint		= postinst config templates
+
 
 build: build-stamp
 build-stamp:
 	dh_testdir
 
-	./configure --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info
+	./configure --prefix=/usr --mandir=\$${prefix}/share/man
 	$(MAKE)
 
 	touch build-stamp
 
-clean: autoclean-files
+clean:
 	dh_testdir
 	dh_testroot
-	rm -f build-stamp
+	rm -f build-stamp $(somaint:%=debian/$(libraw).%)
 
 	-$(MAKE) distclean
 
 	dh_clean
-	xargs <autoclean-files rm -f
 
 install: build
 	dh_testdir
@@ -44,38 +41,34 @@ install: build
 binary-indep: build install
 # Nothing to do here
 
-binary-arch: build install autoclean-files
+binary-arch: build install
 	dh_testdir
 	dh_testroot
+
+	for i in $(somaint); do					\
+		ln -sf libraw1394.$$i.in debian/$(libraw).$$i;	\
+	done
 
 	dh_movefiles -p$(libraw)		\
 		usr/lib/$(majorname)		\
 		usr/lib/$(fullversionname)
 
-	echo >>autoclean-files			\
-		debian/$(libraw).postinst	\
-		debian/$(libraw).substvars
+	dh_movefiles -plibraw1394-dev		\
+		usr/lib				\
+		usr/bin				\
+		usr/include/libraw1394		\
+		usr/share/aclocal/libraw1394.m4
 
-	if [ "$(potato-build)" = "yes" ]; then				\
-		cp debian/libraw1394-potato.postinst.in			\
-			debian/$(libraw).postinst;			\
-		echo "makedev-depend=" >>debian/$(libraw).substvars;	\
-	else								\
-		cp debian/libraw1394.postinst.in			\
-			debian/$(libraw).postinst;			\
-		echo "makedev-depend=, makedev (>= 2.3.1-49)"		\
-			>>debian/$(libraw).substvars;			\
-	fi
-
-	dh_installmanpages -plibraw1394-dev
+	dh_installman
 	dh_installdocs
 	dh_installchangelogs
+	dh_installdebconf
 	dh_strip
 	dh_compress
 	dh_fixperms
 	dh_makeshlibs -V
 	dh_installdeb
-	dh_shlibdeps -ldebian/$(libraw)/usr/lib
+	LD_PRELOAD='' dh_shlibdeps -v -ldebian/$(libraw)/usr/lib
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb
