@@ -1,4 +1,5 @@
-libraw1394 is packaged by the programmer and has no separate Debian changes.
+The maintainer of this package is also the upstream maintainer and author of
+libraw1394.
 
 Copyright:
 
