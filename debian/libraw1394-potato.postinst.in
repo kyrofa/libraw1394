@@ -1,0 +1,47 @@
+#!/bin/sh -e
+
+if [ "$1" = "configure" ]; then
+	ldconfig
+
+	if [ ! -c /dev/raw1394 ]; then
+		cat <<EOF
+
+Required /dev/raw1394 device file not found.  Without it, libraw1394
+is quite useless as it can not talk to the kernel driver.
+
+EOF
+		echo -n "Should I create it for you? [Y/n] "
+		read REPLY
+
+		case "$REPLY" in
+		y|yes|"")
+			mknod -m600 /dev/raw1394 c 171 0
+			chown root.root /dev/raw1394
+			cat <<EOF
+
+/dev/raw1394 created.
+
+It is owned by root with read/write permissions for root.  You may
+want to fix the group/permission to something appropriate for you.
+Note however that anyone who can open raw1394 can access all devices
+on all connected 1394 buses unrestricted, including harddisks and
+other probably sensitive devices.
+
+EOF
+			;;
+		*)
+			cat <<EOF
+
+/dev/raw1394 not created.  You can create it at a later time using
+/dev/MAKEDEV if you have a version that already knows raw1394 or you
+can create it manually with the command:
+
+    mknod -m600 /dev/raw1394 c 171 0
+
+EOF
+			;;
+		esac
+	fi
+fi
+
+#DEBHELPER#

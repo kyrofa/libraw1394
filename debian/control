@@ -1,14 +1,14 @@
 Source: libraw1394
 Section: libs
 Priority: optional
-Maintainer: Andreas E. Bombe <andreas.bombe@munich.netsurf.de>
+Maintainer: Andreas Bombe <bombe@informatik.tu-muenchen.de>
 Standards-Version: 3.1.1.1
 Build-Depends: debhelper
 
 Package: libraw1394-dev
 Architecture: any
 Section: devel
-Depends: libraw1394-4, libc6-dev
+Depends: libraw1394-${soversion} (= ${Source-Version}), libc6-dev
 Description: library for direct access to IEEE 1394 bus - development files
  libraw1394 is the only supported interface to the kernel side raw1394
  of the Linux IEEE-1394 subsystem, which provides direct access to the
@@ -22,7 +22,7 @@ Description: library for direct access to IEEE 1394 bus - development files
 Package: libraw1394-4
 Architecture: any
 Section: libs
-Depends: ${shlibs:Depends}
+Depends: ${makedev-depend}${shlibs:Depends}
 Description: library for direct access to IEEE 1394 bus (aka FireWire)
  libraw1394 is the only supported interface to the kernel side raw1394
  of the Linux IEEE-1394 subsystem, which provides direct access to the

@@ -1,13 +1,14 @@
 #!/usr/bin/make -f
 
-#export DH_VERBOSE=1
 export DH_COMPAT=1
 
+potato-build	= no
 
 majorname	= $(shell grep library_names src/libraw1394.la | cut -d"'" -f 2 | cut -d" " -f 2)
 fullversionname	= $(shell grep library_names src/libraw1394.la | cut -d"'" -f 2 | cut -d" " -f 1)
 major 		= $(shell echo $(majorname) | cut -d"." -f 3)
 
+libraw		= libraw1394-$(major)
 
 autoclean-files:
 	echo $@ >$@
@@ -46,12 +47,26 @@ binary-arch: build install autoclean-files
 	dh_testdir
 	dh_testroot
 
-	dh_movefiles -plibraw1394-$(major)	\
+	dh_movefiles -p$(libraw)		\
 		usr/lib/$(majorname)		\
 		usr/lib/$(fullversionname)
 
-	echo debian/libraw1394-$(major).postinst >>autoclean-files
-	cp debian/libraw1394.postinst.in debian/libraw1394-$(major).postinst
+	echo >>autoclean-files			\
+		debian/substvars		\
+		debian/$(libraw).postinst	\
+		debian/$(libraw).substvars
+
+	echo "soversion=$(major)" >>debian/substvars
+	if [ "$(potato-build)" = "yes" ]; then				\
+		cp debian/libraw1394-potato.postinst.in			\
+			debian/$(libraw).postinst;			\
+		echo "makedev-depend=" >>debian/$(libraw).substvars;	\
+	else								\
+		cp debian/libraw1394.postinst.in			\
+			debian/$(libraw).postinst;			\
+		echo "makedev-depend=makedev (>= 2.3.1-49), "		\
+			>>debian/$(libraw).substvars;			\
+	fi
 
 	dh_installdocs README NEWS
 	dh_installchangelogs
