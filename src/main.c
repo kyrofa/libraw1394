@@ -215,6 +215,7 @@ int raw1394_set_port(struct raw1394_handle *handle, int port)
                         handle->irm_id = ((req->misc >> 8) & 0xff) | 0xffc0;
                         handle->local_id = req->misc >> 16;
                 }
+                handle->generation = req->generation;
                 return 0;
         default:
                 errno = 0;
