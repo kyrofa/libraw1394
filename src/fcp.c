@@ -1,7 +1,7 @@
 /*
  * libraw1394 - library for raw access to the 1394 bus with the Linux subsystem.
  *
- * Copyright (C) 1999,2000 Andreas Bombe
+ * Copyright (C) 1999,2000,2001,2002 Andreas Bombe
  *
  * This library is licensed under the GNU Lesser General Public License (LGPL),
  * version 2.1 or later. See the file COPYING.LIB in the distribution for
@@ -52,11 +52,25 @@ static int do_fcp_listen(struct raw1394_handle *handle, int startstop)
         }
 }
 
+
+/**
+ * raw1394_start_fcp_listen - enable reception of FCP events
+ *
+ * Enables the reception of FCP events (writes to the FCP_COMMAND or
+ * FCP_RESPONSE address ranges) on @handle.  FCP requests are then passed to the
+ * callback specified with raw1394_set_fcp_handler().
+ **/
 int raw1394_start_fcp_listen(struct raw1394_handle *handle)
 {
         return do_fcp_listen(handle, 1);
 }
 
+/**
+ * raw1394_stop_fcp_listen - disable reception of FCP events
+ *
+ * Stops the reception of FCP events (writes to the FCP_COMMAND or
+ * FCP_RESPONSE address ranges) on @handle.
+ **/
 int raw1394_stop_fcp_listen(struct raw1394_handle *handle)
 {
         return do_fcp_listen(handle, 0);

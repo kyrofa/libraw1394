@@ -1,7 +1,7 @@
 /*
  * libraw1394 - library for raw access to the 1394 bus with the Linux subsystem.
  *
- * Copyright (C) 1999,2000 Andreas Bombe
+ * Copyright (C) 1999,2000,2001,2002 Andreas Bombe
  *
  * This library is licensed under the GNU Lesser General Public License (LGPL),
  * version 2.1 or later. See the file COPYING.LIB in the distribution for
@@ -17,6 +17,17 @@
 #include "raw1394_private.h"
 
 
+/**
+ * raw1394_loop_iterate - get and process one event message
+ *
+ * Get one new message through handle and process it with the registered message
+ * handler.  This function will return %-1 for an error or the return value of
+ * the handler which got executed.  The default handlers always return zero.
+ *
+ * Note that some other library functions may call this function multiple times
+ * to wait for their completion, some handler return values may get lost if you
+ * use these.
+ **/
 int raw1394_loop_iterate(struct raw1394_handle *handle)
 {
         struct raw1394_request *req = &handle->req;
@@ -77,6 +88,13 @@ int raw1394_loop_iterate(struct raw1394_handle *handle)
 }
 
 
+/**
+ * raw1394_set_bus_reset_handler - set bus reset handler
+ * @new_h: pointer to new handler
+ *
+ * Sets the handler to be called on every bus reset to @new_h and returns the
+ * old handler. The default handler just calls raw1394_update_generation().
+ **/
 bus_reset_handler_t raw1394_set_bus_reset_handler(struct raw1394_handle *handle,
                                                   bus_reset_handler_t new)
 {
@@ -88,6 +106,19 @@ bus_reset_handler_t raw1394_set_bus_reset_handler(struct raw1394_handle *handle,
         return old;
 }
 
+/**
+ * raw1394_set_tag_handler - set request completion handler
+ * @new_h: pointer to new handler
+ *
+ * Sets the handler to be called whenever a request completes to @new_h and
+ * returns the old handler.  The default handler interprets the tag as a pointer
+ * to a &struct raw1394_reqhandle and calls the callback in there.
+ *
+ * Care must be taken when replacing the tag handler and calling the synchronous
+ * versions of the transaction functions (i.e. raw1394_read(), raw1394_write(),
+ * raw1394_lock(), raw1394_iso_write()) since these do pass pointers to &struct
+ * raw1394_reqhandle as the tag and expect the callback to be invoked.
+ **/
 tag_handler_t raw1394_set_tag_handler(struct raw1394_handle *handle, 
                                       tag_handler_t new)
 {
@@ -99,6 +130,17 @@ tag_handler_t raw1394_set_tag_handler(struct raw1394_handle *handle,
         return old;
 }
 
+/**
+ * raw1394_set_iso_handler - set isochronous packet handler
+ * @new_h: pointer to new handler
+ *
+ * Sets the handler to be called when an isochronous packet is received to
+ * @new_h and returns the old handler.  The default handler does nothing.
+ *
+ * In order to actually get iso packet events, receiving on a specific channel
+ * first has to be enabled with raw1394_start_iso_rcv() and can be stopped again
+ * with raw1394_stop_iso_rcv().
+ **/
 iso_handler_t raw1394_set_iso_handler(struct raw1394_handle *handle,
                                       unsigned int channel, iso_handler_t new)
 {
@@ -120,6 +162,17 @@ iso_handler_t raw1394_set_iso_handler(struct raw1394_handle *handle,
         return NULL;
 }
 
+/**
+ * raw1394_set_fcp_handler - set FCP handler
+ * @new_h: pointer to new handler
+ *
+ * Sets the handler to be called when either FCP command or FCP response
+ * registers get written to @new_h and returns the old handler.  The default
+ * handler does nothing.
+ *
+ * In order to actually get FCP events, you have to enable it with
+ * raw1394_start_fcp_listen() and can stop it with raw1394_stop_fcp_listen().
+ **/
 fcp_handler_t raw1394_set_fcp_handler(struct raw1394_handle *handle,
                                       fcp_handler_t new)
 {

@@ -1,7 +1,7 @@
 /*
  * libraw1394 - library for raw access to the 1394 bus with the Linux subsystem.
  *
- * Copyright (C) 1999,2000 Andreas Bombe
+ * Copyright (C) 1999,2000,2001,2002 Andreas Bombe
  *
  * This library is licensed under the GNU Lesser General Public License (LGPL),
  * version 2.1 or later. See the file COPYING.LIB in the distribution for
@@ -53,6 +53,14 @@ static int do_iso_listen(struct raw1394_handle *handle, int channel)
         }
 }
 
+/**
+ * raw1394_start_iso_rcv - enable isochronous receiving
+ * @channel: channel number to start receiving on
+ *
+ * Enables the reception of isochronous packets in @channel on @handle.
+ * Isochronous packets are then passed to the callback specified with
+ * raw1394_set_iso_handler().
+ **/
 int raw1394_start_iso_rcv(struct raw1394_handle *handle, unsigned int channel)
 {
         if (channel > 63) {
@@ -63,6 +71,12 @@ int raw1394_start_iso_rcv(struct raw1394_handle *handle, unsigned int channel)
         return do_iso_listen(handle, channel);
 }
 
+/**
+ * raw1394_stop_iso_rcv - stop isochronous receiving
+ * @channel: channel to stop receiving on
+ *
+ * Stops the reception of isochronous packets in @channel on @handle.
+ **/
 int raw1394_stop_iso_rcv(struct raw1394_handle *handle, unsigned int channel)
 {
         if (channel > 63) {

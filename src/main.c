@@ -1,7 +1,7 @@
 /*
  * libraw1394 - library for raw access to the 1394 bus with the Linux subsystem.
  *
- * Copyright (C) 1999,2000 Andreas Bombe
+ * Copyright (C) 1999,2000,2001,2002 Andreas Bombe
  *
  * This library is licensed under the GNU Lesser General Public License (LGPL),
  * version 2.1 or later. See the file COPYING.LIB in the distribution for
@@ -77,6 +77,18 @@ static unsigned int init_rawdevice(struct raw1394_handle *h)
 }
 
 
+/**
+ * raw1394_new_handle - create new handle
+ *
+ * Creates and returns a new handle which can (after being set up) control one
+ * port.  It is not allowed to use the same handle in multiple threads or forked
+ * processes.  It is allowed to create and use multiple handles, however.  Use
+ * one handle per thread which needs it in the multithreaded case.
+ *
+ * Returns the created handle or %NULL when initialization fails.  In the latter
+ * case errno either contains some OS specific error code or %0 if the error is
+ * that libraw1394 and raw1394 don't support each other's protocol versions.
+ **/
 struct raw1394_handle *raw1394_new_handle(void)
 {
         struct raw1394_handle *handle;
@@ -107,6 +119,14 @@ struct raw1394_handle *raw1394_new_handle(void)
         return handle;
 }
 
+/**
+ * raw1394_destroy_handle - deallocate handle
+ * @handle: handle to deallocate
+ *
+ * Closes connection with raw1394 on this handle and deallocates everything
+ * associated with it.  It is safe to pass %NULL as handle, nothing is done in
+ * this case.
+ **/
 void raw1394_destroy_handle(struct raw1394_handle *handle)
 {
         if (handle) {
@@ -115,46 +135,137 @@ void raw1394_destroy_handle(struct raw1394_handle *handle)
         }
 }
 
+/**
+ * raw1394_get_fd - get the communication file descriptor
+ * @handle: raw1394 handle
+ *
+ * Returns the fd used for communication with the raw1394 kernel module.  This
+ * can be used for select()/poll() calls if you wait on other fds or can be
+ * integrated into another event loop (e.g. from a GUI application framework).
+ * It can also be used to set/remove the O_NONBLOCK flag using fcntl() to modify
+ * the blocking behaviour in raw1394_loop_iterate().  It must not be used for
+ * anything else.
+ **/
 int raw1394_get_fd(struct raw1394_handle *handle)
 {
         return handle->fd;
 }
 
+/**
+ * raw1394_get_generation - get generation number of handle
+ *
+ * This function returns the generation number associated with the handle.  The
+ * generation number is incremented on every bus reset, and every transaction
+ * started by raw1394 is tagged with the stored generation number.  If these
+ * don't match, the transaction will abort with an error.
+ *
+ * The generation number of the handle is not automatically updated,
+ * raw1394_update_generation() has to be used for this.
+ **/
 unsigned int raw1394_get_generation(struct raw1394_handle *handle)
 {
         return handle->generation;
 }
 
+/**
+ * raw1394_update_generation - set generation number of handle
+ * @gen: new generation number
+ *
+ * This function sets the generation number of the handle to @gen.  All requests
+ * that apply to a single node ID are tagged with this number and abort with an
+ * error if that is different from the generation number kept in the kernel.
+ * This avoids acting on the wrong node which may have changed its ID in a bus
+ * reset.
+ *
+ * TODO HERE
+ **/
 void raw1394_update_generation(struct raw1394_handle *handle, unsigned int gen)
 {
         handle->generation = gen;
 }
 
+/**
+ * raw1394_get_nodecount - get number of nodes on the bus
+ * @handle: libraw1394 handle
+ *
+ * Returns the number of nodes on the bus to which the handle is connected.
+ * This value can change with every bus reset.  Since the root node always has
+ * the highest node ID, this number can be used to determine that ID (it's
+ * LOCAL_BUS|(count-1)).
+ **/
 int raw1394_get_nodecount(struct raw1394_handle *handle)
 {
         return handle->num_of_nodes;
 }
 
+/**
+ * raw1394_get_local_id - get local node ID
+ * @handle: libraw1394 handle
+ *
+ * Returns the node ID of the local node connected to which the handle is
+ * connected.  This value can change with every bus reset.
+ **/
 nodeid_t raw1394_get_local_id(struct raw1394_handle *handle)
 {
         return handle->local_id;
 }
 
+/**
+ * raw1394_get_irm_id - get node ID of isochronous resource manager
+ * @handle: libraw1394 handle
+ *
+ * Returns the node ID of the isochronous resource manager of the bus the handle
+ * is connected to.  This value may change with every bus reset.
+ **/
 nodeid_t raw1394_get_irm_id(struct raw1394_handle *handle)
 {
         return handle->irm_id;
 }
 
-void *raw1394_get_userdata(struct raw1394_handle *handle)
-{
-        return handle->userdata;
-}
-
+/**
+ * raw1394_set_userdata - associate user data with a handle
+ * @handle: raw1394 handle
+ * @data: user data (pointer)
+ *
+ * Allows to associate one void pointer with a handle.  libraw1394 does not care
+ * about the data, it just stores it in the handle allowing it to be retrieved
+ * at any time with raw1394_get_userdata().  This can be useful when multiple
+ * handles are used, so that callbacks can identify the handle.
+ **/
 void raw1394_set_userdata(struct raw1394_handle *handle, void *data)
 {
         handle->userdata = data;
 }
 
+/**
+ * raw1394_get_userdata - retrieve user data from handle
+ * @handle: libraw1394 handle
+ *
+ * Returns the user data pointer associated with the handle using
+ * raw1394_set_userdata().
+ **/
+void *raw1394_get_userdata(struct raw1394_handle *handle)
+{
+        return handle->userdata;
+}
+
+/**
+ * raw1394_get_port_info - get information about available ports
+ * @pinf: pointer to an array of struct raw1394_portinfo
+ * @maxports: number of elements in @pinf
+ *
+ * Before you can set which port to use, you have to use this function to find
+ * out which ports exist.
+ *
+ * If your program is interactive, you should present the user with this list to
+ * let them decide which port to use if there is more than one.  A
+ * non-interactive program (and probably interactive ones, too) should provide a
+ * command line option to choose the port.
+ *
+ * Returns the number of ports and writes information about them into @pinf, but
+ * not into more than @maxports elements.  If @maxports is %0, @pinf can be
+ * %NULL, too.
+ **/
 int raw1394_get_port_info(struct raw1394_handle *handle, 
                           struct raw1394_portinfo *pinf, int maxports)
 {
@@ -191,6 +302,22 @@ int raw1394_get_port_info(struct raw1394_handle *handle,
         return req->misc;
 }
 
+
+/**
+ * raw1394_set_port - choose port for handle
+ * @port: port to connect to (corresponds to index of struct raw1394_portinfo)
+ *
+ * This function connects the handle to the port given (as queried with
+ * raw1394_get_port_info()).  If successful, raw1394_get_port_info() and
+ * raw1394_set_port() are not allowed to be called afterwards on this handle.
+ * To make up for this, all the other functions (those handling asynchronous and
+ * isochronous transmissions) can now be called.
+ *
+ * Returns %0 for success and -1 for failure with errno set appropriately.  A
+ * possible failure mode is with errno = %ESTALE, in this case the configuration
+ * has changed since the call to raw1394_get_port_info() and it has to be called
+ * again to update your view of the available ports.
+ **/
 int raw1394_set_port(struct raw1394_handle *handle, int port)
 {
         struct raw1394_request *req = &handle->req;
@@ -229,6 +356,16 @@ int raw1394_set_port(struct raw1394_handle *handle, int port)
         }
 }
 
+
+/**
+ * raw1394_reset_bus - initiate bus reset
+ *
+ * This function initiates a bus reset on the connected port.  Usually this is
+ * not necessary and should be avoided, this function is here for low level bus
+ * control and debugging.
+ *
+ * Returns %0 for success and -1 for failure with errno set appropriately.
+ **/
 int raw1394_reset_bus(struct raw1394_handle *handle)
 {
         struct raw1394_request *req = &handle->req;

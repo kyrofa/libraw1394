@@ -1,4 +1,3 @@
-
 #ifndef _LIBRAW1394_RAW1394_H
 #define _LIBRAW1394_RAW1394_H
 
