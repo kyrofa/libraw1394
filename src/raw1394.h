@@ -157,11 +157,19 @@ raw1394handle_t raw1394_new_handle(void);
 void raw1394_destroy_handle(raw1394handle_t handle);
 
 /*
+ * Same as raw1394_new_handle(), but also binds the handle to the
+ * specified 1394 port. Equivalent to raw1394_new_handle() followed by
+ * raw1394_get_port_info() and raw1394_set_port(). Useful for
+ * command-line programs that already know what port they want.
+ */
+raw1394handle_t raw1394_new_handle_on_port(int port);
+
+/*
  * Switch off/on busreset-notification for handle
  * return-value:
  * ==0 success 
  * !=0 failure
- * off_on_switch .... RAW1394_NOTIFY_OFF or RAW1394_NOTIFY_ON 
+ * off_on_switch .... RAW1394_NOTIFY_OFF or RAW1394_NOTIFY_ON
  */
 int raw1394_busreset_notify (raw1394handle_t handle, int off_on_switch);
 

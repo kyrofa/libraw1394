@@ -394,6 +394,38 @@ int raw1394_set_port(struct raw1394_handle *handle, int port)
         }
 }
 
+/**
+ * raw1394_new_handle_on_port - create a new handle and bind it to a port
+ * @port: port to connect to (same as argument to raw1394_set_port())
+ *
+ * Same as raw1394_new_handle(), but also binds the handle to the
+ * specified 1394 port. Equivalent to raw1394_new_handle() followed by
+ * raw1394_get_port_info() and raw1394_set_port(). Useful for
+ * command-line programs that already know what port they want. If
+ * raw1394_set_port() returns ESTALE, retries automatically.
+ **/
+raw1394handle_t raw1394_new_handle_on_port(int port)
+{
+	raw1394handle_t handle = raw1394_new_handle();
+	if (!handle)
+		return NULL;
+
+tryagain:
+	if (raw1394_get_port_info(handle, NULL, 0) < 0)
+		return NULL;
+
+	if (raw1394_set_port(handle, port)) {
+		if (errno == ESTALE || errno == EINTR) {
+			goto tryagain;
+		} else {
+			raw1394_destroy_handle(handle);
+			return NULL;
+		}
+	}
+
+	return handle;
+}
+
 int raw1394_reset_bus_new(struct raw1394_handle *handle, int type)
 {
         struct raw1394_request *req = &handle->req;
