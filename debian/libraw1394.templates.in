@@ -1,0 +1,16 @@
+Template: libraw1394/device_node
+Type: note
+Description: Check that /dev/raw1394 permissions are appropriate for you.
+ The device file /dev/raw1394 will be created for libraw1394.  This library is
+ used by applications to access FireWire devices.
+ .
+ The default access permissions allows only users in the "disk" group.  This
+ restrictive setting was chosen since raw1394 allows almost full access to the
+ FireWire bus and all connected devices are accessible, which may include hard
+ disks.
+ .
+ If you don't intend to connect sensitive devices and e.g. only want to get
+ video streams out of a camera, you can relax the permissions.  If you don't
+ have malicious users on your system, you can allow access for all users with
+ this command (executed as the root user):
+     chmod 666 /dev/raw1394
