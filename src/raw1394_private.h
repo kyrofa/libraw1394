@@ -27,8 +27,11 @@ struct raw1394_handle {
 
 	/* memory mapping of the DMA buffer */
 	unsigned char *iso_buffer;
-	unsigned long  iso_buffer_bytes;
-	
+
+	/* iso XMIT only: */
+	unsigned int iso_buf_stride; /* offset between successive packets */
+	unsigned int next_packet; /* index of next packet to be transmitted */
+
 	/* status buffer, updated from _raw1394_iso_iterate() */
 	struct raw1394_iso_status iso_status;
 	unsigned int iso_packets_dropped;
@@ -36,7 +39,7 @@ struct raw1394_handle {
 	/* user-supplied handlers */
 	raw1394_iso_xmit_handler_t iso_xmit_handler;
 	raw1394_iso_recv_handler_t iso_recv_handler;
-	
+
         struct raw1394_request req;
         quadlet_t buffer[HBUF_SIZE/4]; /* 2048 */
 };

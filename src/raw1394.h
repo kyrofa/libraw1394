@@ -55,7 +55,7 @@ enum raw1394_iso_speed {
 	RAW1394_ISO_SPEED_400 = 2,
 };
 
-/* return values from xmit/recv handlers */
+/* return values from isochronous xmit/recv handlers */
 
 enum raw1394_iso_disposition {
 	/* continue on to the next packet */
@@ -72,14 +72,16 @@ enum raw1394_iso_disposition {
 extern "C" {
 #endif
 
+/* handlers for transmitting/receiving isochronous packets */
+
 typedef enum raw1394_iso_disposition (*raw1394_iso_xmit_handler_t)(raw1394handle_t,
 								   unsigned char *data,
 								   unsigned int *len,
 								   unsigned char *tag,
 								   unsigned char *sy,
-								   unsigned int cycle,
+								   int cycle, /* -1 if unknown */
 								   unsigned int dropped);
-	
+
 typedef enum raw1394_iso_disposition (*raw1394_iso_recv_handler_t)(raw1394handle_t,
 								   unsigned char *data,
 								   unsigned int len,
@@ -93,7 +95,7 @@ int raw1394_iso_xmit_init(raw1394handle_t handle,
 			  raw1394_iso_xmit_handler_t handler,
 			  unsigned int buf_packets,
 			  unsigned int max_packet_size,
-			  int channel,
+			  unsigned char channel,
 			  enum raw1394_iso_speed speed,
 			  int irq_interval);
 
@@ -101,13 +103,23 @@ int raw1394_iso_recv_init(raw1394handle_t handle,
 			  raw1394_iso_recv_handler_t handler,
 			  unsigned int buf_packets,
 			  unsigned int max_packet_size,
-			  int channel,
+			  unsigned char channel,
 			  int irq_interval);
 
+int raw1394_iso_multichannel_recv_init(raw1394handle_t handle,
+				       raw1394_iso_recv_handler_t handler,
+				       unsigned int buf_packets,
+				       unsigned int max_packet_size,
+				       int irq_interval);
+
+/* listen/unlisten on a specific channel (multi-channel mode ONLY) */	
+int raw1394_iso_recv_listen_channel(raw1394handle_t handle, unsigned char channel);
+int raw1394_iso_recv_unlisten_channel(raw1394handle_t handle, unsigned char channel);
+int raw1394_iso_recv_set_channel_mask(raw1394handle_t handle, u_int64_t mask);
 
 int raw1394_iso_xmit_start(raw1394handle_t handle, int start_on_cycle, int prebuffer_packets);
 int raw1394_iso_recv_start(raw1394handle_t handle, int start_on_cycle);
-	
+
 void raw1394_iso_stop(raw1394handle_t handle);
 void raw1394_iso_shutdown(raw1394handle_t handle);
 

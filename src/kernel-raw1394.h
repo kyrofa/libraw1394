@@ -118,31 +118,53 @@ typedef struct arm_request_response {
 /* rawiso API */
 
 /* ioctls */
-#define RAW1394_ISO_XMIT_INIT        1  /* arg: raw1394_iso_status* */
-#define RAW1394_ISO_RECV_INIT        2  /* arg: raw1394_iso_status* */
-#define RAW1394_ISO_RECV_START       3  /* arg: int, starting cycle */
-#define RAW1394_ISO_XMIT_START       8  /* arg: int[2], { starting cycle, prebuffer } */
-#define RAW1394_ISO_STOP             4
-#define RAW1394_ISO_GET_STATUS       5  /* arg: raw1394_iso_status* */
-#define RAW1394_ISO_PRODUCE_CONSUME  6  /* arg: int, # of packets */
-#define RAW1394_ISO_SHUTDOWN         7
-#define RAW1394_ISO_QUEUE_ACTIVITY   9
-
+#define RAW1394_ISO_XMIT_INIT               1  /* arg: raw1394_iso_status* */
+#define RAW1394_ISO_RECV_INIT               2  /* arg: raw1394_iso_status* */
+#define RAW1394_ISO_RECV_START              3  /* arg: int, starting cycle */
+#define RAW1394_ISO_XMIT_START              8  /* arg: int[2], { starting cycle, prebuffer } */
+#define RAW1394_ISO_STOP                    4
+#define RAW1394_ISO_GET_STATUS              5  /* arg: raw1394_iso_status* */
+#define RAW1394_ISO_PRODUCE_CONSUME         6  /* no longer used */
+#define RAW1394_ISO_SHUTDOWN                7
+#define RAW1394_ISO_QUEUE_ACTIVITY          9
+#define RAW1394_ISO_RECV_LISTEN_CHANNEL     10 /* arg: channel number */
+#define RAW1394_ISO_RECV_UNLISTEN_CHANNEL   11 /* arg: channel number */
+#define RAW1394_ISO_RECV_SET_CHANNEL_MASK   12 /* arg: pointer to 64-bit mask */
+#define RAW1394_ISO_RECV_PACKETS            13 /* arg: struct raw1394_iso_packets* */
+#define RAW1394_ISO_RECV_RELEASE_PACKETS    14 /* arg: int n_packets */
+#define RAW1394_ISO_XMIT_PACKETS            15 /* arg: struct raw1394_iso_packets* */
+						  
 /* per-packet metadata embedded in the ringbuffer */
 /* must be identical to hpsb_iso_packet_info in iso.h! */
 struct raw1394_iso_packet_info {
+	__u32 offset;
 	__u16 len;
-	__u16 cycle;
+	__u16 cycle;   /* recv only */
 	__u8  channel; /* recv only */
 	__u8  tag;
-	__u8 sy;
+	__u8  sy;
+};
+
+/* argument for RAW1394_ISO_RECV/XMIT_PACKETS ioctls */
+struct raw1394_iso_packets {
+	__u32 n_packets;
+	struct raw1394_iso_packet_info *infos;
 };
 
 struct raw1394_iso_config {
+	/* size of packet data buffer, in bytes (will be rounded up to PAGE_SIZE) */
+	__u32 data_buf_size;
+
+	/* # of packets to buffer */
 	__u32 buf_packets;
-	__u32 max_packet_size;
-	__u32 channel;
-	__u32 speed; /* xmit only */
+
+	/* iso channel (set to -1 for multi-channel recv) */
+	__s32 channel;
+
+	/* xmit only - iso transmission speed */
+	__u8 speed;
+
+	/* max. latency of buffer, in packets (-1 if you don't care) */
 	__s32 irq_interval;
 };
 
@@ -150,19 +172,6 @@ struct raw1394_iso_config {
 struct raw1394_iso_status {
 	/* current settings */
 	struct raw1394_iso_config config;
-	
-	/* byte offset between successive packets in the buffer */
-	__s32 buf_stride;
-
-	/* byte offset of data payload within each packet */
-	__s32 packet_data_offset;
-	
-	/* byte offset of struct iso_packet_info within each packet */
-	__s32 packet_info_offset;
-
-	/* index of next packet to fill with data (ISO transmission)
-	   or next packet containing data recieved (ISO reception) */
-	__u32 first_packet;
 
 	/* number of packets waiting to be filled with data (ISO transmission)
 	   or containing data received (ISO reception) */
@@ -172,6 +181,10 @@ struct raw1394_iso_status {
 	   underflow of the packet buffer (a value of zero guarantees
 	   that no packets have been dropped) */
 	__u32 overflows;
+
+	/* cycle number at which next packet will be transmitted;
+	   -1 if not known */
+	__s16 xmit_cycle;
 };
 
 #endif /* IEEE1394_RAW1394_H */
