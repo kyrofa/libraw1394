@@ -1,4 +1,8 @@
 
+Version 0.7:
+
+- a void pointer can now be stored as user data with a handle
+
 Version 0.6:
 
 - FCP monitoring added
