@@ -1,3 +1,11 @@
+libraw1394 (0.8) unstable; urgency=low
+
+  * New libraw1394 release.
+  * ldconfig is done in postinst (now lintian clean).
+  * /dev/raw1394 is created if it doesn't exist.
+
+ -- Andreas Bombe <andreas.bombe@munich.netsurf.de>  Fri, 24 Nov 2000 02:06:08 +0100
+
 libraw1394 (0.7) unstable; urgency=low
 
   * First unofficial Debian release.
