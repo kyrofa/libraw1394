@@ -113,7 +113,7 @@ iso_handler_t raw1394_set_iso_handler(raw1394handle_t handle,
  */
 typedef int (*fcp_handler_t)(raw1394handle_t, nodeid_t nodeid, int response,
                              size_t length, unsigned char *data);
-fcp_handler_t raw1394_set_fcp_handlet(raw1394handle_t, fcp_handler_t);
+fcp_handler_t raw1394_set_fcp_handler(raw1394handle_t, fcp_handler_t);
 
 /*
  * This is the general request handle.  It is used by the default tag handler
@@ -161,8 +161,8 @@ int raw1394_stop_iso_rcv(raw1394handle_t handle, unsigned int channel);
  * Start and stop receiving requests sent to the local FCP_COMMAND and
  * FCP_RESPONSE registers.
  */
-int raw1394_start_fcp_listen(struct raw1394_handle *handle);
-int raw1394_stop_fcp_listen(struct raw1394_handle *handle);
+int raw1394_start_fcp_listen(raw1394handle_t handle);
+int raw1394_stop_fcp_listen(raw1394handle_t handle);
 
 #ifdef __cplusplus
 }
