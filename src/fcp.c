@@ -54,24 +54,11 @@ static int do_fcp_listen(struct raw1394_handle *handle, int startstop)
 }
 
 
-/**
- * raw1394_start_fcp_listen - enable reception of FCP events
- *
- * Enables the reception of FCP events (writes to the FCP_COMMAND or
- * FCP_RESPONSE address ranges) on @handle.  FCP requests are then passed to the
- * callback specified with raw1394_set_fcp_handler().
- **/
 int raw1394_start_fcp_listen(struct raw1394_handle *handle)
 {
         return do_fcp_listen(handle, 1);
 }
 
-/**
- * raw1394_stop_fcp_listen - disable reception of FCP events
- *
- * Stops the reception of FCP events (writes to the FCP_COMMAND or
- * FCP_RESPONSE address ranges) on @handle.
- **/
 int raw1394_stop_fcp_listen(struct raw1394_handle *handle)
 {
         return do_fcp_listen(handle, 0);

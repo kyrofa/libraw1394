@@ -17,42 +17,11 @@
 #include "ieee1394.h"
 
 
-/**
- * raw1394_get_errcode - return error code of async transaction
- *
- * Returns the error code of the last raw1394_read(), raw1394_write(),
- * raw1394_lock() or raw1394_iso_write().  The error code is either an internal
- * error (i.e. not a bus error) or a combination of acknowledge code and
- * response code, as appropriate.
- *
- * Some macros are available to extract information from the error code,
- * raw1394_errcode_to_errno() can be used to convert it to an errno number of
- * roughly the same meaning.
- **/
 raw1394_errcode_t raw1394_get_errcode(struct raw1394_handle *handle)
 {
         return handle->err;
 }
 
-/**
- * raw1394_errcode_to_errno - convert libraw1394 errcode to errno
- * @errcode: the error code to convert
- *
- * The error code as retrieved by raw1394_get_errcode() is converted into a
- * roughly equivalent errno number and returned.  %0xdead is returned for an
- * illegal errcode.
- *
- * It is intended to be used to decide what to do (retry, give up, report error)
- * for those programs that aren't interested in details, since these get lost in
- * the conversion.  However the returned errnos are equivalent in source code
- * meaning only, the associated text of e.g. perror() is not necessarily
- * meaningful.
- *
- * Returned values are %EAGAIN (retrying might succeed, also generation number
- * mismatch), %EREMOTEIO (other node had internal problems), %EPERM (operation
- * not allowed on this address, e.g. write on read-only location), %EINVAL
- * (invalid argument) and %EFAULT (invalid pointer).
- **/
 int raw1394_errcode_to_errno(raw1394_errcode_t errcode)
 {
         static const int ack2errno[16] = {

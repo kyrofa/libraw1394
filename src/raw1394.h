@@ -1,3 +1,14 @@
+/*
+ * libraw1394 - library for raw access to the 1394 bus with the Linux subsystem.
+ *
+ * Copyright (C) 1999-2004 Andreas Bombe, Dan Maas, Manfred Weihs, and
+ *    Christian Toegel
+ *
+ * This library is licensed under the GNU Lesser General Public License (LGPL),
+ * version 2.1 or later. See the file COPYING.LIB in the distribution for
+ * details.
+ */
+
 #ifndef _LIBRAW1394_RAW1394_H
 #define _LIBRAW1394_RAW1394_H
 
@@ -87,66 +98,182 @@ extern "C" {
 
 /* handlers for transmitting/receiving isochronous packets */
 
-typedef enum raw1394_iso_disposition (*raw1394_iso_xmit_handler_t)(raw1394handle_t,
-								   unsigned char *data,
-								   unsigned int *len,
-								   unsigned char *tag,
-								   unsigned char *sy,
-								   int cycle, /* -1 if unknown */
-								   unsigned int dropped);
+typedef enum raw1394_iso_disposition (*raw1394_iso_xmit_handler_t)(
+	raw1394handle_t handle,
+	unsigned char *data,
+	unsigned int *len,
+	unsigned char *tag,
+	unsigned char *sy,
+	int cycle, /* -1 if unknown */
+	unsigned int dropped);
 
-typedef enum raw1394_iso_disposition (*raw1394_iso_recv_handler_t)(raw1394handle_t,
-								   unsigned char *data,
-								   unsigned int len,
-								   unsigned char channel,
-								   unsigned char tag,
-								   unsigned char sy,
-								   unsigned int cycle,
-								   unsigned int dropped);
+typedef enum raw1394_iso_disposition (*raw1394_iso_recv_handler_t)(
+	raw1394handle_t handle,
+	unsigned char *data,
+	unsigned int len,
+	unsigned char channel,
+	unsigned char tag,
+	unsigned char sy,
+	unsigned int cycle,
+	unsigned int dropped);
 
+/**
+ * raw1394_iso_xmit_init - initialize isochronous transmission
+ * @handle: libraw1394 handle
+ * @handler: handler function for queueing packets
+ * @buf_packets: number of isochronous packets to buffer
+ * @max_packet_size: largest packet you need to handle, in bytes
+ * (not including the isochronous header)
+ * @channel: isochronous channel on which to transmit
+ * @speed: speed at which to transmit
+ * @irq_interval: maximum latency of wake-ups, in packets (-1 if you don't care)
+ *
+ * Allocates all user and kernel resources necessary for isochronous transmission.
+ **/
 int raw1394_iso_xmit_init(raw1394handle_t handle,
-			  raw1394_iso_xmit_handler_t handler,
-			  unsigned int buf_packets,
-			  unsigned int max_packet_size,
-			  unsigned char channel,
-			  enum raw1394_iso_speed speed,
-			  int irq_interval);
+                          raw1394_iso_xmit_handler_t handler,
+                          unsigned int buf_packets,
+                          unsigned int max_packet_size,
+                          unsigned char channel,
+                          enum raw1394_iso_speed speed,
+                          int irq_interval);
 
+/**
+ * raw1394_iso_recv_init - initialize isochronous reception
+ * @handle: libraw1394 handle
+ * @handler: handler function for receiving packets
+ * @buf_packets: number of isochronous packets to buffer
+ * @max_packet_size: largest packet you need to handle, in bytes (not including
+ * the isochronous header)
+ * @channel: isochronous channel to receive
+ * @speed: speed at which to receive
+ * @irq_interval: maximum latency of wake-ups, in packets
+ * (-1 if you don't care)
+ *
+ * Allocates all user and kernel resources necessary for isochronous reception.
+ **/
 int raw1394_iso_recv_init(raw1394handle_t handle,
-			  raw1394_iso_recv_handler_t handler,
-			  unsigned int buf_packets,
-			  unsigned int max_packet_size,
-			  unsigned char channel,
-			  enum raw1394_iso_dma_recv_mode mode,
-			  int irq_interval);
+                          raw1394_iso_recv_handler_t handler,
+                          unsigned int buf_packets,
+                          unsigned int max_packet_size,
+                          unsigned char channel,
+                          enum raw1394_iso_dma_recv_mode mode,
+                          int irq_interval);
 
+/**
+ * raw1394_iso_multichannel_recv_init - initialize multi-channel iso reception
+ * @handle: libraw1394 handle
+ * @handler: handler function for receiving packets
+ * @buf_packets: number of isochronous packets to buffer
+ * @max_packet_size: largest packet you need to handle, in bytes (not including
+ * the isochronous header)
+ * @speed: speed at which to receive
+ * @irq_interval: maximum latency of wake-ups, in packets (-1 if you don't care)
+ *
+ * Allocates all user and kernel resources necessary for isochronous reception.
+ **/
 int raw1394_iso_multichannel_recv_init(raw1394handle_t handle,
-				       raw1394_iso_recv_handler_t handler,
-				       unsigned int buf_packets,
-				       unsigned int max_packet_size,
-				       int irq_interval);
+                                       raw1394_iso_recv_handler_t handler,
+                                       unsigned int buf_packets,
+                                       unsigned int max_packet_size,
+                                       int irq_interval);
 
-/* listen/unlisten on a specific channel (multi-channel mode ONLY) */	
-int raw1394_iso_recv_listen_channel(raw1394handle_t handle, unsigned char channel);
-int raw1394_iso_recv_unlisten_channel(raw1394handle_t handle, unsigned char channel);
+/**
+ * raw1394_iso_recv_listen_channel - listen to a specific channel in multi-channel mode
+ * @handle: libraw1394 handle
+ *
+ * listen/unlisten on a specific channel (multi-channel mode ONLY)	
+ **/
+int raw1394_iso_recv_listen_channel(raw1394handle_t handle, 
+                                    unsigned char channel);
+
+/**
+ * raw1394_iso_recv_unlisten_channel - stop listening  to a specific channel in multi-channel mode
+ * @handle: libraw1394 handle
+ **/
+int raw1394_iso_recv_unlisten_channel(raw1394handle_t handle, 
+                                      unsigned char channel);
+
+/**
+ * raw1394_iso_recv_set_channel_mask - listen or unlisten to a whole bunch of channels at once
+ * @handle: libraw1394 handle
+ * @mask: 64-bit mask of channels, 1 means listen, 0 means unlisten,
+ *        channel 0 is LSB, channel 63 is MSB
+ *
+ * for multi-channel reception mode only
+ **/
 int raw1394_iso_recv_set_channel_mask(raw1394handle_t handle, u_int64_t mask);
 
-int raw1394_iso_xmit_start(raw1394handle_t handle, int start_on_cycle, int prebuffer_packets);
-int raw1394_iso_recv_start(raw1394handle_t handle, int start_on_cycle, int tag_mask, int sync);
+/**
+ * raw1394_iso_xmit_start - begin isochronous transmission
+ * @handle: libraw1394 handle
+ * @start_on_cycle: isochronous cycle number on which to start 
+ * (-1 if you don't care)
+ * @prebuffer_packets: number of packets to queue up before starting transmission
+ * (-1 if you don't care)
+ **/
+int raw1394_iso_xmit_start(raw1394handle_t handle, int start_on_cycle,
+                           int prebuffer_packets);
 
-/* write() style API - do NOT use this if you have set an xmit_handler
+/**
+ * raw1394_iso_recv_start - begin isochronous reception
+ * @handle: libraw1394 handle
+ * @start_on_cycle: isochronous cycle number on which to start 
+ * (-1 if you don't care)
+ * @tag_mask: mask of tag fields to match (-1 to receive all packets)
+ * @sync: not used, reserved for future implementation
+ **/
+int raw1394_iso_recv_start(raw1394handle_t handle, int start_on_cycle, 
+                           int tag_mask, int sync);
+
+/**
+ * raw1394_iso_xmit_write - alternative blocking-write API for ISO transmission
+ * @handle: libraw1394 handle
+ * @data: pointer to packet data buffer
+ * @len: length of packet, in bytes
+ * @tag: tag field
+ * @sy: sync field
+ *
+ * write() style API - do NOT use this if you have set an xmit_handler
  * if buffer is full, waits for more space UNLESS the file descriptor is
- * set to non-blocking, in which case xmit_write() will return -1 with errno = EAGAIN */
-int raw1394_iso_xmit_write(raw1394handle_t handle, unsigned char *data, unsigned int len,
-			   unsigned char tag, unsigned char sy);
+ * set to non-blocking, in which case xmit_write() will return -1 with
+ * errno = EAGAIN
+ **/
+int raw1394_iso_xmit_write(raw1394handle_t handle, unsigned char *data, 
+                           unsigned int len, unsigned char tag, 
+                           unsigned char sy);
 
-/* wait until all queued packets have been sent */
+/**
+ * raw1394_iso_xmit_sync - wait until all queued packets have been sent
+ * @handle: libraw1394 handle
+ **/
 int raw1394_iso_xmit_sync(raw1394handle_t handle);
 
-/* flush all already received iso packets from kernel into user space*/
+/**
+ * raw1394_iso_recv_flush - flush all already received iso packets from kernel into user space
+ * @handle: libraw1394 handle
+ *
+ * If you specified an irq_interval > 1 in
+ * iso_recv_init, you won't be notified for every single iso packet, but
+ * for groups of them. Now e.g. if irq_interval is 100, and you were just
+ * notified about iso packets and after them only 20 more packets arrived,
+ * no notification will be generated (20 < 100). In the case that you know
+ * that there should be more packets at this moment, you can call this
+ * function and all iso packets which are already received by the kernel
+ * will be flushed out to user space.
+ **/
 int raw1394_iso_recv_flush(raw1394handle_t handle);
 
+/**
+ * raw1394_iso_stop - halt isochronous transmission or reception
+ * @handle: libraw1394 handle
+ **/
 void raw1394_iso_stop(raw1394handle_t handle);
+
+/**
+ * raw1394_iso_shutdown - clean up and deallocate all resources for isochronous transmission or reception
+ * @handle: libraw1394 handle
+ **/
 void raw1394_iso_shutdown(raw1394handle_t handle);
 
 typedef int raw1394_errcode_t;
@@ -155,187 +282,354 @@ typedef int raw1394_errcode_t;
 #define raw1394_get_ack(errcode) ((errcode) >> 16)
 #define raw1394_get_rcode(errcode) ((errcode) & 0xf)
 #define raw1394_get_internal(errcode) (errcode)
-raw1394_errcode_t raw1394_get_errcode(raw1394handle_t);
-int raw1394_errcode_to_errno(raw1394_errcode_t);
 
-/*
- * Required as initialization.  One handle can control one port, it is possible
- * to use multiple handles.  raw1394_new_handle returns NULL for failure,
- * raw1394_destroy_handle accepts NULL.  If raw1394_new_handle returns NULL and
- * errno is 0, this version of libraw1394 is incompatible with the kernel.  
- */
+/**
+ * raw1394_get_errcode - return error code of async transaction
+ * @handle: libraw1394 handle
+ *
+ * Returns the error code of the last raw1394_read(), raw1394_write(),
+ * raw1394_lock() or raw1394_iso_write().  The error code is either an internal
+ * error (i.e. not a bus error) or a combination of acknowledge code and
+ * response code, as appropriate.
+ *
+ * Some macros are available to extract information from the error code,
+ * raw1394_errcode_to_errno() can be used to convert it to an errno number of
+ * roughly the same meaning.
+ **/
+raw1394_errcode_t raw1394_get_errcode(raw1394handle_t handle);
+
+/**
+ * raw1394_errcode_to_errno - convert libraw1394 errcode to errno
+ * @errcode: the error code to convert
+ *
+ * The error code as retrieved by raw1394_get_errcode() is converted into a
+ * roughly equivalent errno number and returned.  %0xdead is returned for an
+ * illegal errcode.
+ *
+ * It is intended to be used to decide what to do (retry, give up, report error)
+ * for those programs that aren't interested in details, since these get lost in
+ * the conversion.  However the returned errnos are equivalent in source code
+ * meaning only, the associated text of e.g. perror() is not necessarily
+ * meaningful.
+ *
+ * Returned values are %EAGAIN (retrying might succeed, also generation number
+ * mismatch), %EREMOTEIO (other node had internal problems), %EPERM (operation
+ * not allowed on this address, e.g. write on read-only location), %EINVAL
+ * (invalid argument) and %EFAULT (invalid pointer).
+ **/
+int raw1394_errcode_to_errno(raw1394_errcode_t errcode);
+
+/**
+ * raw1394_new_handle - create new handle
+ *
+ * Creates and returns a new handle which can (after being set up) control one
+ * port.  It is not allowed to use the same handle in multiple threads or forked
+ * processes.  It is allowed to create and use multiple handles, however.  Use
+ * one handle per thread which needs it in the multithreaded case.
+ *
+ * Returns the created handle or %NULL when initialization fails.  In the latter
+ * case errno either contains some OS specific error code or %0 if the error is
+ * that libraw1394 and raw1394 don't support each other's protocol versions.
+ **/
 raw1394handle_t raw1394_new_handle(void);
+
+/**
+ * raw1394_destroy_handle - deallocate handle
+ * @handle: handle to deallocate
+ *
+ * Closes connection with raw1394 on this handle and deallocates everything
+ * associated with it.  It is safe to pass %NULL as handle, nothing is done in
+ * this case.
+ **/
 void raw1394_destroy_handle(raw1394handle_t handle);
 
-/*
+/**
+ * raw1394_new_handle_on_port - create a new handle and bind it to a port
+ * @port: port to connect to (same as argument to raw1394_set_port())
+ *
  * Same as raw1394_new_handle(), but also binds the handle to the
  * specified 1394 port. Equivalent to raw1394_new_handle() followed by
  * raw1394_get_port_info() and raw1394_set_port(). Useful for
- * command-line programs that already know what port they want.
- */
+ * command-line programs that already know what port they want. If
+ * raw1394_set_port() returns ESTALE, retries automatically.
+ **/
 raw1394handle_t raw1394_new_handle_on_port(int port);
 
-/*
- * Switch off/on busreset-notification for handle
- * return-value:
+/**
+ * raw1394_busreset_notify - Switch off/on busreset-notification for handle
+ * @handle: libraw1394 handle
+ *
+ * returns:
  * ==0 success 
  * !=0 failure
  * off_on_switch .... RAW1394_NOTIFY_OFF or RAW1394_NOTIFY_ON
- */
+ **/
 int raw1394_busreset_notify (raw1394handle_t handle, int off_on_switch);
 
-/*
- * Get the fd of this handle to select()/poll() on it.  Don't try to mess around
- * with it any other way.  Valid only after the handle got attached to a port.
- */
+/**
+ * raw1394_get_fd - get the communication file descriptor
+ * @handle: libraw1394 handle
+ *
+ * Returns the fd used for communication with the raw1394 kernel module.  This
+ * can be used for select()/poll() calls if you wait on other fds or can be
+ * integrated into another event loop (e.g. from a GUI application framework).
+ * It can also be used to set/remove the O_NONBLOCK flag using fcntl() to modify
+ * the blocking behaviour in raw1394_loop_iterate().  It must not be used for
+ * anything else.
+ **/
 int raw1394_get_fd(raw1394handle_t handle);
 
-/*
- * Set and get user data.  This isn't used inside libraw1394, you can use it for
- * your own purposes.
- */
-void *raw1394_get_userdata(raw1394handle_t handle);
+/**
+ * raw1394_set_userdata - associate user data with a handle
+ * @handle: libraw1394 handle
+ * @data: user data (pointer)
+ *
+ * Allows to associate one void pointer with a handle.  libraw1394 does not care
+ * about the data, it just stores it in the handle allowing it to be retrieved
+ * at any time with raw1394_get_userdata().  This can be useful when multiple
+ * handles are used, so that callbacks can identify the handle.
+ **/
 void raw1394_set_userdata(raw1394handle_t handle, void *data);
 
+/**
+ * raw1394_get_userdata - retrieve user data from handle
+ * @handle: libraw1394 handle
+ *
+ * Returns the user data pointer associated with the handle using
+ * raw1394_set_userdata().
+ **/
+void *raw1394_get_userdata(raw1394handle_t handle);
+
+/**
+ * raw1394_get_local_id - get node ID of the current port
+ * @handle: libraw1394 handle
+ *
+ * Returns the node ID of the local node connected to which the handle is
+ * connected.  This value can change with every bus reset.
+ **/
 nodeid_t raw1394_get_local_id(raw1394handle_t handle);
+
+/**
+ * raw1394_get_irm_id - get node ID of isochronous resource manager
+ * @handle: libraw1394 handle
+ *
+ * Returns the node ID of the isochronous resource manager of the bus the handle
+ * is connected to.  This value may change with every bus reset.
+ **/
 nodeid_t raw1394_get_irm_id(raw1394handle_t handle);
 
-/* Get number of nodes on bus. */
+/**
+ * raw1394_get_nodecount - get number of nodes on the bus
+ * @handle: libraw1394 handle
+ *
+ * Returns the number of nodes on the bus to which the handle is connected.
+ * This value can change with every bus reset.  Since the root node always has
+ * the highest node ID, this number can be used to determine that ID (it's
+ * LOCAL_BUS|(count-1)).
+ **/
 int raw1394_get_nodecount(raw1394handle_t handle);
 
-/*
- * Returns number of available ports (port == one IEEE 1394 card or onboard
- * chip).  A maximum number of maxport raw1394_portinfos will be filled out at
- * *pinf, zero is valid if you're only interested in the number of ports (which
- * is returned).
- */
 struct raw1394_portinfo {
         int nodes;
         char name[32];
 };
 
+/**
+ * raw1394_get_port_info - get information about available ports
+ * @handle: libraw1394 handle
+ * @pinf: pointer to an array of struct raw1394_portinfo
+ * @maxports: number of elements in @pinf
+ *
+ * Before you can set which port to use, you have to use this function to find
+ * out which ports exist.
+ *
+ * If your program is interactive, you should present the user with this list to
+ * let them decide which port to use if there is more than one.  A
+ * non-interactive program (and probably interactive ones, too) should provide a
+ * command line option to choose the port.
+ *
+ * Returns the number of ports and writes information about them into @pinf, but
+ * not into more than @maxports elements.  If @maxports is %0, @pinf can be
+ * %NULL, too.
+ **/
 int raw1394_get_port_info(raw1394handle_t handle, struct raw1394_portinfo *pinf,
                           int maxports);
 
-/*
- * Attach handle to port (counted from zero).  Returns zero for success or -1
- * for failure.  If in the case of failure errno is set to ESTALE the generation
- * number has changed and you should reget the port info.
- */
+/**
+ * raw1394_set_port - choose port for handle
+ * @handle: libraw1394 handle
+ * @port: port to connect to (corresponds to index of struct raw1394_portinfo)
+ *
+ * This function connects the handle to the port given (as queried with
+ * raw1394_get_port_info()).  If successful, raw1394_get_port_info() and
+ * raw1394_set_port() are not allowed to be called afterwards on this handle.
+ * To make up for this, all the other functions (those handling asynchronous and
+ * isochronous transmissions) can now be called.
+ *
+ * Returns %0 for success and -1 for failure with errno set appropriately.  A
+ * possible failure mode is with errno = %ESTALE, in this case the configuration
+ * has changed since the call to raw1394_get_port_info() and it has to be called
+ * again to update your view of the available ports.
+ **/
 int raw1394_set_port(raw1394handle_t handle, int port);
 
-/*
- * Reset the connected bus.  Returns -1 for failure, 0 for success.
- */
+/**
+ * raw1394_reset_bus - initiate bus reset
+ * @handle: libraw1394 handle
+ *
+ * This function initiates a bus reset on the connected port.  Usually this is
+ * not necessary and should be avoided, this function is here for low level bus
+ * control and debugging.
+ *
+ * Returns: %0 for success and -1 for failure with errno set appropriately.
+ **/
 int raw1394_reset_bus(raw1394handle_t handle);
 
-/*
- * Reset the connected bus (with certain type). 
- * return-value:
+/**
+ * raw1394_reset_bus_new - Reset the connected bus (with certain type). 
+ * @handle: libraw1394 handle
+ *
+ * returns:
  * -1 failure 
  * 0  success
  * type .... RAW1394_SHORT_RESET or RAW1394_LONG_RESET
- */
+ **/
 int raw1394_reset_bus_new(raw1394handle_t handle, int type);
 
-/*
- * Get one new message through handle and process it.  See below for handler
- * registering functions.  This function will return -1 for an error or the
- * return value of the handler which got executed.  Default handlers always
- * return zero.
+/**
+ * raw1394_loop_iterate - get and process one event message
+ * @handle: libraw1394 handle
+ *
+ * Get one new message through handle and process it with the registered message
+ * handler.  This function will return %-1 for an error or the return value of
+ * the handler which got executed.  The default handlers always return zero.
  *
  * Note that some other library functions may call this function multiple times
  * to wait for their completion, some handler return values may get lost if you
  * use these.
- */
+ **/
 int raw1394_loop_iterate(raw1394handle_t handle);
 
-/*
- * Set the handler that will be called when a bus reset message is encountered.
- * The default action is to just call raw1394_update_generation().  Returns old
- * handler.
- */
 typedef int (*bus_reset_handler_t)(raw1394handle_t, unsigned int generation);
+
+/**
+ * raw1394_set_bus_reset_handler - set bus reset handler
+ * @handle: libraw1394 handle
+ * @new_h: pointer to new handler
+ *
+ * Sets the handler to be called on every bus reset to @new_h and returns the
+ * old handler. The default handler just calls raw1394_update_generation().
+ **/
 bus_reset_handler_t raw1394_set_bus_reset_handler(raw1394handle_t handle,
                                                   bus_reset_handler_t new_h);
 
-/*
- * Since node IDs may change during a bus reset, generation numbers incremented
- * every bus reset are used to verify if a transaction request is intended for
- * this configuration.  If numbers don't match, they will fail immediately.
+/**
+ * raw1394_get_generation - get generation number of handle
+ * @handle: libraw1394 handle
  *
- * raw1394_get_generation() returns the generation number in use by the handle,
- * not the current generation number.  The current generation number is passed
- * to the bus reset handler.
- */
+ * This function returns the generation number associated with the handle.  The
+ * generation number is incremented on every bus reset, and every transaction
+ * started by raw1394 is tagged with the stored generation number.  If these
+ * don't match, the transaction will abort with an error.
+ *
+ * The generation number of the handle is not automatically updated,
+ * raw1394_update_generation() has to be used for this.
+ **/
 unsigned int raw1394_get_generation(raw1394handle_t handle);
+
+/**
+ * raw1394_update_generation - set generation number of handle
+ * @generation: new generation number
+ * @handle: libraw1394 handle
+ *
+ * This function sets the generation number of the handle to @gen.  All requests
+ * that apply to a single node ID are tagged with this number and abort with an
+ * error if that is different from the generation number kept in the kernel.
+ * This avoids acting on the wrong node which may have changed its ID in a bus
+ * reset.
+ *
+ * You should call this within your bus reset handler with an incremented value.
+ **/
 void raw1394_update_generation(raw1394handle_t handle, unsigned int generation);
 
-/*
- * Set the handler that will be called when an async read/write/lock returns.
- * The default action is to call the callback in the raw1394_reqhandle pointed
- * to by tag.  Returns old handler.
- */
 typedef int (*tag_handler_t)(raw1394handle_t, unsigned long tag,
                              raw1394_errcode_t err);
+
+/**
+ * raw1394_set_tag_handler - set request completion handler
+ * @handle: libraw1394 handle
+ * @new_h: pointer to new handler
+ *
+ * Sets the handler to be called whenever a request completes to @new_h and
+ * returns the old handler.  The default handler interprets the tag as a pointer
+ * to a &struct raw1394_reqhandle and calls the callback in there.
+ *
+ * Care must be taken when replacing the tag handler and calling the synchronous
+ * versions of the transaction functions (i.e. raw1394_read(), raw1394_write(),
+ * raw1394_lock(), raw1394_iso_write()) since these do pass pointers to &struct
+ * raw1394_reqhandle as the tag and expect the callback to be invoked.
+ **/
 tag_handler_t raw1394_set_tag_handler(raw1394handle_t handle,
                                       tag_handler_t new_h);
 
-/*
- * Set the handler that will be called when an async read/write/lock arm_request
- * arrived. The default action is to call the arm_callback in the 
- * raw1394_arm_reqhandle pointed to by arm_tag.  Returns old handler.
- */
 typedef int (*arm_tag_handler_t)(raw1394handle_t handle, unsigned long arm_tag,
                              byte_t request_type, unsigned int requested_length,
                              void *data); 
+
+/**
+ * raw1394_set_arm_tag_handler - set the async request handler
+ * @handle: libraw1394 handle
+ * @new_h: pointer to new handler
+ *
+ * Set the handler that will be called when an async read/write/lock arm_request
+ * arrived. The default action is to call the arm_callback in the 
+ * raw1394_arm_reqhandle pointed to by arm_tag.  Returns old handler.
+ **/
 arm_tag_handler_t raw1394_set_arm_tag_handler(raw1394handle_t handle,
                                       arm_tag_handler_t new_h);
 
-/*
- * Set the handler that will be called when an iso packet arrives (data points
- * to the iso packet header).  The default action is to do nothing.
- *
- * Handlers have to be set separately for each channel, it is not possible to
- * set a handler when there is already one set for that channel.  Handlers can
- * be cleared by passing NULL for "new" parameter, in that case the old handler
- * will be returned.  Otherwise the return value is NULL for success and -1 for
- * failure.
- */
-typedef int (*iso_handler_t)(raw1394handle_t, int channel, size_t length,
-                             quadlet_t *data);
-iso_handler_t raw1394_set_iso_handler(raw1394handle_t handle,
-                                      unsigned int channel,
-                                      iso_handler_t new_h);
-
-/*
- * Set the handler that will be called when the local FCP_COMMAND or
- * FCP_RESPONSE register gets written to.  Returns old handler.
- *
- * The handler arg nodeid contains the node ID of the writer.  If response is 0
- * FCP_COMMAND was written, FCP_RESPONSE otherwise.
- */
 typedef int (*fcp_handler_t)(raw1394handle_t, nodeid_t nodeid, int response,
                              size_t length, unsigned char *data);
-fcp_handler_t raw1394_set_fcp_handler(raw1394handle_t, fcp_handler_t);
 
-/*
- * This is the general request handle.  It is used by the default tag handler
+/**
+ * raw1394_set_fcp_handler - set FCP handler
+ * @handle: libraw1394 handle
+ * @new_h: pointer to new handler
+ *
+ * Function Control Protocol is defined in IEC 61883-1.
+ *
+ * Sets the handler to be called when either FCP command or FCP response
+ * registers get written to @new_h and returns the old handler.  The default
+ * handler does nothing.
+ *
+ * In order to actually get FCP events, you have to enable it with
+ * raw1394_start_fcp_listen() and can stop it with raw1394_stop_fcp_listen().
+ **/
+fcp_handler_t raw1394_set_fcp_handler(raw1394handle_t handle, fcp_handler_t new_h);
+
+/**
+ * req_callback_t - This is the general request handler
+ *
+ * It is used by the default tag handler
  * when a request completes, it calls the callback and passes it the data
  * pointer and the error code of the request.
- */
+ **/
 typedef int (*req_callback_t)(raw1394handle_t, void *data,
                               raw1394_errcode_t err);
+
 struct raw1394_reqhandle {
         req_callback_t callback;
         void *data;
 };
 
-/*
- * This is the genereal arm-request handle. (arm...address range mapping)
+/**
+ * arm_req_callback_t - This is the general arm-request handle
+ * @handle: libraw1394 handle
+ *
+ * (arm = address range mapping)
  * It is used by the default arm-tag handler when a request has been 
  * received, it calls the arm_callback.
- */
+ **/
 typedef int (*arm_req_callback_t) (raw1394handle_t,
                                    struct raw1394_arm_request_response *arm_req_resp,
                                    unsigned int requested_length,
@@ -346,212 +640,462 @@ struct raw1394_arm_reqhandle {
         void *pcontext;
 };
 
-/*
- * AdressRangeMapping REGISTERING:
- * start, length .... identifies addressrange
- * *initial_value ... pointer to buffer containing (if necessary) initial value
+/**
+ * raw1394_arm_register - register an AddressRangeMapping
+ * @handle: libraw1394 handle
+ * @start:            identifies addressrange
+ * @length:           identifies addressrange
+ * @initial_value:    pointer to buffer containing (if necessary) initial value
  *                    NULL means undefined
- * arm_tag .......... identifier for arm_tag_handler 
+ * @arm_tag:          identifier for arm_tag_handler 
  *                    (usually pointer to raw1394_arm_reqhandle)
- * access_rights .... access-rights for registered addressrange handled 
+ * @access_rights:    access-rights for registered addressrange handled 
  *                    by kernel-part. Value is one or more binary or of the 
- *                    following flags: ARM_READ, ARM_WRITE, ARM_LOCK
- * notification_options ... identifies for which type of request you want
+ *                    following flags - ARM_READ, ARM_WRITE, ARM_LOCK
+ * @notification_options: identifies for which type of request you want
  *                    to be notified. Value is one or more binary or of the 
- *                    following flags: ARM_READ, ARM_WRITE, ARM_LOCK
- * client_transactions ... identifies for which type of request you want
+ *                    following flags - ARM_READ, ARM_WRITE, ARM_LOCK
+ * @client_transactions: identifies for which type of request you want
  *                    to handle the request by the client application.
  *                    for those requests no response will be generated, but
  *                    has to be generated by the application.
  *                    Value is one or more binary or of the 
- *                    following flags: ARM_READ, ARM_WRITE, ARM_LOCK
+ *                    following flags - ARM_READ, ARM_WRITE, ARM_LOCK
  *                    For each bit set here, notification_options and
  *                    access_rights will be ignored.
- * returnvalue:       0  ... success
+ *
+ * ARM = Adress Range Mapping
+ * returns:            0  ... success
  *                    <0 ... failure
- */
-int raw1394_arm_register(struct raw1394_handle *handle, nodeaddr_t start, 
+ **/
+int raw1394_arm_register(raw1394handle_t handle, nodeaddr_t start, 
                          size_t length, byte_t *initial_value,
                          octlet_t arm_tag, arm_options_t access_rights,
                          arm_options_t notification_options,
                          arm_options_t client_transactions);
-/*
- * AdressRangeMapping UNREGISTERING:
- * start ............ identifies addressrange for unregistering 
+/**
+ * raw1394_arm_unregister - unregister an AddressRangeMapping
+ * @handle: libraw1394 handle
+ * @start:            identifies addressrange for unregistering 
  *                    (value of start have to be the same value 
  *                    used for registering this adressrange)
- * returnvalue:       0  ... success
+ * 
+ * returns:           0  ... success
  *                    <0 ... failure
- */
+ **/
 int raw1394_arm_unregister(raw1394handle_t handle, nodeaddr_t start);
 
-/*
- * AdressRangeMapping SET BUFFER:
- * start, length .... identifies addressrange
- * buf .............. pointer to buffer
+/**
+ * raw1394_arm_set_buf - set the buffer of an AdressRangeMapping
+ * @start: identifies addressrange
+ * @length: identifies addressrange
+ * @buf: pointer to buffer
  *
- * This function copies 'length' bytes from user memory area 'buf'
+ * This function copies @length bytes from user memory area @buf
  * to one ARM block in kernel memory area
- * with start offset 'start'.
+ * with start offset @start.
  *
- * returnvalue:       0  ... success
- *                    <0 ... failure, and errno - error code
- */
-int raw1394_arm_set_buf (struct raw1394_handle *handle, nodeaddr_t start,
+ * returns:       0  ... success
+ *                <0 ... failure, and errno - error code
+ **/
+int raw1394_arm_set_buf (raw1394handle_t handle, nodeaddr_t start,
                          size_t length, void *buf);
 
-/*
- * AdressRangeMapping GET BUFFER:
- * start, length .... identifies addressrange
- * buf .............. pointer to buffer
+/**
+ * raw1394_arm_get_buf - get the buffer of an AdressRangeMapping
+ * @handle: libraw1394 handle
+ * @start: identifies addressrange
+ * @length: identifies addressrange
+ * @buf: pointer to buffer
  *
- * This function copies 'length' bytes from one
- * ARM block in kernel memory area with start offset `start`
- * to user memory area 'buf'
+ * This function copies @length bytes from one
+ * ARM block in kernel memory area with start offset @start
+ * to user memory area @buf
  *
- * returnvalue:       0  ... success
- *                    <0 ... failure, and errno - error code
- */
-int raw1394_arm_get_buf (struct raw1394_handle *handle, nodeaddr_t start,
+ * returns:       0  ... success
+ *                <0 ... failure, and errno - error code
+ **/
+int raw1394_arm_get_buf (raw1394handle_t handle, nodeaddr_t start,
                          size_t length, void *buf);
 
-/* 
- * send an echo request to the driver. the driver then send back the
+/**
+ * raw1394_echo_request - send an echo request to the driver
+ * @handle: libraw1394 handle
+ * @data:              arbitrary data; raw1394_loop_iterate will return it
+ *
+ * the driver then send back the
  * same request. raw1394_loop_iterate will return data as return value,
  * when it processes the echo. 
- *
- * data:              arbitrary data; raw1394_loop_iterate will return it
- * returnvalue:       0 .... success
- *                    <0 ... failure
- */
-int raw1394_echo_request(struct raw1394_handle *handle, quadlet_t data);
+ * returns:       0 .... success
+ *                <0 ... failure
+ **/
+int raw1394_echo_request(raw1394handle_t handle, quadlet_t data);
 
-/* 
- * wake up raw1394_loop_iterate (or a blocking read from the device
+/**
+ * raw1394_wake_up - wake up raw1394_loop_iterate
+ * @handle: libraw1394 handle
+ *
+ * (or a blocking read from the device
  * file). actually this calls raw1394_echo_request with 0 as data. 
  *
- * returnvalue:       0 .... success
- *                    <0 ... failure
- */
+ * returns:       0 .... success
+ *                <0 ... failure
+ **/
 int raw1394_wake_up(raw1394handle_t handle);
 
  
-/* 
- * send physical request such as linkon, physicalconfigurationpacket ... etc.
+/**
+ * raw1394_phy_packet_write - send physical request
+ * @handle: libraw1394 handle
  *
- * returnvalue:       0 .... success
- *                    <0 ... failure
- */
+ * examples of physical requests are linkon, physicalconfigurationpacket, etc.
+ * returns:       0 .... success
+ *                <0 ... failure
+ **/
 int raw1394_phy_packet_write (raw1394handle_t handle, quadlet_t data);
 int raw1394_start_phy_packet_write(raw1394handle_t handle, 
         quadlet_t data, unsigned long tag);
 
-/*
- * Passes custom tag.  Use pointer to raw1394_reqhandle if you use the standard
- * tag handler.
- */
+/**
+ * raw1394_start_read - initiate a read transaction
+ * @handle: libraw1394 handle
+ * @node: target node
+ * @addr: address to read from
+ * @length: amount of data to read
+ * @buffer: pointer to buffer where data will be saved
+ * @tag: data to identify the request to completion handler
+ *
+ * This function starts the specified read request and returns %0 for success
+ * and a negative number for an error, in which case errno will be set.  If
+ * @length is %4 a quadlet read is initiated and a block read otherwise.
+ *
+ * The transaction is only started, no success of the transaction is implied
+ * with a successful return of this function.  When the transaction completes, a
+ * raw1394_loop_iterate() will call the tag handler and pass it the tag and
+ * error code of the transaction.  @tag should therefore be set to something
+ * that uniquely identifies this transaction (e.g. a struct pointer casted to
+ * unsigned long).
+ **/
 int raw1394_start_read(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
                        size_t length, quadlet_t *buffer, unsigned long tag);
+
+/**
+ * raw1394_start_write - initiate a write transaction
+ * @handle: libraw1394 handle
+ * @node: target node
+ * @addr: address to write to
+ * @length: amount of data to write
+ * @data: pointer to data to be sent
+ * @tag: data to identify the request to completion handler
+ *
+ * This function starts the specified write request and returns %0 for success
+ * and a negative number for an error, in which case errno will be set.  If
+ * @length is %4 a quadlet write is initiated and a block write otherwise.
+ *
+ * The transaction is only started, no success of the transaction is implied
+ * with a successful return of this function.  When the transaction completes, a
+ * raw1394_loop_iterate() will call the tag handler and pass it the tag and
+ * error code of the transaction.  @tag should therefore be set to something
+ * that uniquely identifies this transaction (e.g. a struct pointer casted to
+ * unsigned long).
+ **/
 int raw1394_start_write(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
                         size_t length, quadlet_t *data, unsigned long tag);
+
+/**
+ * raw1394_start_lock - initiate a 32-bit compare-swap lock transaction
+ * @handle: libraw1394 handle
+ * @node: target node
+ * @addr: address to read from
+ * @extcode: extended transaction code determining the lock operation
+ * @data: data part of lock parameters
+ * @arg: arg part of lock parameters
+ * @result: address where return value will be written
+ * @tag: data to identify the request to completion handler
+ *
+ * This function starts the specified lock request and returns %0 for success
+ * and a negative number for an error, in which case errno will be set.
+ *
+ * The transaction is only started, no success of the transaction is implied
+ * with a successful return of this function.  When the transaction completes, a
+ * raw1394_loop_iterate() will call the tag handler and pass it the tag and
+ * error code of the transaction.  @tag should therefore be set to something
+ * that uniquely identifies this transaction (e.g. a struct pointer casted to
+ * unsigned long).
+ **/
 int raw1394_start_lock(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
                        unsigned int extcode, quadlet_t data, quadlet_t arg,
                        quadlet_t *result, unsigned long tag);
+
+/**
+ * raw1394_start_lock64 - initiate a 64-bit compare-swap lock transaction
+ * @handle: libraw1394 handle
+ * @node: target node
+ * @addr: address to read from
+ * @extcode: extended transaction code determining the lock operation
+ * @data: data part of lock parameters
+ * @arg: arg part of lock parameters
+ * @result: address where return value will be written
+ * @tag: data to identify the request to completion handler
+ *
+ * This function starts the specified lock request and returns %0 for success
+ * and a negative number for an error, in which case errno will be set.
+ *
+ * The transaction is only started, no success of the transaction is implied
+ * with a successful return of this function.  When the transaction completes, a
+ * raw1394_loop_iterate() will call the tag handler and pass it the tag and
+ * error code of the transaction.  @tag should therefore be set to something
+ * that uniquely identifies this transaction (e.g. a struct pointer casted to
+ * unsigned long).
+ **/
 int raw1394_start_lock64(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
                        unsigned int extcode, octlet_t data, octlet_t arg,
                        octlet_t *result, unsigned long tag);
-int raw1394_start_iso_write(raw1394handle_t handle, unsigned int channel,
-                            unsigned int tag, unsigned int sy,
-                            unsigned int speed, size_t length, quadlet_t *data,
-                            unsigned long rawtag);
+
+/**
+ * raw1394_start_read - initiate asynchronous stream
+ * @handle: libraw1394 handle
+ *
+ * Passes custom tag.  Use pointer to raw1394_reqhandle if you use the standard
+ * tag handler.
+ **/
 int raw1394_start_async_stream(raw1394handle_t handle, unsigned int channel,
                                unsigned int tag, unsigned int sy,
                                unsigned int speed, size_t length, quadlet_t *data,
                                unsigned long rawtag);
 
 
-/* This starts sending an arbitrary async packet. It gets an array of quadlets consisting of
-   header and data (without CRC in between). Header information is always in machine byte order,
-   data (data block as well as quadlet data in a read response for data quadlet) shall be in
-   big endian byte order. expect_response indicates, if we expect a response (i.e. if we will
-   get the tag back after the packet was sent or after a response arrived). length is the length
-   of the complete packet (header_length + length of the data block).
-   The main purpose of this function is to send responses for incoming transactions, that
-   are handled by the application.
-   Do not use that function, unless you really know, what you do! Sending corrupt packet may
-   lead to weird results.
-*/
+/**
+ * raw1394_start_async_send - send an asynchronous packet
+ * @handle: libraw1394 handle
+ *
+ * This starts sending an arbitrary async packet. It gets an array of quadlets 
+ * consisting of header and data (without CRC in between). Header information 
+ * is always in machine byte order, data (data block as well as quadlet data 
+ * in a read response for data quadlet) shall be in big endian byte order. 
+ * expect_response indicates, if we expect a response (i.e. if we will get the 
+ * tag back after the packet was sent or after a response arrived). length is 
+ * the length of the complete packet (header_length + length of the data block).
+ * The main purpose of this function is to send responses for incoming 
+ * transactions, that are handled by the application.
+ * Do not use that function, unless you really know, what you do! Sending 
+ * corrupt packet may lead to weird results.
+ **/
 int raw1394_start_async_send(raw1394handle_t handle,
-                             size_t length, size_t header_length, unsigned int expect_response,
+                             size_t length, size_t header_length, 
+                             unsigned int expect_response,
                              quadlet_t *data, unsigned long rawtag);
 
-/*
+/**
+ * raw1394_read - send async read request to a node and wait for response.
+ * @handle: libraw1394 handle
+ *
  * This does the complete transaction and will return when it's finished.  It
  * will call raw1394_loop_iterate() as often as necessary, return values of
  * handlers called will be therefore lost.
- */
+ **/
 int raw1394_read(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
                  size_t length, quadlet_t *buffer);
+
+/**
+ * raw1394_write - send async write request to a node and wait for response.
+ * @handle: libraw1394 handle
+ *
+ * This does the complete transaction and will return when it's finished.  It
+ * will call raw1394_loop_iterate() as often as necessary, return values of
+ * handlers called will be therefore lost.
+ **/
 int raw1394_write(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
                   size_t length, quadlet_t *data);
+
+/**
+ * raw1394_lock - send 32-bit compare-swap lock request and wait for response.
+ * @handle: libraw1394 handle
+ *
+ * This does the complete transaction and will return when it's finished.  It
+ * will call raw1394_loop_iterate() as often as necessary, return values of
+ * handlers called will be therefore lost.
+ **/
 int raw1394_lock(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
                  unsigned int extcode, quadlet_t data, quadlet_t arg,
                  quadlet_t *result);
+
+/**
+ * raw1394_lock64 - send 64-bit compare-swap lock request and wait for response.
+ * @handle: libraw1394 handle
+ *
+ * This does the complete transaction and will return when it's finished.  It
+ * will call raw1394_loop_iterate() as often as necessary, return values of
+ * handlers called will be therefore lost.
+ **/
 int raw1394_lock64(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
                  unsigned int extcode, octlet_t data, octlet_t arg,
                  octlet_t *result);
-int raw1394_iso_write(raw1394handle_t handle, unsigned int channel,
-                      unsigned int tag, unsigned int sy, unsigned int speed,
-                      size_t length, quadlet_t *data);
+
+/**
+ * raw1394_async_stream
+ * @handle: libraw1394 handle
+ **/
 int raw1394_async_stream(raw1394handle_t handle, unsigned int channel,
                          unsigned int tag, unsigned int sy, unsigned int speed,
                          size_t length, quadlet_t *data);
+
+/**
+ * raw1394_async_send
+ * @handle: libraw1394 handle
+ **/
 int raw1394_async_send(raw1394handle_t handle,
-                             size_t length, size_t header_length, unsigned int expect_response,
-                             quadlet_t *data);
+                       size_t length, size_t header_length,
+                       unsigned int expect_response,
+                       quadlet_t *data);
 
-/*
- * Start and stop receiving a certain isochronous channel.  You have to set an
- * iso handler (see above).  You can receive multiple channels simultaneously.
- */
-int raw1394_start_iso_rcv(raw1394handle_t handle, unsigned int channel);
-int raw1394_stop_iso_rcv(raw1394handle_t handle, unsigned int channel);
-
-/*
- * Start and stop receiving requests sent to the local FCP_COMMAND and
- * FCP_RESPONSE registers.
- */
+/**
+ * raw1394_start_fcp_listen - enable reception of FCP events
+ * @handle: libraw1394 handle
+ *
+ * FCP = Function Control Protocol (see IEC 61883-1)
+ * Enables the reception of FCP events (writes to the FCP_COMMAND or
+ * FCP_RESPONSE address ranges) on @handle.  FCP requests are then passed to the
+ * callback specified with raw1394_set_fcp_handler().
+ **/
 int raw1394_start_fcp_listen(raw1394handle_t handle);
+
+/**
+ * raw1394_stop_fcp_listen - disable reception of FCP events
+ * @handle: libraw1394 handle
+ *
+ * Stops the reception of FCP events (writes to the FCP_COMMAND or
+ * FCP_RESPONSE address ranges) on @handle.
+ **/
 int raw1394_stop_fcp_listen(raw1394handle_t handle);
 
 
-/*
- * Returns the version string.  Designed to be used by the autoconf macro to
- * detect the libraw version, not really intended for general use.
+/**
+ * raw1394_get_libversion - Returns the version string
+ *
+ * Instead, typically, one uses 'pkg-config --mod-version libraw1394'
+ * Might be useful for an application.
  */
 const char *raw1394_get_libversion(void);
 
 
-/* updates the configuration rom of a host. rom_version must be the current
+/**
+ * raw1394_update_config_rom - updates the configuration rom of a host
+ * @handle: libraw1394 handle
+ *
+ * @rom_version must be the current
  * version, otherwise it will fail with return value -1. 
  * Return value -2 indicates that the new rom version is too big.
  * Return value 0 indicates success
-*/
+ **/
 
 int raw1394_update_config_rom(raw1394handle_t handle, const quadlet_t
         *new_rom, size_t size, unsigned char rom_version);
 
 
-/* reads the current version of the configuration rom of a host. 
- * buffersize is the size of the buffer, rom_size
- * returns the size of the current rom image.. rom_version is the
+/**
+ * raw1394_get_config_rom - reads the current version of the configuration rom of a host
+ * @handle: libraw1394 handle
+ * @buffersize: is the size of the buffer, @rom_size
+ *
+ * returns the size of the current rom image. @rom_version is the
  * version number of the fetched rom.
  * return value -1 indicates, that the buffer was too small, 
  * 0 indicates success.
- */
+ **/
 
 int raw1394_get_config_rom(raw1394handle_t handle, quadlet_t *buffer,
         size_t buffersize, size_t *rom_size, unsigned char *rom_version);
+
+
+/**
+ * iso_handler_t - DEPRECATED
+ * @handle: libraw1394 handle
+ *
+ * DEPRECATED
+ **/
+typedef int (*iso_handler_t)(raw1394handle_t, int channel, size_t length,
+                             quadlet_t *data);
+ 
+/**
+ * raw1394_set_iso_handler - set isochronous packet handler (DEPRECATED)
+ * @handle: libraw1394 handle
+ * @new_h: pointer to new handler
+ *
+ * DEPRECATED
+ *
+ * Sets the handler to be called when an isochronous packet is received to
+ * @new_h and returns the old handler.  The default handler does nothing.
+ *
+ * In order to actually get iso packet events, receiving on a specific channel
+ * first has to be enabled with raw1394_start_iso_rcv() and can be stopped again
+ * with raw1394_stop_iso_rcv().
+ **/
+iso_handler_t raw1394_set_iso_handler(raw1394handle_t handle,
+                                      unsigned int channel,
+                                      iso_handler_t new_h);
+/**
+ * raw1394_start_iso_rcv - enable isochronous receiving (DEPRECATED)
+ * @handle: libraw1394 handle
+ * @channel: channel number to start receiving on
+ *
+ * DEPRECATED
+ *
+ * Enables the reception of isochronous packets in @channel on @handle.
+ * Isochronous packets are then passed to the callback specified with
+ * raw1394_set_iso_handler().
+ **/
+int raw1394_start_iso_rcv(raw1394handle_t handle, unsigned int channel);
+
+/**
+ * raw1394_stop_iso_rcv - stop isochronous receiving (DEPRECATED)
+ * @handle: libraw1394 handle
+ * @channel: channel to stop receiving on
+ *
+ * DEPRECATED
+ *
+ * Stops the reception of isochronous packets in @channel on @handle.
+ **/
+int raw1394_stop_iso_rcv(raw1394handle_t handle, unsigned int channel);
+
+/**
+ * raw1394_start_iso_write - initiate an isochronous packet write (DEPRECATED)
+ * @handle: libraw1394 handle
+ * @channel: channel number on which to send on
+ * @tag: data to be put into packet's tag field
+ * @sy: data to be put into packet's sy field
+ * @speed: speed at which to send
+ * @length: amount of data to send
+ * @data: pointer to data to send
+ * @rawtag: data to identify the request to completion handler
+ *
+ * DEPRECATED
+ *
+ * This function starts the specified isochronous packet transmission and
+ * returns %0 for success and a negative number for an error, in which case
+ * errno will be set.
+ *
+ * When the send completes, a raw1394_loop_iterate() will call the tag handler
+ * and pass it the tag and error code of the transaction.  @tag should therefore
+ * be set to something that uniquely identifies this transaction (e.g. a struct
+ * pointer casted to unsigned long).
+ *
+ * Isochronous packets are automatically
+ **/
+int raw1394_start_iso_write(raw1394handle_t handle, unsigned int channel,
+                            unsigned int tag, unsigned int sy,
+                            unsigned int speed, size_t length, quadlet_t *data,
+                            unsigned long rawtag);
+
+/**
+ * raw1394_iso_write - DEPRECATED
+ * @handle: libraw1394 handle
+ *
+ * DEPRECATED
+ **/
+int raw1394_iso_write(raw1394handle_t handle, unsigned int channel,
+                      unsigned int tag, unsigned int sy, unsigned int speed,
+                      size_t length, quadlet_t *data);
 
 #ifdef __cplusplus
 }

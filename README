@@ -56,7 +56,7 @@ correctly links with libraw1394.
 
 6. Maintainer
 
-	Maintainers of libraw1394 are currently Ben Collins and Dan Dennedy.  Send 
+	Maintainer of libraw1394 is currently Dan Dennedy.  Send 
 suggestions, bug reports and fixes to linux1394-devel@lists.sourceforge.net.  
 See the file AUTHORS for a complete list of contributors to libraw1394.
 

@@ -52,8 +52,8 @@ int raw1394_arm_register(struct raw1394_handle *handle, nodeaddr_t start,
         int     retval=0;
         struct  raw1394_request req;
 
-	if (((start & ~(0xFFFFFFFFFFFF)) != 0) ||
-                (((start + length) & ~(0xFFFFFFFFFFFF)) != 0)) {
+	if (((start & ~(0xFFFFFFFF)) != 0) ||
+                (((start + length) & ~(0xFFFFFFFF)) != 0)) {
                 errno = EINVAL;
                 return (-1);
 	}
@@ -152,4 +152,3 @@ int raw1394_arm_get_buf (struct raw1394_handle *handle, nodeaddr_t start,
 
         return 0;
 }
-

@@ -60,14 +60,6 @@ static int do_iso_listen(struct raw1394_handle *handle, int channel)
         }
 }
 
-/**
- * raw1394_start_iso_rcv - enable isochronous receiving
- * @channel: channel number to start receiving on
- *
- * Enables the reception of isochronous packets in @channel on @handle.
- * Isochronous packets are then passed to the callback specified with
- * raw1394_set_iso_handler().
- **/
 int raw1394_start_iso_rcv(struct raw1394_handle *handle, unsigned int channel)
 {
         if (channel > 63) {
@@ -78,12 +70,6 @@ int raw1394_start_iso_rcv(struct raw1394_handle *handle, unsigned int channel)
         return do_iso_listen(handle, channel);
 }
 
-/**
- * raw1394_stop_iso_rcv - stop isochronous receiving
- * @channel: channel to stop receiving on
- *
- * Stops the reception of isochronous packets in @channel on @handle.
- **/
 int raw1394_stop_iso_rcv(struct raw1394_handle *handle, unsigned int channel)
 {
         if (channel > 63) {
@@ -169,17 +155,6 @@ static int do_iso_init(raw1394handle_t handle,
 	return 0;			
 }
 
-/**
- * raw1394_iso_xmit_init - initialize isochronous transmission
- * @handler: handler function for queueing packets
- * @buf_packets: number of isochronous packets to buffer
- * @max_packet_size: largest packet you need to handle, in bytes (not including the isochronous header)
- * @channel: isochronous channel on which to transmit
- * @speed: speed at which to transmit
- * @irq_interval: maximum latency of wake-ups, in packets (-1 if you don't care)
- *
- * Allocates all user and kernel resources necessary for isochronous transmission.
- **/
 int raw1394_iso_xmit_init(raw1394handle_t handle,
 			  raw1394_iso_xmit_handler_t handler,
 			  unsigned int buf_packets,
@@ -199,17 +174,6 @@ int raw1394_iso_xmit_init(raw1394handle_t handle,
 	return 0;
 }
 
-/**
- * raw1394_iso_recv_init - initialize isochronous reception
- * @handler: handler function for receiving packets
- * @buf_packets: number of isochronous packets to buffer
- * @max_packet_size: largest packet you need to handle, in bytes (not including the isochronous header)
- * @channel: isochronous channel to receive
- * @speed: speed at which to receive
- * @irq_interval: maximum latency of wake-ups, in packets (-1 if you don't care)
- *
- * Allocates all user and kernel resources necessary for isochronous reception.
- **/
 int raw1394_iso_recv_init(raw1394handle_t handle,
 			  raw1394_iso_recv_handler_t handler,
 			  unsigned int buf_packets,
@@ -228,16 +192,6 @@ int raw1394_iso_recv_init(raw1394handle_t handle,
 	return 0;
 }
 
-/**
- * raw1394_iso_multichannel_recv_init - initialize multi-channel isochronous reception
- * @handler: handler function for receiving packets
- * @buf_packets: number of isochronous packets to buffer
- * @max_packet_size: largest packet you need to handle, in bytes (not including the isochronous header)
- * @speed: speed at which to receive
- * @irq_interval: maximum latency of wake-ups, in packets (-1 if you don't care)
- *
- * Allocates all user and kernel resources necessary for isochronous reception.
- **/
 int raw1394_iso_multichannel_recv_init(raw1394handle_t handle,
 				       raw1394_iso_recv_handler_t handler,
 				       unsigned int buf_packets,
@@ -255,9 +209,6 @@ int raw1394_iso_multichannel_recv_init(raw1394handle_t handle,
 	return 0;
 }
 
-/**
- * raw1394_iso_recv_listen_channel - listen to a specific channel in multi-channel mode
- **/
 int raw1394_iso_recv_listen_channel(raw1394handle_t handle, unsigned char channel)
 {
 	if (handle->iso_mode != ISO_RECV) {
@@ -268,9 +219,6 @@ int raw1394_iso_recv_listen_channel(raw1394handle_t handle, unsigned char channe
 	return ioctl(handle->fd, RAW1394_IOC_ISO_RECV_LISTEN_CHANNEL, channel);
 }
 
-/**
- * raw1394_iso_recv_unlisten_channel - stop listening  to a specific channel in multi-channel mode
- **/
 int raw1394_iso_recv_unlisten_channel(raw1394handle_t handle, unsigned char channel)
 {
 	if (handle->iso_mode != ISO_RECV) {
@@ -281,16 +229,6 @@ int raw1394_iso_recv_unlisten_channel(raw1394handle_t handle, unsigned char chan
 	return ioctl(handle->fd, RAW1394_IOC_ISO_RECV_UNLISTEN_CHANNEL, channel);
 }
 
-/**
- * raw1394_iso_recv_flush - if you specified an irq_interval > 1 in
- * iso_recv_init, you won't be notified for every single iso packet, but
- * for groups of them. Now e.g. if irq_interval is 100, and you were just
- * notified about iso packets and after them only 20 more packets arrived,
- * no notification will be generated (20 < 100). In the case that you know
- * that there should be more packets at this moment, you can call this
- * function and all iso packets which are already received by the kernel
- * will be flushed out to user space.
- */
 int raw1394_iso_recv_flush(raw1394handle_t handle)
 {
 	if (handle->iso_mode != ISO_RECV) {
@@ -301,13 +239,6 @@ int raw1394_iso_recv_flush(raw1394handle_t handle)
 	return ioctl(handle->fd, RAW1394_IOC_ISO_RECV_FLUSH, 0);
 }
 
-/**
- * raw1394_iso_recv_set_channel_mask - listen or unlisten to a whole bunch of channels at once
- * @mask: 64-bit mask of channels, 1 means listen, 0 means unlisten,
- *        channel 0 is LSB, channel 63 is MSB
- *
- * for multi-channel reception mode only
- **/
 int raw1394_iso_recv_set_channel_mask(raw1394handle_t handle, u_int64_t mask)
 {
 	if (handle->iso_mode != ISO_RECV) {
@@ -318,12 +249,6 @@ int raw1394_iso_recv_set_channel_mask(raw1394handle_t handle, u_int64_t mask)
 	return ioctl(handle->fd, RAW1394_IOC_ISO_RECV_SET_CHANNEL_MASK, (void*) &mask);
 }
 
-/**
- * raw1394_iso_recv_start - begin isochronous reception
- * @start_on_cycle: isochronous cycle number on which to start (-1 if you don't care)
- * @tag_mask: mask of tag fields to match (-1 to receive all packets)
- * @sync: not used, reserved for future implementation
- **/
 int raw1394_iso_recv_start(raw1394handle_t handle, int start_on_cycle, int tag_mask, int sync)
 {
 	int args[3];
@@ -422,13 +347,6 @@ out:
 	return retval;
 }
 
-/**
- * raw1394_iso_xmit_write - alternative blocking-write API for ISO transmission
- * @data: pointer to packet data buffer
- * @len: length of packet, in bytes
- * @tag: tag field
- * @sy: sync field
- **/
 int raw1394_iso_xmit_write(raw1394handle_t handle, unsigned char *data, unsigned int len,
 			   unsigned char tag, unsigned char sy)
 {
@@ -477,11 +395,6 @@ int raw1394_iso_xmit_write(raw1394handle_t handle, unsigned char *data, unsigned
 	return 0;
 }
 
-/**
- * raw1394_iso_xmit_start - begin isochronous transmission
- * @start_on_cycle: isochronous cycle number on which to start (-1 if you don't care)
- * @prebuffer_packets: number of packets to queue up before starting transmission (-1 if you don't care)
- **/
 int raw1394_iso_xmit_start(raw1394handle_t handle, int start_on_cycle, int prebuffer_packets)
 {
 	int args[2];
@@ -501,9 +414,6 @@ int raw1394_iso_xmit_start(raw1394handle_t handle, int start_on_cycle, int prebu
 	return 0;
 }
 
-/**
- * raw1394_iso_xmit_sync - wait until all queued packets have been sent
- **/
 int raw1394_iso_xmit_sync(raw1394handle_t handle)
 {
 	if(handle->iso_mode != ISO_XMIT) {
@@ -513,9 +423,6 @@ int raw1394_iso_xmit_sync(raw1394handle_t handle)
 	return ioctl(handle->fd, RAW1394_IOC_ISO_XMIT_SYNC, 0);
 }
 
-/**
- * raw1394_iso_stop - halt isochronous transmission or reception
- **/
 void raw1394_iso_stop(raw1394handle_t handle)
 {
 	if(handle->iso_mode == ISO_INACTIVE) {
@@ -526,9 +433,6 @@ void raw1394_iso_stop(raw1394handle_t handle)
 	handle->iso_state = ISO_STOP;
 }
 
-/**
- * raw1394_iso_shutdown - clean up and deallocate all resources for isochronous transmission or reception
- **/
 void raw1394_iso_shutdown(raw1394handle_t handle)
 {
 	if(handle->iso_buffer) {
@@ -640,4 +544,3 @@ int _raw1394_iso_iterate(raw1394handle_t handle)
 
 	return 0;
 }
-

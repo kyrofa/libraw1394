@@ -5,12 +5,15 @@ Version 1.1.0:
   numbers changed to reflect a new interface that is not backwards compatible!
 - added raw1394_arm_set_buf() and raw1394_arm_get_buf() functions.
 - added raw1394_new_handle_on_port() to make initialization simpler.
-- new, consistent versioning scheme. 1.0.0 was reported by pkg-config in 0.10
-  series; hence, 1.1.0 in this release.
+- make versioning consistent and updated. 1.0.0 was reported by pkg-config in 
+  0.10 series; hence, 1.1.0 in this release.
 - removed outdated, bogus "linking required only" version symbols in 
   version.c - use pkg-config now.
 - dropped libraw1394.m4 - use pkg-config now.
 - added RPM spec file.
+- deprecate old isochronous API.
+- move API comment documentation to header and reformat header comments as
+  kernel-doc (use linux/scripts/kernel-doc to extract and format them).
 
 Version 0.10:
 

@@ -10,7 +10,6 @@
 
 #include <config.h>
 
-/* This function is to be used by the autoconf macro to find the lib version */
 const char *raw1394_get_libversion()
 {
         return VERSION;
