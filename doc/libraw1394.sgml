@@ -711,6 +711,9 @@
        <para>
          <symbol>mode</symbol> for <function>raw1394_iso_recv_init()</function>
          sets whether to use packet-per-buffer or buffer-fill receive mode.
+		 Possible values are <symbol>RAW1394_DMA_DEFAULT</symbol> (bufferfill 
+		 on ohci1394), <symbol>RAW1394_DMA_BUFFERFILL</symbol>, and 
+		 <symbol>RAW1394_DMA_PACKET_PER_BUFFER</symbol>.
        </para>
 
        <para>
