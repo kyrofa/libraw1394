@@ -130,6 +130,7 @@ typedef struct arm_request_response {
 #define RAW1394_ISO_GET_STATUS       5  /* arg: raw1394_iso_status* */
 #define RAW1394_ISO_PRODUCE_CONSUME  6  /* arg: int, # of packets */
 #define RAW1394_ISO_SHUTDOWN         7
+#define RAW1394_ISO_QUEUE_ACTIVITY   9
 
 /* per-packet metadata embedded in the ringbuffer */
 /* must be identical to hpsb_iso_packet_info in iso.h! */

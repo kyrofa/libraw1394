@@ -72,23 +72,23 @@ enum raw1394_iso_disposition {
 extern "C" {
 #endif
 
-typedef int (*raw1394_iso_xmit_handler_t)(raw1394handle_t,
-					  unsigned char *data,
-					  unsigned int *len,
-					  unsigned char *tag,
-					  unsigned char *sy,
-					  unsigned int cycle,
-					  unsigned int dropped);
+typedef enum raw1394_iso_disposition (*raw1394_iso_xmit_handler_t)(raw1394handle_t,
+								   unsigned char *data,
+								   unsigned int *len,
+								   unsigned char *tag,
+								   unsigned char *sy,
+								   unsigned int cycle,
+								   unsigned int dropped);
 	
-typedef int (*raw1394_iso_recv_handler_t)(raw1394handle_t,
-					  unsigned char *data,
-					  unsigned int len,
-					  unsigned char channel,
-					  unsigned char tag,
-					  unsigned char sy,
-					  unsigned int cycle,
-					  unsigned int dropped);
-	
+typedef enum raw1394_iso_disposition (*raw1394_iso_recv_handler_t)(raw1394handle_t,
+								   unsigned char *data,
+								   unsigned int len,
+								   unsigned char channel,
+								   unsigned char tag,
+								   unsigned char sy,
+								   unsigned int cycle,
+								   unsigned int dropped);
+
 int raw1394_iso_xmit_init(raw1394handle_t handle,
 			  raw1394_iso_xmit_handler_t handler,
 			  unsigned int buf_packets,

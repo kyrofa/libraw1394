@@ -160,7 +160,7 @@ static int do_iso_init(raw1394handle_t handle,
  * raw1394_iso_xmit_init - initialize isochronous transmission
  * @handler: handler function for queueing packets
  * @buf_packets: number of isochronous packets to buffer
- * @max_packet_size: largest packet you need to handle, in bytes (not including the 8-byte isochronous header)
+ * @max_packet_size: largest packet you need to handle, in bytes (not including the isochronous header)
  * @channel: isochronous channel on which to transmit
  * @speed: speed at which to transmit
  * @irq_interval: maximum latency of wake-ups, in packets (-1 if you don't care)
@@ -186,7 +186,7 @@ int raw1394_iso_xmit_init(raw1394handle_t handle,
  * raw1394_iso_recv_init - initialize isochronous reception
  * @handler: handler function for receiving packets
  * @buf_packets: number of isochronous packets to buffer
- * @max_packet_size: largest packet you need to handle, in bytes (not including the 8-byte isochronous header)
+ * @max_packet_size: largest packet you need to handle, in bytes (not including the isochronous header)
  * @channel: isochronous channel to receive
  * @speed: speed at which to receive
  * @irq_interval: maximum latency of wake-ups, in packets (-1 if you don't care)
@@ -275,6 +275,9 @@ static int _raw1394_iso_xmit_queue_packets(raw1394handle_t handle)
 		packets_done++;
 
 		if(disp == RAW1394_ISO_DEFER) {
+			/* queue an event so that we don't hang in the next read() */
+			if(ioctl(handle->fd, RAW1394_ISO_QUEUE_ACTIVITY, 0))
+				return -1;
 			break;
 		} else if(disp == RAW1394_ISO_ERROR) {
 			retval = -1;
@@ -377,6 +380,9 @@ static int _raw1394_iso_recv_packets(raw1394handle_t handle)
 		packets_done++;
 		
 		if(disp == RAW1394_ISO_DEFER) {
+			/* queue an event so that we don't hang in the next read() */
+			if(ioctl(handle->fd, RAW1394_ISO_QUEUE_ACTIVITY, 0))
+				return -1;
 			break;
 		} else if(disp == RAW1394_ISO_ERROR) {
 			retval = -1;
