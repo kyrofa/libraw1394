@@ -411,8 +411,10 @@ raw1394handle_t raw1394_new_handle_on_port(int port)
 		return NULL;
 
 tryagain:
-	if (raw1394_get_port_info(handle, NULL, 0) < 0)
+	if (raw1394_get_port_info(handle, NULL, 0) < 0) {
+		raw1394_destroy_handle(handle);
 		return NULL;
+	}
 
 	if (raw1394_set_port(handle, port)) {
 		if (errno == ESTALE || errno == EINTR) {
