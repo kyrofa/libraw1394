@@ -4,6 +4,7 @@ AC_INIT(Makefile.am)
 AM_INIT_AUTOMAKE(libraw1394, 0.4)
 
 AC_PROG_CC
+AC_PROG_RANLIB
 AM_PROG_LIBTOOL
 
 AC_OUTPUT([ Makefile src/Makefile ])

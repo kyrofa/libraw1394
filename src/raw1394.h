@@ -90,13 +90,18 @@ tag_handler_t raw1394_set_tag_handler(raw1394handle_t handle,
 
 /*
  * Set the handler that will be called when an iso packet arrives (data points
- * to the iso packet header).  The default action is to do nothing.  Returns old
- * handler.
+ * to the iso packet header).  The default action is to do nothing.
+ *
+ * Handlers have to be set separately for each channel, it is not possible to
+ * set a handler when there is already one set for that channel.  Handlers can
+ * be cleared by passing NULL for "new" parameter, in that case the old handler
+ * will be returned.  Otherwise the return value is NULL for success and -1 for
+ * failure.
  */
 typedef int (*iso_handler_t)(raw1394handle_t, int channel, size_t length,
                              quadlet_t *data);
 iso_handler_t raw1394_set_iso_handler(raw1394handle_t handle,
-                                      iso_handler_t new);
+                                      unsigned int channel, iso_handler_t new);
 
 
 /*

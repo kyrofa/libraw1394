@@ -9,7 +9,7 @@
 int raw1394_loop_iterate(struct raw1394_handle *handle)
 {
         struct raw1394_request *req = &handle->req;
-        int retval = 0;
+        int retval = 0, channel;
 
         if (read(handle->fd, req, sizeof(*req)) < 0) {
                 return -1;
@@ -27,11 +27,12 @@ int raw1394_loop_iterate(struct raw1394_handle *handle)
                 break;
 
         case RAW1394_REQ_ISO_RECEIVE:
-                if (handle->iso_handler) {
-                        retval = handle->iso_handler(handle,
-                                                     (handle->buffer[0] >> 8)
-                                                     & 0x3f, req->length,
-                                                     handle->buffer);
+                channel = (handle->buffer[0] >> 8) & 0x3f;
+
+                if (handle->iso_handler[channel]) {
+                        retval = handle->iso_handler[channel](handle, channel,
+                                                              req->length,
+                                                              handle->buffer);
                 }
                 break;
 
@@ -70,12 +71,22 @@ tag_handler_t raw1394_set_tag_handler(struct raw1394_handle *handle,
 }
 
 iso_handler_t raw1394_set_iso_handler(struct raw1394_handle *handle,
-                                      iso_handler_t new)
+                                      unsigned int channel, iso_handler_t new)
 {
-        iso_handler_t old;
+        if (channel >= 64) {
+                return (iso_handler_t)-1;
+        }
 
-        old = handle->iso_handler;
-        handle->iso_handler = new;
+        if (new == NULL) {
+                iso_handler_t old = handle->iso_handler[channel];
+                handle->iso_handler[channel] = NULL;
+                return old;
+        }
 
-        return old;
+        if (handle->iso_handler[channel] != NULL) {
+                return (iso_handler_t)-1;
+        }
+
+        handle->iso_handler[channel] = new;
+        return NULL;
 }

@@ -27,12 +27,6 @@ static int tag_handler_default(struct raw1394_handle *handle, unsigned long tag,
         }
 }
 
-static int iso_handler_default(struct raw1394_handle *handle, int channel,
-                               size_t length, quadlet_t *data)
-{
-        return 0;
-}
-
 int _raw1394_sync_cb(struct raw1394_handle *unused, struct sync_cb_data *data,
                      int error)
 {
@@ -88,7 +82,7 @@ struct raw1394_handle *raw1394_get_handle(void)
 
         handle->bus_reset_handler = bus_reset_default;
         handle->tag_handler = tag_handler_default;
-        handle->iso_handler = iso_handler_default;
+        memset(handle->iso_handler, 0, sizeof(handle->iso_handler));
         return handle;
 }
 
