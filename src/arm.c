@@ -91,3 +91,65 @@ int raw1394_arm_unregister (struct raw1394_handle *handle, nodeaddr_t start)
         retval = write(handle->fd, &req, sizeof(req));
         return (retval == sizeof(req)) ? 0:-1;
 }
+
+
+/*
+ * AdressRangeMapping SET BUFFER:
+ * start, length .... identifies addressrange
+ * buf .............. pointer to buffer
+ *
+ * This function copies 'length' bytes from user memory area 'buf'
+ * to one ARM block in kernel memory area
+ * with start offset 'start'.
+ *
+ * returnvalue:       0  ... success
+ *                    <0 ... failure, and errno - error code
+ */
+int raw1394_arm_set_buf (struct raw1394_handle *handle, nodeaddr_t start,
+                         size_t length, void *buf)
+{
+        struct raw1394_request req;
+        int status;
+
+        CLEAR_REQ(&req);
+
+        req.type = RAW1394_REQ_ARM_SET_BUF;
+        req.sendb = ptr2int(buf);
+        req.length = length;
+        req.address = start;
+
+        if (write(handle->fd, &req, sizeof(req)) < 0) return -1;
+
+        return 0;
+}
+
+/*
+ * AdressRangeMapping GET BUFFER:
+ * start, length .... identifies addressrange
+ * buf .............. pointer to buffer
+ *
+ * This function copies 'length' bytes from one
+ * ARM block in kernel memory area with start offset `start`
+ * to user memory area 'buf'
+ *
+ * returnvalue:       0  ... success
+ *                    <0 ... failure, and errno - error code
+ */
+int raw1394_arm_get_buf (struct raw1394_handle *handle, nodeaddr_t start,
+                         size_t length, void *buf)
+{
+        struct raw1394_request req;
+        int status;
+
+        CLEAR_REQ(&req);
+
+        req.type = RAW1394_REQ_ARM_GET_BUF;
+        req.recvb = ptr2int(buf);
+        req.length = length;
+        req.address = start;
+
+        if (write(handle->fd, &req, sizeof(req)) < 0) return -1;
+
+        return 0;
+}
+

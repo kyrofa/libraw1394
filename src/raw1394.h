@@ -377,6 +377,36 @@ int raw1394_arm_register(struct raw1394_handle *handle, nodeaddr_t start,
  */
 int raw1394_arm_unregister(raw1394handle_t handle, nodeaddr_t start);
 
+/*
+ * AdressRangeMapping SET BUFFER:
+ * start, length .... identifies addressrange
+ * buf .............. pointer to buffer
+ *
+ * This function copies 'length' bytes from user memory area 'buf'
+ * to one ARM block in kernel memory area
+ * with start offset 'start'.
+ *
+ * returnvalue:       0  ... success
+ *                    <0 ... failure, and errno - error code
+ */
+int raw1394_arm_set_buf (struct raw1394_handle *handle, nodeaddr_t start,
+                         size_t length, void *buf);
+
+/*
+ * AdressRangeMapping GET BUFFER:
+ * start, length .... identifies addressrange
+ * buf .............. pointer to buffer
+ *
+ * This function copies 'length' bytes from one
+ * ARM block in kernel memory area with start offset `start`
+ * to user memory area 'buf'
+ *
+ * returnvalue:       0  ... success
+ *                    <0 ... failure, and errno - error code
+ */
+int raw1394_arm_get_buf (struct raw1394_handle *handle, nodeaddr_t start,
+                         size_t length, void *buf);
+
 /* 
  * send an echo request to the driver. the driver then send back the
  * same request. raw1394_loop_iterate will return data as return value,
