@@ -66,6 +66,12 @@ enum raw1394_iso_disposition {
 
 	/* return from raw1394_loop_iterate() immediately, which will return an error */
 	RAW1394_ISO_ERROR = 2,
+
+	/* return from raw1394_loop_iterate() immediately, and stop receiving packets */
+	RAW1394_ISO_STOP = 3,
+
+	/* (transmission only) - like ISO_STOP, but don't wait for the buffer to empty */
+	RAW1394_ISO_STOP_NOSYNC = 4,
 };
 
 #ifdef __cplusplus
@@ -119,6 +125,15 @@ int raw1394_iso_recv_set_channel_mask(raw1394handle_t handle, u_int64_t mask);
 
 int raw1394_iso_xmit_start(raw1394handle_t handle, int start_on_cycle, int prebuffer_packets);
 int raw1394_iso_recv_start(raw1394handle_t handle, int start_on_cycle, int tag_mask, int sync);
+
+/* write() style API - do NOT use this if you have set an xmit_handler
+ * if buffer is full, waits for more space UNLESS the file descriptor is
+ * set to non-blocking, in which case xmit_write() will return -1 with errno = EAGAIN */
+int raw1394_iso_xmit_write(raw1394handle_t handle, unsigned char *data, unsigned int len,
+			   unsigned char tag, unsigned char sy);
+
+/* wait until all queued packets have been sent */
+int raw1394_iso_xmit_sync(raw1394handle_t handle);
 
 void raw1394_iso_stop(raw1394handle_t handle);
 void raw1394_iso_shutdown(raw1394handle_t handle);

@@ -27,6 +27,8 @@ struct raw1394_handle {
 
 	/* memory mapping of the DMA buffer */
 	unsigned char *iso_buffer;
+	enum { ISO_INACTIVE, ISO_XMIT, ISO_RECV } iso_mode;
+	enum { ISO_STOP, ISO_GO } iso_state;
 
 	/* iso XMIT only: */
 	unsigned int iso_buf_stride; /* offset between successive packets */

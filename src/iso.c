@@ -13,6 +13,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <string.h>
+#include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 
@@ -118,7 +119,7 @@ static int do_iso_init(raw1394handle_t handle,
 	unsigned int bufsize, stride;
 
 	/* already initialized? */
-	if(handle->iso_buffer)
+	if(handle->iso_mode != ISO_INACTIVE)
 		return -1;
 
 	/* choose a power-of-two stride for the packet data buffer,
@@ -160,6 +161,8 @@ static int do_iso_init(raw1394handle_t handle,
 	handle->iso_xmit_handler = NULL;
 	handle->iso_recv_handler = NULL;
 
+	handle->iso_state = ISO_STOP;
+
 	return 0;			
 }
 
@@ -186,6 +189,7 @@ int raw1394_iso_xmit_init(raw1394handle_t handle,
 		       irq_interval, RAW1394_ISO_XMIT_INIT))
 		return -1;
 
+	handle->iso_mode = ISO_XMIT;
 	handle->iso_xmit_handler = handler;
 	handle->next_packet = 0;
 
@@ -215,6 +219,7 @@ int raw1394_iso_recv_init(raw1394handle_t handle,
 		       irq_interval, RAW1394_ISO_RECV_INIT))
 		return -1;
 
+	handle->iso_mode = ISO_RECV;
 	handle->iso_recv_handler = handler;
 	return 0;
 }
@@ -240,6 +245,7 @@ int raw1394_iso_multichannel_recv_init(raw1394handle_t handle,
 		       irq_interval, RAW1394_ISO_RECV_INIT))
 		return -1;
 
+	handle->iso_mode = ISO_RECV;
 	handle->iso_recv_handler = handler;
 	return 0;
 }
@@ -249,10 +255,10 @@ int raw1394_iso_multichannel_recv_init(raw1394handle_t handle,
  **/
 int raw1394_iso_recv_listen_channel(raw1394handle_t handle, unsigned char channel)
 {
-	if(!handle->iso_buffer)
+	if(handle->iso_mode != ISO_RECV) {
+		errno = EINVAL;
 		return -1;
-	if(!handle->iso_recv_handler)
-		return -1;
+	}
 
 	return ioctl(handle->fd, RAW1394_ISO_RECV_LISTEN_CHANNEL, channel);
 }
@@ -262,10 +268,10 @@ int raw1394_iso_recv_listen_channel(raw1394handle_t handle, unsigned char channe
  **/
 int raw1394_iso_recv_unlisten_channel(raw1394handle_t handle, unsigned char channel)
 {
-	if(!handle->iso_buffer)
+	if(handle->iso_mode != ISO_RECV) {
+		errno = EINVAL;
 		return -1;
-	if(!handle->iso_recv_handler)
-		return -1;
+	}
 
 	return ioctl(handle->fd, RAW1394_ISO_RECV_UNLISTEN_CHANNEL, channel);
 }
@@ -279,10 +285,10 @@ int raw1394_iso_recv_unlisten_channel(raw1394handle_t handle, unsigned char chan
  **/
 int raw1394_iso_recv_set_channel_mask(raw1394handle_t handle, u_int64_t mask)
 {
-	if(!handle->iso_buffer)
+	if(handle->iso_mode != ISO_RECV) {
+		errno = EINVAL;
 		return -1;
-	if(!handle->iso_recv_handler)
-		return -1;
+	}
 
 	return ioctl(handle->fd, RAW1394_ISO_RECV_SET_CHANNEL_MASK, (void*) &mask);
 }
@@ -297,10 +303,10 @@ int raw1394_iso_recv_start(raw1394handle_t handle, int start_on_cycle, int tag_m
 {
 	int args[3];
 
-	if(!handle->iso_buffer)
+	if(handle->iso_mode != ISO_RECV) {
+		errno = EINVAL;
 		return -1;
-	if(!handle->iso_recv_handler)
-		return -1;
+	}
 
 	args[0] = start_on_cycle;
 	args[1] = tag_mask;
@@ -309,6 +315,7 @@ int raw1394_iso_recv_start(raw1394handle_t handle, int start_on_cycle, int tag_m
 	if(ioctl(handle->fd, RAW1394_ISO_RECV_START, &args[0]))
 		return -1;
 
+	handle->iso_state = ISO_GO;
 	return 0;
 }
 
@@ -318,12 +325,12 @@ static int _raw1394_iso_xmit_queue_packets(raw1394handle_t handle)
 	struct raw1394_iso_status *stat = &handle->iso_status;
 	struct raw1394_iso_packets packets;
 	int retval = -1;
+	int stop_sync = 0;
 
-	if(!handle->iso_buffer)
+	if(handle->iso_mode != ISO_XMIT) {
+		errno = EINVAL;
 		goto out;
-
-	if(!handle->iso_xmit_handler)
-		goto out;
+	}
 
 	/* we could potentially send up to stat->n_packets packets */
 	packets.n_packets = 0;
@@ -360,6 +367,12 @@ static int _raw1394_iso_xmit_queue_packets(raw1394handle_t handle)
 			if(ioctl(handle->fd, RAW1394_ISO_QUEUE_ACTIVITY, 0))
 				goto out_produce;
 			break;
+		} else if(disp == RAW1394_ISO_STOP) {
+			stop_sync = 1;
+			break;
+		} else if(disp == RAW1394_ISO_STOP_NOSYNC) {
+			raw1394_iso_stop(handle);
+			break;
 		} else if(disp == RAW1394_ISO_ERROR) {
 			goto out_produce;
 		}
@@ -375,10 +388,70 @@ out_produce:
 	}
 out_free:
 	free(packets.infos);
-out:	
+out:
+	if(stop_sync) {
+		if(raw1394_iso_xmit_sync(handle))
+			return -1;
+		raw1394_iso_stop(handle);
+	}
+	
 	return retval;
 }
 
+/**
+ * raw1394_iso_xmit_write - alternative blocking-write API for ISO transmission
+ * @data: pointer to packet data buffer
+ * @len: length of packet, in bytes
+ * @tag: tag field
+ * @sy: sync field
+ **/
+int raw1394_iso_xmit_write(raw1394handle_t handle, unsigned char *data, unsigned int len,
+			   unsigned char tag, unsigned char sy)
+{
+	struct raw1394_iso_status *stat = &handle->iso_status;
+	struct raw1394_iso_packets packets;
+	struct raw1394_iso_packet_info info;
+
+	if(handle->iso_mode != ISO_XMIT || handle->iso_xmit_handler != NULL) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	/* wait until buffer space is available */
+	while(handle->iso_status.n_packets == 0) {
+		/* if the file descriptor has been set non-blocking,
+		   return immediately */
+		if(fcntl(handle->fd, F_GETFL) & O_NONBLOCK) {
+			errno = EAGAIN;
+			return -1;
+		}
+			
+		if(raw1394_loop_iterate(handle)) {
+			return -1;
+		}
+	}
+
+	/* copy the data to the packet buffer */
+	info.offset = handle->next_packet * handle->iso_buf_stride;
+	info.len = len;
+	info.tag = tag;
+	info.sy = sy;
+	
+	memcpy(handle->iso_buffer + info.offset, data, len);
+	
+	packets.n_packets = 1;
+	packets.infos = &info;
+
+	if(ioctl(handle->fd, RAW1394_ISO_XMIT_PACKETS, &packets))
+		return -1;
+
+	stat->n_packets--;
+	handle->next_packet = (handle->next_packet + 1) % stat->config.buf_packets;
+	if(stat->xmit_cycle != -1)
+		stat->xmit_cycle = (stat->xmit_cycle + 1) % 8000;
+
+	return 0;
+}
 
 /**
  * raw1394_iso_xmit_start - begin isochronous transmission
@@ -389,10 +462,10 @@ int raw1394_iso_xmit_start(raw1394handle_t handle, int start_on_cycle, int prebu
 {
 	int args[2];
 
-	if(!handle->iso_buffer)
+	if(handle->iso_mode != ISO_XMIT) {
+		errno = EINVAL;
 		return -1;
-	if(!handle->iso_xmit_handler)
-		return -1;
+	}
 
 	args[0] = start_on_cycle;
 	args[1] = prebuffer_packets;
@@ -400,7 +473,20 @@ int raw1394_iso_xmit_start(raw1394handle_t handle, int start_on_cycle, int prebu
 	if(ioctl(handle->fd, RAW1394_ISO_XMIT_START, &args[0]))
 		return -1;
 
+	handle->iso_state = ISO_GO;
 	return 0;
+}
+
+/**
+ * raw1394_iso_xmit_sync - wait until all queued packets have been sent
+ **/
+int raw1394_iso_xmit_sync(raw1394handle_t handle)
+{
+	if(handle->iso_mode != ISO_XMIT) {
+		errno = EINVAL;
+		return -1;
+	}
+	return ioctl(handle->fd, RAW1394_ISO_XMIT_SYNC, 0);
 }
 
 /**
@@ -408,10 +494,12 @@ int raw1394_iso_xmit_start(raw1394handle_t handle, int start_on_cycle, int prebu
  **/
 void raw1394_iso_stop(raw1394handle_t handle)
 {
-	if(!handle->iso_buffer)
+	if(handle->iso_mode == ISO_INACTIVE) {
 		return;
+	}
 
-	ioctl(handle->fd, RAW1394_ISO_STOP, 0);
+	ioctl(handle->fd, RAW1394_ISO_XMIT_RECV_STOP, 0);
+	handle->iso_state = ISO_STOP;
 }
 
 /**
@@ -420,11 +508,16 @@ void raw1394_iso_stop(raw1394handle_t handle)
 void raw1394_iso_shutdown(raw1394handle_t handle)
 {
 	if(handle->iso_buffer) {
-		raw1394_iso_stop(handle);
 		munmap(handle->iso_buffer, handle->iso_status.config.data_buf_size);
-		ioctl(handle->fd, RAW1394_ISO_SHUTDOWN, 0);
 		handle->iso_buffer = NULL;
 	}
+	
+	if(handle->iso_mode != ISO_INACTIVE) {
+		raw1394_iso_stop(handle);
+		ioctl(handle->fd, RAW1394_ISO_SHUTDOWN, 0);
+	}
+
+	handle->iso_mode = ISO_INACTIVE;
 }
 
 static int _raw1394_iso_recv_packets(raw1394handle_t handle)
@@ -434,12 +527,11 @@ static int _raw1394_iso_recv_packets(raw1394handle_t handle)
 
 	int retval = -1, packets_done = 0;
 
-	if(!handle->iso_buffer)
-		goto out;
-
-	if(!handle->iso_recv_handler)
-		goto out;
-
+	if(handle->iso_mode != ISO_RECV) {
+		errno = EINVAL;
+		return -1;
+	}
+	
 	/* ask the kernel to fill an array with packet info structs */
 	packets.n_packets = stat->n_packets;
 	packets.infos = malloc(packets.n_packets * sizeof(struct raw1394_iso_packet_info));
@@ -472,6 +564,9 @@ static int _raw1394_iso_recv_packets(raw1394handle_t handle)
 			if(ioctl(handle->fd, RAW1394_ISO_QUEUE_ACTIVITY, 0))
 				goto out_consume;
 			break;
+		} else if(disp == RAW1394_ISO_STOP || disp == RAW1394_ISO_STOP_NOSYNC) {
+			raw1394_iso_stop(handle);
+			break;
 		} else if(disp == RAW1394_ISO_ERROR) {
 			goto out_consume;
 		}
@@ -496,7 +591,7 @@ int _raw1394_iso_iterate(raw1394handle_t handle)
 {
 	int err;
 
-	if(!handle->iso_buffer)
+	if(handle->iso_mode == ISO_INACTIVE)
 		return 0;
 
 	err = ioctl(handle->fd, RAW1394_ISO_GET_STATUS, &handle->iso_status);
@@ -505,10 +600,18 @@ int _raw1394_iso_iterate(raw1394handle_t handle)
 
 	handle->iso_packets_dropped += handle->iso_status.overflows;
 
-	if(handle->iso_xmit_handler) {
-		return _raw1394_iso_xmit_queue_packets(handle);
-	} else if(handle->iso_recv_handler) {
-		return _raw1394_iso_recv_packets(handle);
+	if(handle->iso_state == ISO_GO) {
+		if(handle->iso_mode == ISO_XMIT) {
+			if(handle->iso_xmit_handler) {
+				return _raw1394_iso_xmit_queue_packets(handle);
+			}
+		}
+
+		if(handle->iso_mode == ISO_RECV) {
+			if(handle->iso_recv_handler) {
+				return _raw1394_iso_recv_packets(handle);
+			}
+		}
 	}
 
 	return 0;

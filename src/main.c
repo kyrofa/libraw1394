@@ -150,6 +150,7 @@ struct raw1394_handle *raw1394_new_handle(void)
         handle->arm_tag_handler = arm_tag_handler_default;
         memset(handle->iso_handler, 0, sizeof(handle->iso_handler));
 	handle->iso_buffer = NULL;
+	handle->iso_mode = ISO_INACTIVE;
         return handle;
 }
 
@@ -164,7 +165,7 @@ struct raw1394_handle *raw1394_new_handle(void)
 void raw1394_destroy_handle(struct raw1394_handle *handle)
 {
 	if (handle) {
-		if(handle->iso_buffer) {
+		if(handle->iso_mode != ISO_INACTIVE) {
 			raw1394_iso_shutdown(handle);
 		}
 		close(handle->fd);
