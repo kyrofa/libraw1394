@@ -19,6 +19,8 @@ build-stamp:
 	./configure --prefix=/usr --mandir=\$${prefix}/share/man
 	$(MAKE)
 
+	$(MAKE) -C doc libraw1394.pdf
+
 	touch build-stamp
 
 clean:
