@@ -1,6 +1,7 @@
 
 Version 0.8:
 
+- functions for isochronous sending
 - new raw1394_reset_bus() function to reset the bus
 
 Version 0.7:

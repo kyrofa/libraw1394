@@ -94,6 +94,27 @@ int raw1394_start_lock(struct raw1394_handle *handle, nodeid_t node,
         return (int)write(handle->fd, req, sizeof(*req));
 }
 
+int raw1394_start_iso_write(struct raw1394_handle *handle, unsigned int channel,
+                            unsigned int tag, unsigned int sy,
+                            unsigned int speed, size_t length, quadlet_t *data,
+                            unsigned long rawtag)
+{
+        struct raw1394_request *req = &handle->req;
+
+        CLEAR_REQ(req);
+
+        req->type = RAW1394_REQ_ISO_SEND;
+        req->generation = handle->generation;
+        req->tag = tag;
+
+        req->address = ((__u64)channel << 48) | speed;
+        req->misc = (tag << 16) | sy;
+        req->length = length;
+        req->sendb = data;
+
+        return (int)write(handle->fd, req, sizeof(*req));
+}
+
 
 #define SYNCFUNC_VARS                                                     \
         struct sync_cb_data sd = { 0, 0 };                                \
@@ -138,6 +159,18 @@ int raw1394_lock(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,
 
         err = raw1394_start_lock(handle, node, addr, extcode, data, arg, result,
                                  (unsigned long)&rh);
+
+        SYNCFUNC_BODY;
+}
+
+int raw1394_iso_write(struct raw1394_handle *handle, unsigned int channel,
+                      unsigned int tag, unsigned int sy, unsigned int speed,
+                      size_t length, quadlet_t *data)
+{
+        SYNCFUNC_VARS;
+
+        err = raw1394_start_iso_write(handle, channel, tag, sy, speed, length,
+                                      data, (unsigned long)&rh);
 
         SYNCFUNC_BODY;
 }
