@@ -20,7 +20,7 @@ Description: library for direct access to IEEE 1394 bus - development files
  libraw1394, as well as the testlibraw program and programmer's
  documentation.
 
-Package: libraw1394-5
+Package: libraw1394-6
 Architecture: any
 Section: libs
 Depends: debconf, makedev (>= 2.3.1-49), ${shlibs:Depends}

@@ -1,3 +1,6 @@
+Version 0.10:
+
+- merged in the rawiso branch
 - add sendiso and dumpiso tools with man files
 - fix wrong error mapping on local transactions in raw1394_errcode_to_errno().
 - added comment headers for most exported functions
