@@ -47,8 +47,8 @@
 #include <asm/types.h>
 
 struct raw1394_request {
-        __s16 type;
-        __s16 error;
+        __u32 type;
+        __s32 error;
         __u32 misc;
 
         __u32 generation;
