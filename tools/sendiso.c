@@ -239,7 +239,7 @@ void send_iso_file(raw1394handle_t handle)
         }
 
         if (memcmp("1394 isodump v", buffer, 14)) goto bad_format;
-        if (buffer[14] != '1') goto wrong_version;
+        if (buffer[14] != '2') goto wrong_version;
 
         while (1) {
                 send_file_once(handle, file);

@@ -135,7 +135,7 @@ void parse_args(int argc, char **argv)
 
 void write_header()
 {
-        static char header[32] = "1394 isodump v1";
+        static char header[32] = "1394 isodump v2";
         int i;
 
         for (i = 0; i < 8; i++)
