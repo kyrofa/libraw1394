@@ -1,3 +1,11 @@
+libraw1394 (0.9.0-2) unstable; urgency=low
+
+  * Fix postinst of shared library package so that it does not fail over
+    the question to create /dev/raw1394 if input is connected to /dev/null
+    (makes autobuilders happy).
+
+ -- Andreas Bombe <aeb@debian.org>  Sun, 17 Jun 2001 01:16:53 +0200
+
 libraw1394 (0.9.0-1) unstable; urgency=low
 
   * Maintainer email address changed to my debian.org account.
