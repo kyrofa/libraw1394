@@ -4,11 +4,11 @@
   <bookinfo>
 
     <title>libraw1394</title>
-    <subtitle>version 1.0.0</subtitle>
+    <subtitle>version 1.1.0</subtitle>
 
     <copyright>
-      <year>2001</year>
-      <holder>Andreas Bombe</holder>
+      <year>2001-2004</year>
+      <holder>Andreas Bombe, Dan Maas, Manfred Weihs, and Christian Toegel</holder>
     </copyright>
 
   </bookinfo>
