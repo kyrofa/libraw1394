@@ -53,11 +53,9 @@ binary-arch: build install autoclean-files
 		usr/lib/$(fullversionname)
 
 	echo >>autoclean-files			\
-		debian/substvars		\
 		debian/$(libraw).postinst	\
 		debian/$(libraw).substvars
 
-	echo "soversion=$(major)" >>debian/substvars
 	if [ "$(potato-build)" = "yes" ]; then				\
 		cp debian/libraw1394-potato.postinst.in			\
 			debian/$(libraw).postinst;			\
