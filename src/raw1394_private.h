@@ -4,6 +4,7 @@
 
 #define HBUF_SIZE      8192
 #define ARM_REC_LENGTH 4096 
+#define MAXIMUM_BANDWIDTH 4915
 
 struct raw1394_handle {
         int fd;

@@ -1,3 +1,7 @@
+Version 1.2.0:
+- added constants useful for ARM: transaction and response return codes.
+- added raw1394_bandwidth_modify() and raw1394_channel_modify().
+
 Version 1.1.0:
 - added ability to specify the isochronous receive mode in the new
   rawiso (raw1394_iso_*) API. Therefore, the signature of 

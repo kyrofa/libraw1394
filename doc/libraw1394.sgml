@@ -4,7 +4,7 @@
   <bookinfo>
 
     <title>libraw1394</title>
-    <subtitle>version 1.1.0</subtitle>
+    <subtitle>version 1.2.0</subtitle>
 
     <copyright>
       <year>2001-2004</year>
@@ -4887,6 +4887,130 @@
  <title>Return</title>
  <para>
     -1 (failure) if the buffer was too small or 0 for success
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-bandwidth-modify">raw1394_bandwidth_modify</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_bandwidth_modify</refname>
+ <refpurpose>
+      allocate or release bandwidth
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_bandwidth_modify </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>unsigned int <parameter>bandwidth</parameter></paramdef>
+   <paramdef>enum raw1394_modify_mode <parameter>mode</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      a libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>bandwidth</parameter></term>
+   <listitem>
+    <para>
+      IEEE 1394 Bandwidth Alloction Units
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>mode</parameter></term>
+   <listitem>
+    <para>
+      whether to allocate or free
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   Communicates with the isochronous resource manager.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Return</title>
+ <para>
+   -1 for failure, 0 for success
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-channel-modify">raw1394_channel_modify</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_channel_modify</refname>
+ <refpurpose>
+      allocate or release isochronous channel
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_channel_modify </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>unsigned int <parameter>channel</parameter></paramdef>
+   <paramdef>enum raw1394_modify_mode <parameter>mode</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      a libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>channel</parameter></term>
+   <listitem>
+    <para>
+      isochronous channel
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>mode</parameter></term>
+   <listitem>
+    <para>
+      whether to allocate or free
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   Communicates with the isochronous resource manager.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Return</title>
+ <para>
+   -1 for failure, 0 for success
  </para>
 </refsect1>
 </refentry>

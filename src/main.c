@@ -27,8 +27,10 @@
 #include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <netinet/in.h>
 
 #include "raw1394.h"
+#include "csr.h"
 #include "kernel-raw1394.h"
 #include "raw1394_private.h"
 
@@ -367,3 +369,111 @@ int raw1394_get_config_rom(raw1394handle_t handle, quadlet_t *buffer,
 
         return status;
 }
+
+int raw1394_bandwidth_modify (raw1394handle_t handle, unsigned int bandwidth,
+	enum raw1394_modify_mode mode)
+{
+        quadlet_t buffer, compare, swap, new;
+        int retry = 3;
+        int result;
+        
+        if (bandwidth == 0)
+                return 0;
+        
+        /* Reading current bandwidth usage from IRM. */
+        result = raw1394_read (handle, raw1394_get_irm_id (handle),
+                CSR_REGISTER_BASE + CSR_BANDWIDTH_AVAILABLE,
+                sizeof (quadlet_t), &buffer);
+        if (result < 0)
+                return -1;
+  
+        buffer = ntohl (buffer);
+        compare = buffer;
+  
+        while (retry > 0) {
+                if (mode == RAW1394_MODIFY_ALLOC ) {
+                        if (compare < bandwidth) {
+                                return -1;
+                        }
+  
+                        swap = compare - bandwidth;
+                }
+                else {
+                        swap = compare + bandwidth;
+  
+                        if( swap > MAXIMUM_BANDWIDTH ) {
+                                swap = MAXIMUM_BANDWIDTH;
+                        }
+                }
+                
+                result = raw1394_lock (handle, raw1394_get_irm_id (handle),
+                                        CSR_REGISTER_BASE + CSR_BANDWIDTH_AVAILABLE, 
+                                        RAW1394_EXTCODE_COMPARE_SWAP, ntohl(swap), ntohl(compare),
+                                        &new);
+                if (result < 0)
+                        return -1;
+                
+                new = ntohl (new);
+                
+                if (new != compare) {
+                        compare = new;
+                        retry--;
+                        if ( retry == 0 )
+                                return -1;
+                }
+                else {
+                        /* Success. */
+                        retry = 0;
+                        return 0;
+                }
+        }
+  
+        return 0;
+}
+
+int raw1394_channel_modify (raw1394handle_t handle, unsigned int channel,
+	enum raw1394_modify_mode mode)
+{
+        quadlet_t buffer;
+        int result;
+        nodeaddr_t addr = CSR_REGISTER_BASE;
+        unsigned int c = channel;
+        quadlet_t compare, swap = 0, new;
+        
+        if (c > 31 && c < 64) {
+                addr += CSR_CHANNELS_AVAILABLE_LO;
+                c -= 32;
+        } else if (c < 64)
+                addr += CSR_CHANNELS_AVAILABLE_HI;
+        else
+                return -1;
+        c = 31 - c;
+  
+        result = raw1394_read (handle, raw1394_get_irm_id (handle), addr, 
+                sizeof (quadlet_t), &buffer);
+        if (result < 0)
+                return -1;
+        
+        buffer = ntohl (buffer);
+  
+        if ( mode == RAW1394_MODIFY_ALLOC ) {
+                if( (buffer & (1 << c)) == 0 )
+                        return -1;
+                swap = htonl (buffer & ~(1 << c));
+        }
+        else if ( mode == RAW1394_MODIFY_FREE ) {
+                if ( (buffer & (1 << c)) != 0 )
+                        return -1;
+                swap = htonl (buffer | (1 << c));
+        }
+  
+        compare = htonl (buffer);
+  
+        result = raw1394_lock (handle, raw1394_get_irm_id (handle), addr,
+                                RAW1394_EXTCODE_COMPARE_SWAP, swap, compare, &new);
+        if ( (result < 0) || (new != compare) )
+                return -1;
+  
+        return 0;
+}
+

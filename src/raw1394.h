@@ -12,6 +12,8 @@
 #ifndef _LIBRAW1394_RAW1394_H
 #define _LIBRAW1394_RAW1394_H
 
+#include <sys/types.h>
+
 #define RAW1394_ARM_READ  1
 #define RAW1394_ARM_WRITE 2
 #define RAW1394_ARM_LOCK  4
@@ -23,7 +25,21 @@
 #define RAW1394_NOTIFY_OFF 0
 #define RAW1394_NOTIFY_ON  1
 
-#include <sys/types.h>
+/* extended transaction codes (lock-request-response) */
+#define RAW1394_EXTCODE_MASK_SWAP        0x1
+#define RAW1394_EXTCODE_COMPARE_SWAP     0x2
+#define RAW1394_EXTCODE_FETCH_ADD        0x3
+#define RAW1394_EXTCODE_LITTLE_ADD       0x4
+#define RAW1394_EXTCODE_BOUNDED_ADD      0x5
+#define RAW1394_EXTCODE_WRAP_ADD         0x6
+
+/* response codes */
+#define RAW1394_RCODE_COMPLETE           0x0
+#define RAW1394_RCODE_CONFLICT_ERROR     0x4
+#define RAW1394_RCODE_DATA_ERROR         0x5
+#define RAW1394_RCODE_TYPE_ERROR         0x6
+#define RAW1394_RCODE_ADDRESS_ERROR      0x7
+
 typedef u_int8_t  byte_t;
 typedef u_int32_t quadlet_t;
 typedef u_int64_t octlet_t;
@@ -91,6 +107,12 @@ enum raw1394_iso_disposition {
 	/* (transmission only) - like ISO_STOP, but don't wait for the buffer to empty */
 	RAW1394_ISO_STOP_NOSYNC = 4,
 };
+
+enum raw1394_modify_mode {
+	RAW1394_MODIFY_ALLOC,
+	RAW1394_MODIFY_FREE
+};
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -1123,6 +1145,36 @@ int raw1394_update_config_rom(raw1394handle_t handle, const quadlet_t
 
 int raw1394_get_config_rom(raw1394handle_t handle, quadlet_t *buffer,
         size_t buffersize, size_t *rom_size, unsigned char *rom_version);
+
+/**
+ * raw1394_bandwidth_modify - allocate or release bandwidth
+ * @handle: a libraw1394 handle
+ * @bandwidth: IEEE 1394 Bandwidth Alloction Units
+ * @mode: whether to allocate or free
+ *
+ * Communicates with the isochronous resource manager.
+ *
+ * Return:
+ * -1 for failure, 0 for success
+ **/
+int 
+raw1394_bandwidth_modify (raw1394handle_t handle, unsigned int bandwidth, 
+	enum raw1394_modify_mode mode);
+
+/**
+ * raw1394_bandwidth_modify - allocate or release isochronous channel
+ * @handle: a libraw1394 handle
+ * @channel: isochronous channel
+ * @mode: whether to allocate or free
+ *
+ * Communicates with the isochronous resource manager.
+ *
+ * Return:
+ * -1 for failure, 0 for success
+ **/
+int 
+raw1394_channel_modify (raw1394handle_t handle, unsigned int channel, 
+	enum raw1394_modify_mode mode);
 
 
 /**
