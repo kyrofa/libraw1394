@@ -149,6 +149,10 @@ int raw1394_start_write(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 int raw1394_start_lock(struct raw1394_handle *handle, nodeid_t node,
                        nodeaddr_t addr, unsigned int extcode, quadlet_t data,
                        quadlet_t arg, quadlet_t *result, unsigned long tag);
+int raw1394_start_iso_write(struct raw1394_handle *handle, unsigned int channel,
+                            unsigned int tag, unsigned int sy,
+                            unsigned int speed, size_t length, quadlet_t *data,
+                            unsigned long rawtag);
 
 /*
  * This does the complete transaction and will return when it's finished.  It
@@ -162,6 +166,9 @@ int raw1394_write(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 int raw1394_lock(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,
                  unsigned int extcode, quadlet_t data, quadlet_t arg,
                  quadlet_t *result);
+int raw1394_iso_write(struct raw1394_handle *handle, unsigned int channel,
+                      unsigned int tag, unsigned int sy, unsigned int speed,
+                      size_t length, quadlet_t *data);
 
 /*
  * Start and stop receiving a certain isochronous channel.  You have to set an
