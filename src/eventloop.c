@@ -1,4 +1,5 @@
 
+#include <config.h>
 #include <unistd.h>
 
 #include "raw1394.h"

@@ -56,8 +56,14 @@ struct raw1394_request {
         unsigned long tag;
 
         size_t length;
+
+#ifdef __KERNEL__
         quadlet_t *sendb;
         quadlet_t *recvb;
+#else
+        kptr_t sendb;
+        kptr_t recvb;
+#endif
 };
 
 struct raw1394_khost_list {

@@ -1,4 +1,5 @@
 
+#include <config.h>
 #include <unistd.h>
 #include <errno.h>
 
@@ -21,7 +22,7 @@ int raw1394_start_read(struct raw1394_handle *handle, nodeid_t node,
 
         req->address = ((u_int64_t)node << 48) | addr;
         req->length = length;
-        req->recvb = buffer;
+        req->recvb = (kptr_t)buffer;
 
         return (int)write(handle->fd, req, sizeof(*req));
 }
@@ -40,7 +41,7 @@ int raw1394_start_write(struct raw1394_handle *handle, nodeid_t node,
 
         req->address = ((u_int64_t)node << 48) | addr;
         req->length = length;
-        req->sendb = data;
+        req->sendb = (kptr_t)data;
 
         return (int)write(handle->fd, req, sizeof(*req));
 }
@@ -64,8 +65,8 @@ int raw1394_start_lock(struct raw1394_handle *handle, nodeid_t node,
         req->tag = tag;
 
         req->address = ((u_int64_t)node << 48) | addr;
-        req->sendb = sendbuf;
-        req->recvb = result;
+        req->sendb = (kptr_t)sendbuf;
+        req->recvb = (kptr_t)result;
         req->misc = extcode;
 
         switch (extcode) {

@@ -1,4 +1,5 @@
 
+#include <config.h>
 #include <errno.h>
 #include <unistd.h>
 
@@ -19,7 +20,7 @@ static int do_iso_listen(struct raw1394_handle *handle, int channel)
         req->generation = handle->generation;
         req->misc = channel;
         req->tag = (unsigned long)&rh;
-        req->recvb = handle->buffer;
+        req->recvb = (kptr_t)handle->buffer;
         req->length = HBUF_SIZE;
 
         err = write(handle->fd, req, sizeof(*req));

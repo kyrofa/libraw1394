@@ -1,4 +1,5 @@
 
+#include <config.h>
 #include <errno.h>
 #include <unistd.h>
 
@@ -18,7 +19,7 @@ static int do_fcp_listen(struct raw1394_handle *handle, int startstop)
         req->generation = handle->generation;
         req->misc = startstop;
         req->tag = (unsigned long)&rh;
-        req->recvb = handle->buffer;
+        req->recvb = (kptr_t)handle->buffer;
         req->length = 512;
 
         err = write(handle->fd, req, sizeof(*req));

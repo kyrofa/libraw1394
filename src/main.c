@@ -1,4 +1,5 @@
 
+#include <config.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
@@ -134,7 +135,7 @@ int raw1394_get_port_info(struct raw1394_handle *handle,
         CLEAR_REQ(req);
         req->type = RAW1394_REQ_LIST_CARDS;
         req->generation = handle->generation;
-        req->recvb = handle->buffer;
+        req->recvb = (kptr_t)handle->buffer;
         req->length = HBUF_SIZE;
 
         while (1) {
