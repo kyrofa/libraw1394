@@ -8,6 +8,7 @@ libraw1394_la_LDFLAGS = -version-info @lt_major@:@lt_revision@:@lt_age@
 libraw1394_la_SOURCES =   \
 	main.c            \
 	eventloop.c       \
+	errors.c          \
 	readwrite.c       \
 	iso.c             \
 	fcp.c             \

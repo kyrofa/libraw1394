@@ -14,6 +14,7 @@
 #include "raw1394.h"
 #include "kernel-raw1394.h"
 #include "raw1394_private.h"
+#include "ieee1394.h"
 
 raw1394_errcode_t raw1394_get_errcode(struct raw1394_handle *handle)
 {
