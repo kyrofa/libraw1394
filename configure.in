@@ -4,20 +4,7 @@ AC_INIT(Makefile.am)
 AM_INIT_AUTOMAKE(libraw1394, 0.6)
 AM_CONFIG_HEADER(config.h)
 
-# AC_CANONICAL_HOST
-
 AC_PROG_CC
 AM_PROG_LIBTOOL
-
-
-AC_ARG_ENABLE(32-64,
-              [  --enable-32-64          support systems with 64 bit kernel and 32 bit userland],
-              [
-case $enableval in
-yes) AC_DEFINE(KERNEL64_USER32) ;;
-no) ;;
-*) AC_MSG_ERROR([ Invalid arg for --enable-32-64 ])
-esac
-              ])
 
 AC_OUTPUT([ Makefile src/Makefile debian/Makefile ])

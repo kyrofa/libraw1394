@@ -20,9 +20,9 @@ int raw1394_start_read(struct raw1394_handle *handle, nodeid_t node,
         req->generation = handle->generation;
         req->tag = tag;
 
-        req->address = ((u_int64_t)node << 48) | addr;
+        req->address = ((__u64)node << 48) | addr;
         req->length = length;
-        req->recvb = (kptr_t)buffer;
+        req->recvb = (__u64)buffer;
 
         return (int)write(handle->fd, req, sizeof(*req));
 }
@@ -39,9 +39,9 @@ int raw1394_start_write(struct raw1394_handle *handle, nodeid_t node,
         req->generation = handle->generation;
         req->tag = tag;
 
-        req->address = ((u_int64_t)node << 48) | addr;
+        req->address = ((__u64)node << 48) | addr;
         req->length = length;
-        req->sendb = (kptr_t)data;
+        req->sendb = (__u64)data;
 
         return (int)write(handle->fd, req, sizeof(*req));
 }
@@ -64,9 +64,9 @@ int raw1394_start_lock(struct raw1394_handle *handle, nodeid_t node,
         req->generation = handle->generation;
         req->tag = tag;
 
-        req->address = ((u_int64_t)node << 48) | addr;
-        req->sendb = (kptr_t)sendbuf;
-        req->recvb = (kptr_t)result;
+        req->address = ((__u64)node << 48) | addr;
+        req->sendb = (__u64)sendbuf;
+        req->recvb = (__u64)result;
         req->misc = extcode;
 
         switch (extcode) {

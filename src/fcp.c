@@ -18,8 +18,8 @@ static int do_fcp_listen(struct raw1394_handle *handle, int startstop)
         req->type = RAW1394_REQ_FCP_LISTEN;
         req->generation = handle->generation;
         req->misc = startstop;
-        req->tag = (unsigned long)&rh;
-        req->recvb = (kptr_t)handle->buffer;
+        req->tag = (__u64)&rh;
+        req->recvb = (__u64)handle->buffer;
         req->length = 512;
 
         err = write(handle->fd, req, sizeof(*req));

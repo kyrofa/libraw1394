@@ -135,7 +135,7 @@ int raw1394_get_port_info(struct raw1394_handle *handle,
         CLEAR_REQ(req);
         req->type = RAW1394_REQ_LIST_CARDS;
         req->generation = handle->generation;
-        req->recvb = (kptr_t)handle->buffer;
+        req->recvb = (__u64)handle->buffer;
         req->length = HBUF_SIZE;
 
         while (1) {

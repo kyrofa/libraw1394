@@ -1,6 +1,8 @@
 
 Version 0.7:
 
+- added support for environments where the kernel runs in 64 bit mode whereas
+  user space runs in 32 bit mode
 - fixed lock transaction to actually return the required response; these
   functions are actually useful now, prototypes for raw1394_start_lock and
   raw1394_lock changed
