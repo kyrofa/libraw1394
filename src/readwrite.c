@@ -1,5 +1,6 @@
 
 #include <unistd.h>
+#include <errno.h>
 
 #include "raw1394.h"
 #include "kernel-raw1394.h"
@@ -44,6 +45,42 @@ int raw1394_start_write(struct raw1394_handle *handle, nodeid_t node,
         return (int)write(handle->fd, req, sizeof(*req));
 }
 
+int raw1394_start_lock(struct raw1394_handle *handle, nodeid_t node,
+                       nodeaddr_t addr, unsigned int extcode, quadlet_t data,
+                       quadlet_t arg, unsigned long tag)
+{
+        struct raw1394_request *req = &handle->req;
+        quadlet_t sendbuf[2];
+
+        if ((extcode > 7) || (extcode == 0)) {
+                errno = EINVAL;
+                return -1;
+        }
+
+        CLEAR_REQ(req);
+
+        req->type = RAW1394_REQ_LOCK;
+        req->generation = handle->generation;
+        req->tag = tag;
+
+        req->address = ((u_int64_t)node << 48) | addr;
+        req->sendb = sendbuf;
+
+        switch (extcode) {
+        case 3: /* EXTCODE_FETCH_ADD */
+        case 4: /* EXTCODE_LITTLE_ADD */
+                sendbuf[0] = data;
+                req->length = 4;
+                break;
+        default:
+                sendbuf[0] = arg;
+                sendbuf[1] = data;
+                req->length = 8;
+                break;
+        }
+
+        return (int)write(handle->fd, req, sizeof(*req));
+}
 
 
 #define SYNCFUNC_VARS                                                     \
@@ -77,6 +114,17 @@ int raw1394_write(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,
 
         err = raw1394_start_write(handle, node, addr, length, data, 
                                   (unsigned long)&rh);
+
+        SYNCFUNC_BODY;
+}
+
+int raw1394_lock(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,
+                 unsigned int extcode, quadlet_t data, quadlet_t arg)
+{
+        SYNCFUNC_VARS;
+
+        err = raw1394_start_lock(handle, node, addr, extcode, data, arg,
+                                 (unsigned long)&rh);
 
         SYNCFUNC_BODY;
 }
