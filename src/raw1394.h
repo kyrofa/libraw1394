@@ -68,6 +68,10 @@ enum raw1394_iso_disposition {
 	RAW1394_ISO_ERROR = 2,
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef int (*raw1394_iso_xmit_handler_t)(raw1394handle_t,
 					  unsigned char *data,
 					  unsigned int *len,
@@ -106,10 +110,6 @@ int raw1394_iso_recv_start(raw1394handle_t handle, int start_on_cycle);
 	
 void raw1394_iso_stop(raw1394handle_t handle);
 void raw1394_iso_shutdown(raw1394handle_t handle);
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 typedef int raw1394_errcode_t;
 #define raw1394_make_errcode(ack, rcode) (((ack) << 16) | rcode)
