@@ -31,7 +31,7 @@ int raw1394_start_read(struct raw1394_handle *handle, nodeid_t node,
 
         req->address = ((__u64)node << 48) | addr;
         req->length = length;
-        req->recvb = (__u64)buffer;
+        req->recvb = ptr2int(buffer);
 
         return (int)write(handle->fd, req, sizeof(*req));
 }
@@ -50,7 +50,7 @@ int raw1394_start_write(struct raw1394_handle *handle, nodeid_t node,
 
         req->address = ((__u64)node << 48) | addr;
         req->length = length;
-        req->sendb = (__u64)data;
+        req->sendb = ptr2int(data);
 
         return (int)write(handle->fd, req, sizeof(*req));
 }
@@ -74,8 +74,8 @@ int raw1394_start_lock(struct raw1394_handle *handle, nodeid_t node,
         req->tag = tag;
 
         req->address = ((__u64)node << 48) | addr;
-        req->sendb = (__u64)sendbuf;
-        req->recvb = (__u64)result;
+        req->sendb = ptr2int(sendbuf);
+        req->recvb = ptr2int(result);
         req->misc = extcode;
 
         switch (extcode) {
@@ -110,7 +110,7 @@ int raw1394_start_iso_write(struct raw1394_handle *handle, unsigned int channel,
         req->address = ((__u64)channel << 48) | speed;
         req->misc = (tag << 16) | sy;
         req->length = length;
-        req->sendb = data;
+        req->sendb = ptr2int(data);
 
         return (int)write(handle->fd, req, sizeof(*req));
 }

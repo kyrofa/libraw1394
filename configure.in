@@ -8,6 +8,8 @@ AC_PROG_CC
 AM_PROG_LIBTOOL
 AC_PROG_INSTALL
 
+AC_CHECK_SIZEOF(void *, 8)
+
 # set the libtool so version numbers
 lt_major=4
 lt_revision=0

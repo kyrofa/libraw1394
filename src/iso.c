@@ -28,8 +28,8 @@ static int do_iso_listen(struct raw1394_handle *handle, int channel)
         req->type = RAW1394_REQ_ISO_LISTEN;
         req->generation = handle->generation;
         req->misc = channel;
-        req->tag = (__u64)&rh;
-        req->recvb = (__u64)handle->buffer;
+        req->tag = ptr2int(&rh);
+        req->recvb = ptr2int(handle->buffer);
         req->length = HBUF_SIZE;
 
         err = write(handle->fd, req, sizeof(*req));

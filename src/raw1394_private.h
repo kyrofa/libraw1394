@@ -32,4 +32,12 @@ int _raw1394_sync_cb(struct raw1394_handle*, struct sync_cb_data*, int);
 #define HBUF_SIZE 8192
 #define CLEAR_REQ(reqp) memset((reqp), 0, sizeof(struct raw1394_request))
 
+#if SIZEOF_VOID_P == 4
+#define int2ptr(x) ((void *)(__u32)x)
+#define ptr2int(x) ((__u64)(__u32)x)
+#else
+#define int2ptr(x) ((void *)x)
+#define ptr2int(x) ((__u64)x)
+#endif
+
 #endif /* _RAW1394_PRIVATE_H */
