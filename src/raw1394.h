@@ -193,6 +193,13 @@ int raw1394_stop_iso_rcv(raw1394handle_t handle, unsigned int channel);
 int raw1394_start_fcp_listen(raw1394handle_t handle);
 int raw1394_stop_fcp_listen(raw1394handle_t handle);
 
+
+/*
+ * Returns the version string.  Designed to be used by the autoconf macro to
+ * detect the libraw version, not really intended for general use.
+ */
+const char *raw1394_get_libversion(void);
+
 #ifdef __cplusplus
 }
 #endif

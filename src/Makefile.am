@@ -12,6 +12,7 @@ libraw1394_la_SOURCES =   \
 	readwrite.c       \
 	iso.c             \
 	fcp.c             \
+	version.c         \
 	kernel-raw1394.h  \
 	raw1394_private.h
 
