@@ -201,3 +201,17 @@ int raw1394_set_port(struct raw1394_handle *handle, int port)
                 return -1;
         }
 }
+
+int raw1394_reset_bus(struct raw1394_handle *handle)
+{
+        struct raw1394_request *req = &handle->req;
+
+        CLEAR_REQ(req);
+
+        req->type = RAW1394_REQ_RESET_BUS;
+        req->generation = handle->generation;
+
+        if (write(handle->fd, req, sizeof(*req)) < 0) return -1;
+
+        return 0;
+}

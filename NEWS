@@ -1,4 +1,8 @@
 
+Version 0.8:
+
+- new raw1394_reset_bus() function to reset the bus
+
 Version 0.7:
 
 - added support for environments where the kernel runs in 64 bit mode whereas

@@ -21,6 +21,7 @@
 
 #define RAW1394_REQ_ISO_LISTEN    200
 #define RAW1394_REQ_FCP_LISTEN    201
+#define RAW1394_REQ_RESET_BUS     202
 
 /* kernel to user */
 #define RAW1394_REQ_BUS_RESET     10000

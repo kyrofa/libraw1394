@@ -65,6 +65,10 @@ int raw1394_get_port_info(raw1394handle_t handle, struct raw1394_portinfo *pinf,
  */
 int raw1394_set_port(raw1394handle_t handle, int port);
 
+/*
+ * Reset the connected bus.  Returns -1 for failure, 0 for success.
+ */
+int raw1394_reset_bus(raw1394handle_t handle);
 
 /*
  * Get one new message through handle and process it.  See below for handler
