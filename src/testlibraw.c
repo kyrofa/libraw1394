@@ -20,7 +20,7 @@ you haven't loaded the raw1394 module.\n";
 
 quadlet_t buffer;
 
-int my_tag_handler(struct raw1394_handle *handle, unsigned long tag, int error)
+int my_tag_handler(raw1394handle_t handle, unsigned long tag, int error)
 {
         if (error < 0) {
                 printf("completed with error %d\n", error);
