@@ -114,6 +114,15 @@ nodeid_t raw1394_get_local_id(struct raw1394_handle *handle)
         return handle->local_id;
 }
 
+void *raw1394_get_userdata(struct raw1394_handle *handle)
+{
+        return handle->userdata;
+}
+
+void raw1394_set_userdata(struct raw1394_handle *handle, void *data)
+{
+        handle->userdata = data;
+}
 
 int raw1394_get_port_info(struct raw1394_handle *handle, 
                           struct raw1394_portinfo *pinf, int maxports)

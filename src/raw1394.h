@@ -31,6 +31,13 @@ void raw1394_destroy_handle(raw1394handle_t handle);
  */
 int raw1394_get_fd(raw1394handle_t handle);
 
+/*
+ * Set and get user data.  This isn't used inside libraw1394, you can use it for
+ * your own purposes.
+ */
+void *raw1394_get_userdata(raw1394handle_t handle);
+void raw1394_set_userdata(raw1394handle_t handle, void *data);
+
 unsigned int raw1394_get_generation(raw1394handle_t handle);
 nodeid_t raw1394_get_local_id(raw1394handle_t handle);
 

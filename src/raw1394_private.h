@@ -16,6 +16,8 @@ struct raw1394_handle {
 
         struct raw1394_request req;
         quadlet_t buffer[2048];
+
+        void *userdata;
 };
 
 struct sync_cb_data {
