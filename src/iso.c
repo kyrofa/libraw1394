@@ -16,6 +16,7 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
+#include <malloc.h>
 
 #include "raw1394.h"
 #include "kernel-raw1394.h"
@@ -116,7 +117,7 @@ static int do_iso_init(raw1394handle_t handle,
 		       int irq_interval,
 		       int cmd)
 {
-	unsigned int bufsize, stride;
+	unsigned int stride;
 
 	/* already initialized? */
 	if(handle->iso_mode != ISO_INACTIVE)
@@ -386,7 +387,6 @@ out_produce:
 		if(ioctl(handle->fd, RAW1394_IOC_ISO_XMIT_PACKETS, &packets))
 			retval = -1;
 	}
-out_free:
 	free(packets.infos);
 out:
 	if(stop_sync) {

@@ -11,6 +11,7 @@
 #include <config.h>
 #include <errno.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "raw1394.h"
 #include "kernel-raw1394.h"

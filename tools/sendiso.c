@@ -1,9 +1,20 @@
+/*
+ * libraw1394 - library for raw access to the 1394 bus with the Linux subsystem.
+ *
+ * Copyright (C) 1999,2000 Andreas Bombe
+ *
+ * This library is licensed under the GNU Lesser General Public License (LGPL),
+ * version 2.1 or later. See the file COPYING.LIB in the distribution for
+ * details.
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <getopt.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <string.h>
 
 #include "../src/raw1394.h"
 
@@ -13,8 +24,6 @@ char *filename;
 
 unsigned long loopcount = 1;
 unsigned int speed;
-unsigned long packetcount;
-volatile unsigned int pend_req;
 
 void usage_exit(int exitcode)
 {
@@ -126,12 +135,12 @@ void parse_args(int argc, char **argv)
 }
 
 
-int dec_int_callback(raw1394handle_t unused, int *counter, int unused_errcode)
+static int dec_int_callback(raw1394handle_t unused, void *counter, raw1394_errcode_t unused_errcode)
 {
-        (*counter)--;
-        packetcount++;
-        return 0;
+	(*(int *)counter)--;
+	return 0;
 }
+static int pend_req;
 
 #define BUF_SIZE 65536
 #define BUF_OVER BUF_SIZE
@@ -143,7 +152,7 @@ void send_file_once(raw1394handle_t handle, int file)
         static char buffer[BUF_SIZE + BUF_OVER];
 
         static struct raw1394_reqhandle rh = {
-                (req_callback_t)dec_int_callback,
+                dec_int_callback,
                 &pend_req
         };
 
