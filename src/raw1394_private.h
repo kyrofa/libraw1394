@@ -4,10 +4,12 @@
 
 struct raw1394_handle {
         int fd;
+        int protocol_version;
         unsigned int generation;
 
         nodeid_t local_id;
         int num_of_nodes;
+        nodeid_t irm_id;
 
         bus_reset_handler_t bus_reset_handler;
         tag_handler_t tag_handler;

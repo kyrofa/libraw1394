@@ -28,8 +28,15 @@ int raw1394_loop_iterate(struct raw1394_handle *handle)
         switch (req->type) {
         case RAW1394_REQ_BUS_RESET:
                 handle->generation = req->generation;
-                handle->num_of_nodes = req->misc & 0xffff;
-                handle->local_id = req->misc >> 16;
+
+                if (handle->protocol_version == 3) {
+                        handle->num_of_nodes = req->misc & 0xffff;
+                        handle->local_id = req->misc >> 16;
+                } else {
+                        handle->num_of_nodes = req->misc & 0xff;
+                        handle->irm_id = ((req->misc >> 8) & 0xff) | 0xffc0;
+                        handle->local_id = req->misc >> 16;
+                }
 
                 if (handle->bus_reset_handler) {
                         retval = handle->bus_reset_handler(handle);

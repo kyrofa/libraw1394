@@ -40,6 +40,7 @@ void raw1394_set_userdata(raw1394handle_t handle, void *data);
 
 unsigned int raw1394_get_generation(raw1394handle_t handle);
 nodeid_t raw1394_get_local_id(raw1394handle_t handle);
+nodeid_t raw1394_get_irm_id(raw1394handle_t handle);
 
 /* Get number of nodes on bus. */
 int raw1394_get_nodecount(raw1394handle_t handle);

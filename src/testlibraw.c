@@ -107,9 +107,10 @@ int main(int argc, char **argv)
                 exit(1);
         }
 
-        printf("using first card found: %d nodes on bus, local ID is %d\n",
+        printf("using first card found: %d nodes on bus, local ID is %d, IRM is %d\n",
                raw1394_get_nodecount(handle),
-               raw1394_get_local_id(handle) & 0x3f);
+               raw1394_get_local_id(handle) & 0x3f,
+               raw1394_get_irm_id(handle) & 0x3f);
 
         printf("\ndoing transactions with custom tag handler\n");
         std_handler = raw1394_set_tag_handler(handle, my_tag_handler);

@@ -56,9 +56,17 @@ static unsigned int init_rawdevice(struct raw1394_handle *h)
         CLEAR_REQ(req);
         req->type = RAW1394_REQ_INITIALIZE;
         req->misc = RAW1394_KERNELAPI_VERSION;
+        h->protocol_version = RAW1394_KERNELAPI_VERSION;
 
         if (write(h->fd, req, sizeof(*req)) < 0) return -1;
         if (read(h->fd, req, sizeof(*req)) < 0) return -1;
+
+        if (req->error == RAW1394_ERROR_COMPAT && req->misc == 3) {
+                h->protocol_version = 3;
+                if (write(h->fd, req, sizeof(*req)) < 0) return -1;
+                if (read(h->fd, req, sizeof(*req)) < 0) return -1;
+        }
+
         if (req->error) {
                 errno = 0;
                 return -1;
@@ -123,6 +131,11 @@ int raw1394_get_nodecount(struct raw1394_handle *handle)
 nodeid_t raw1394_get_local_id(struct raw1394_handle *handle)
 {
         return handle->local_id;
+}
+
+nodeid_t raw1394_get_irm_id(struct raw1394_handle *handle)
+{
+        return handle->irm_id;
 }
 
 void *raw1394_get_userdata(struct raw1394_handle *handle)
@@ -193,8 +206,14 @@ int raw1394_set_port(struct raw1394_handle *handle, int port)
                 errno = EINVAL;
                 return -1;
         case RAW1394_ERROR_NONE:
-                handle->num_of_nodes = req->misc & 0xffff;
-                handle->local_id = req->misc >> 16;
+                if (handle->protocol_version == 3) {
+                        handle->num_of_nodes = req->misc & 0xffff;
+                        handle->local_id = req->misc >> 16;
+                } else {
+                        handle->num_of_nodes = req->misc & 0xff;
+                        handle->irm_id = ((req->misc >> 8) & 0xff) | 0xffc0;
+                        handle->local_id = req->misc >> 16;
+                }
                 return 0;
         default:
                 errno = 0;

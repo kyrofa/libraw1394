@@ -4,7 +4,7 @@
 #define RAW1394_DEVICE_MAJOR      171
 #define RAW1394_DEVICE_NAME       "raw1394"
 
-#define RAW1394_KERNELAPI_VERSION 3
+#define RAW1394_KERNELAPI_VERSION 4
 
 /* state: opened */
 #define RAW1394_REQ_INITIALIZE    1
@@ -81,6 +81,7 @@ struct file_info {
         struct list_head list;
 
         enum { opened, initialized, connected } state;
+        unsigned int protocol_version;
 
         struct hpsb_host *host;
 
