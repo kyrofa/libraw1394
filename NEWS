@@ -1,3 +1,18 @@
+Version 1.1.0:
+- added ability to specify the isochronous receive mode in the new
+  rawiso (raw1394_iso_*) API. Therefore, the signature of 
+  raw1394_iso_recv_init() changed, and likewise, the libtool/.so version
+  numbers changed to reflect a new interface that is not backwards compatible!
+- added raw1394_arm_set_buf() and raw1394_arm_get_buf() functions.
+- new, consistent versioning scheme. 1.0.0 was reported by pkg-config in 0.10
+  series; hence, 1.1.0 in this release.
+- removed outdated, bogus "linking required only" version symbols in 
+  version.c - use pkg-config now.
+- dropped libraw1394.m4 - use pkg-config now.
+- incremented the raw1394 kernel API protocol version to 5 due to features 
+  introduced in v0.10.
+- added RPM spec file.
+
 Version 0.10:
 
 - merged in the rawiso branch

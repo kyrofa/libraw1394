@@ -30,8 +30,7 @@ files.
 
 	Finally there is something, in the doc subdirectory.  The file is
 libraw1394.sgml (it's Docbook format), and there are preformatted PostScript and
-HTML available.  This documentation is not complete yet!  I hopefully will have
-a libraw1394 0.9.1 out soon with finished documentation.
+HTML available.  This documentation is not complete yet.
 
 
 4. Multithreading
@@ -42,28 +41,23 @@ operating on the same handle would royally mess up the kernel-user protocol.
 Simply use separate handles for each thread in which you need to use libraw1394.
 
 
-5. Autoconf macro
+5. Pkg-config
 
-	Along with the library an autoconf macro gets installed (in
-$prefix/share/aclocal).  It is called the following way:
+	The library comes with a pkg-config .pc file, so you can check for
+libraw1394 and its version in your configure script.  For example, here is how 
+to use the autoconf macro:
 
-AC_LIB_RAW1394(MINIMUMVERSION[,ACTION_IF_FOUND[,ACTION_IF_NOT_FOUND]])
+PKG_CHECK_MODULES(LIBRAW1394, libraw1394 >= 1.1.0)
 
-	Versions prior to 0.9 can not be checked and appear as "not found".
-This macro sets the variables LIBRAW1394_CPPFLAGS, LIBRAW1394_CFLAGS and
-LIBRAW1394_LIBS.  You have to include those into your build variables so that
-the build process correctly links with libraw1394.
+	This macro sets the variables LIBRAW1394_CFLAGS and LIBRAW1394_LIBS.  You 
+have to include those into your build variables so that the build process 
+correctly links with libraw1394.
 
 
 6. Maintainer
 
-	Maintainer of libraw1394 is currently Andreas Bombe.  Send suggestions,
-bug reports and fixes to andreas.bombe@munich.netsurf.de.  See the file AUTHORS
-for a complete list of contributors to libraw1394.
+	Maintainers of libraw1394 are currently Ben Collins and Dan Dennedy.  Send 
+suggestions, bug reports and fixes to linux1394-devel@lists.sourceforge.net.  
+See the file AUTHORS for a complete list of contributors to libraw1394.
 
-	You can get updates through this project's homepage on SourceForge, see
-http://sourceforge.net/project/?group_id=2514 for more information.  You can
-also submit bugs through this page.
-
-
-2001-05-14  Andreas Bombe
+Visit http://www.linux1394.org/ for more information or to see what is new.

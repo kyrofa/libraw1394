@@ -1,0 +1,14 @@
+This project does not use a ChangeLog file.
+
+The source code of this project is managed by the Subversion revision
+control system (http://subversion.tigris.org), a very nice replacement
+for the venerable CVS.  One of the many nice features of Subversion is
+the 'log' command, which will give you the equivalent of a GNU style
+ChangeLog file.
+
+To view the Subversion log for this project you must have a Subversion
+client installed.  Type on the command line
+
+	$ svn://svn.linux1394.org/libraw1394/trunk
+
+to view the log.

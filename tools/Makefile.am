@@ -1,3 +1,4 @@
+MAINTAINERCLEANFILES = Makefile.in
 
 # testlibraw
 bin_PROGRAMS = testlibraw sendiso dumpiso

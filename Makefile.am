@@ -2,13 +2,13 @@
 
 SUBDIRS = src tools doc debian
 
-aclocaldir = @datadir@/aclocal
-aclocal_DATA = libraw1394.m4
-
 pkgconfigdir = @libdir@/pkgconfig
 pkgconfig_DATA = libraw1394.pc
 
-EXTRA_DIST = libraw1394.m4 libraw1394.pc
+EXTRA_DIST = libraw1394.pc libraw1394.spec
+
+MAINTAINERCLEANFILES = Makefile.in aclocal.m4 configure config.h.in stamp-h.in \
+	depcomp install-sh missing mkinstalldirs config.guess ltmain.sh
 
 doc: psdoc pdfdoc htmldoc
 
@@ -45,3 +45,6 @@ install-exec-hook:
 		echo "********************************************"; \
 		echo;                                                \
 	fi
+
+dist-hook:
+	svn log >$(distdir)/ChangeLog

@@ -1,3 +1,4 @@
+MAINTAINERCLEANFILES = Makefile.in
 
 # the libraw1394 itself
 
@@ -15,7 +16,8 @@ libraw1394_la_SOURCES =   \
 	arm.c             \
 	version.c         \
 	kernel-raw1394.h  \
-	raw1394_private.h
+	raw1394_private.h \
+	ieee1394-ioctl.h
 
 # headers to be installed
 pkginclude_HEADERS = raw1394.h csr.h ieee1394.h

@@ -4,7 +4,7 @@
   <bookinfo>
 
     <title>libraw1394</title>
-    <subtitle>version 0.9</subtitle>
+    <subtitle>version 1.0.0</subtitle>
 
     <copyright>
       <year>2001</year>
@@ -319,6 +319,7 @@
 	be different nodes, so automatic behaviour would be very undesirable in
 	these cases.
       </para>
+	</sect1>
 
   </chapter>
 
@@ -694,7 +695,8 @@
        <para>
          <symbol>speed</symbol> is the isochronous speed at which you
          wish to operate. Possible values are
-         <symbol>RAW1394_ISO_SPEED_100</symbol> through
+         <symbol>RAW1394_ISO_SPEED_100</symbol>, 
+		 <symbol>RAW1394_ISO_SPEED_200</symbol>, and
          <symbol>RAW1394_ISO_SPEED_400</symbol>.
        </para>
 
@@ -704,6 +706,11 @@
          low-level drivers only trigger an interrupt every
          irq_interval packets). Pass -1 to receive a default value
          that should be suitable for most applications.
+       </para>
+	   
+       <para>
+         <symbol>mode</symbol> for <function>raw1394_iso_recv_init()</function>
+         sets whether to use packet-per-buffer or buffer-fill receive mode.
        </para>
 
        <para>
