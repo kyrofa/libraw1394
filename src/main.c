@@ -104,6 +104,7 @@ static unsigned int init_rawdevice(struct raw1394_handle *h)
                 errno = 0;
                 return -1;
         }
+        memset(h->buffer, 0, HBUF_SIZE);
 
         return req.generation;
 }
@@ -218,12 +219,6 @@ int raw1394_get_port_info(struct raw1394_handle *handle,
                 }
 
                 return -1;
-        }
-
-        for (num = req.misc, khl = (struct raw1394_khost_list *) int2ptr(req.recvb);
-             num && maxports; num--, maxports--, pinf++, khl++) {
-                pinf->nodes = khl->nodes;
-                strcpy(pinf->name, khl->name);
         }
 
         return req.misc;
