@@ -135,6 +135,9 @@ int raw1394_iso_xmit_write(raw1394handle_t handle, unsigned char *data, unsigned
 /* wait until all queued packets have been sent */
 int raw1394_iso_xmit_sync(raw1394handle_t handle);
 
+/* flush all already received iso packets from kernel into user space*/
+int raw1394_iso_recv_flush(raw1394handle_t handle);
+
 void raw1394_iso_stop(raw1394handle_t handle);
 void raw1394_iso_shutdown(raw1394handle_t handle);
 
