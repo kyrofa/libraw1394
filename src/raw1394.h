@@ -57,9 +57,9 @@ enum raw1394_iso_speed {
 
 /* The dma mode when receiving iso data. Must be supported by chipset */
 enum raw1394_iso_dma_recv_mode {
-	RAW1394_DMA_DEFAULT = 0,           /* use the default mode, this is BUFFERFILL for ohci */
-	RAW1394_DMA_BUFFERFILL = 1,        /* BUFFER_FILL mode */
-	RAW1394_DMA_PACKET_PER_BUFFER = 2  /* PACKET_PER_BUFFER mode */
+	RAW1394_DMA_DEFAULT = -1,		/* Use the default mode, this is BUFFERFILL for ohci */
+	RAW1394_DMA_BUFFERFILL = 1,		/* BUFFER_FILL mode */
+	RAW1394_DMA_PACKET_PER_BUFFER = 2	/* PACKET_PER_BUFFER mode */
 };
 
 /* return values from isochronous xmit/recv handlers */
