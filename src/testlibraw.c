@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <errno.h>
+#include <string.h>
 #include <sys/poll.h>
 
 #include "raw1394.h"
@@ -29,12 +30,15 @@ you haven't loaded the raw1394 module.\n";
 
 quadlet_t buffer;
 
-int my_tag_handler(raw1394handle_t handle, unsigned long tag, int error)
+int my_tag_handler(raw1394handle_t handle, unsigned long tag,
+                   raw1394_errcode_t errcode)
 {
-        if (error < 0) {
-                printf("failed with error %d\n", error);
+        int err = raw1394_errcode_to_errno(errcode);
+
+        if (err) {
+                printf("failed with error: %s\n", strerror(err));
         } else {
-                printf("completed with 0x%08x, value 0x%08x\n", error, buffer);
+                printf("completed with value 0x%08x\n", buffer);
         }
 
         return 0;
@@ -70,7 +74,7 @@ int main(int argc, char **argv)
         struct pollfd pfd;
         unsigned char fcp_test[] = { 0x1, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef };
 
-        handle = raw1394_get_handle();
+        handle = raw1394_new_handle();
 
         if (!handle) {
                 if (!errno) {
@@ -136,20 +140,19 @@ int main(int argc, char **argv)
 
                 retval = raw1394_read(handle, 0xffc0 | i, TESTADDR, 4, &buffer);
                 if (retval < 0) {
-                        printf("failed with error %d\n", retval);
+                        perror("failed with error");
                 } else {
-                        printf("completed with 0x%08x, value 0x%08x\n", retval,
-                               buffer);
+                        printf("completed with value 0x%08x\n", buffer);
                 }
         }
 
         printf("\ntesting FCP monitoring on local node\n");
         raw1394_set_fcp_handler(handle, my_fcp_handler);
         raw1394_start_fcp_listen(handle);
-        retval = raw1394_write(handle, raw1394_get_local_id(handle),
-                               CSR_REGISTER_BASE + CSR_FCP_COMMAND, sizeof(fcp_test),
-                               (quadlet_t *)fcp_test);
-        retval = raw1394_write(handle, raw1394_get_local_id(handle),
+        raw1394_write(handle, raw1394_get_local_id(handle),
+                      CSR_REGISTER_BASE + CSR_FCP_COMMAND, sizeof(fcp_test),
+                      (quadlet_t *)fcp_test);
+        raw1394_write(handle, raw1394_get_local_id(handle),
                       CSR_REGISTER_BASE + CSR_FCP_RESPONSE, sizeof(fcp_test),
                       (quadlet_t *)fcp_test);
 
@@ -158,13 +161,11 @@ int main(int argc, char **argv)
         pfd.events = POLLIN;
         pfd.revents = 0;
         while (1) {
-                if (poll(&pfd, 1, 10) < 1) break;
+                retval = poll(&pfd, 1, 10);
+                if (retval < 1) break;
                 raw1394_loop_iterate(handle);
         }
 
-        if (retval < 0) {
-                perror("poll failed");
-        }
-
+        if (retval < 0) perror("poll failed");
         exit(0);
 }
