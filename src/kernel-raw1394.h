@@ -151,6 +151,9 @@ struct raw1394_iso_config {
 	/* xmit only - iso transmission speed */
 	__u8 speed;
 
+	/* The mode of the dma when receiving iso data. Must be supported by chip */
+	__u8 dma_mode;
+
 	/* max. latency of buffer, in packets (-1 if you don't care) */
 	__s32 irq_interval;
 };

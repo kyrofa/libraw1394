@@ -114,6 +114,7 @@ static int do_iso_init(raw1394handle_t handle,
 		       unsigned int max_packet_size,
 		       int channel,
 		       enum raw1394_iso_speed speed,
+		       enum raw1394_iso_dma_recv_mode mode,
 		       int irq_interval,
 		       int cmd)
 {
@@ -139,6 +140,7 @@ static int do_iso_init(raw1394handle_t handle,
 	handle->iso_status.config.channel = channel;
 	handle->iso_status.config.speed = speed;
 	handle->iso_status.config.irq_interval = irq_interval;
+	handle->iso_status.config.dma_mode = mode;
 
 	if(ioctl(handle->fd, cmd, &handle->iso_status))
 		return -1;
@@ -186,7 +188,7 @@ int raw1394_iso_xmit_init(raw1394handle_t handle,
 			  enum raw1394_iso_speed speed,
 			  int irq_interval)
 {
-	if(do_iso_init(handle, buf_packets, max_packet_size, channel, speed,
+	if (do_iso_init(handle, buf_packets, max_packet_size, channel, speed, RAW1394_DMA_DEFAULT,
 		       irq_interval, RAW1394_IOC_ISO_XMIT_INIT))
 		return -1;
 
@@ -213,10 +215,11 @@ int raw1394_iso_recv_init(raw1394handle_t handle,
 			  unsigned int buf_packets,
 			  unsigned int max_packet_size,
 			  unsigned char channel,
+		          enum raw1394_iso_dma_recv_mode mode,
 			  int irq_interval)
 {
 	/* any speed will work */
-	if(do_iso_init(handle, buf_packets, max_packet_size, channel, RAW1394_ISO_SPEED_100,
+	if (do_iso_init(handle, buf_packets, max_packet_size, channel, RAW1394_ISO_SPEED_100, mode,
 		       irq_interval, RAW1394_IOC_ISO_RECV_INIT))
 		return -1;
 
@@ -242,7 +245,8 @@ int raw1394_iso_multichannel_recv_init(raw1394handle_t handle,
 				       int irq_interval)
 {
 	/* any speed will work */
-	if(do_iso_init(handle, buf_packets, max_packet_size, -1, RAW1394_ISO_SPEED_100,
+	if (do_iso_init(handle, buf_packets, max_packet_size, -1, RAW1394_ISO_SPEED_100,
+			RAW1394_DMA_BUFFERFILL,
 		       irq_interval, RAW1394_IOC_ISO_RECV_INIT))
 		return -1;
 
