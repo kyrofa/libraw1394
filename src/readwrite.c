@@ -105,7 +105,7 @@ int raw1394_start_iso_write(struct raw1394_handle *handle, unsigned int channel,
 
         req->type = RAW1394_REQ_ISO_SEND;
         req->generation = handle->generation;
-        req->tag = tag;
+        req->tag = rawtag;
 
         req->address = ((__u64)channel << 48) | speed;
         req->misc = (tag << 16) | sy;
