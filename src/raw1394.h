@@ -1,9 +1,9 @@
 #ifndef _LIBRAW1394_RAW1394_H
 #define _LIBRAW1394_RAW1394_H
 
-#define ARM_READ  1
-#define ARM_WRITE 2
-#define ARM_LOCK  4
+#define RAW1394_ARM_READ  1
+#define RAW1394_ARM_WRITE 2
+#define RAW1394_ARM_LOCK  4
 
 #define RAW1394_LONG_RESET  0
 #define RAW1394_SHORT_RESET 1
@@ -24,7 +24,7 @@ typedef u_int16_t arm_length_t;
 
 typedef struct raw1394_handle *raw1394handle_t;
 
-typedef struct arm_request {
+typedef struct raw1394_arm_request {
         nodeid_t        destination_nodeid;
         nodeid_t        source_nodeid;
         nodeaddr_t      destination_offset;
@@ -34,18 +34,18 @@ typedef struct arm_request {
         u_int32_t       generation;
         arm_length_t    buffer_length;
         byte_t          *buffer;
-} *arm_request_t;
+} *raw1394_arm_request_t;
 
-typedef struct arm_response {
+typedef struct raw1394_arm_response {
         int             response_code;
         arm_length_t    buffer_length;
         byte_t          *buffer;
-} *arm_response_t;
+} *raw1394_arm_response_t;
 
-typedef struct arm_request_response {
-        struct arm_request  *request;
-        struct arm_response *response;
-} *arm_request_response_t;
+typedef struct raw1394_arm_request_response {
+        struct raw1394_arm_request  *request;
+        struct raw1394_arm_response *response;
+} *raw1394_arm_request_response_t;
 
 /* new ISO API */
 
@@ -291,7 +291,7 @@ struct raw1394_reqhandle {
  * received, it calls the arm_callback.
  */
 typedef int (*arm_req_callback_t) (raw1394handle_t,
-                                   struct arm_request_response *arm_req_resp,
+                                   struct raw1394_arm_request_response *arm_req_resp,
                                    unsigned int requested_length,
                                    void *pcontext, byte_t request_type);
 

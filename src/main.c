@@ -57,11 +57,11 @@ static int arm_tag_handler_default(struct raw1394_handle *handle, unsigned long 
 			       void *data)
 {
         struct raw1394_arm_reqhandle *rh;
-        struct arm_request_response *arm_req_resp;
+        struct raw1394_arm_request_response *arm_req_resp;
 
         if (tag) {
                 rh = (struct raw1394_arm_reqhandle *)tag;
-                arm_req_resp  = (struct arm_request_response *) data;
+                arm_req_resp  = (struct raw1394_arm_request_response *) data;
                 return rh->arm_callback(handle, arm_req_resp, 
                                         requested_length, rh->pcontext, 
                                         request_type);
