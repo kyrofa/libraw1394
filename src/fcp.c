@@ -6,7 +6,7 @@
 #include "kernel-raw1394.h"
 #include "raw1394_private.h"
 
-static int do_fcp_listen(struct raw1394_handle *handle)
+static int do_fcp_listen(struct raw1394_handle *handle, int startstop)
 {
         struct sync_cb_data sd = { 0, 0 };
         struct raw1394_reqhandle rh = { (req_callback_t)_raw1394_sync_cb, &sd };
@@ -16,7 +16,7 @@ static int do_fcp_listen(struct raw1394_handle *handle)
         CLEAR_REQ(req);
         req->type = RAW1394_REQ_FCP_LISTEN;
         req->generation = handle->generation;
-        req->misc = 0;
+        req->misc = startstop;
         req->tag = (unsigned long)&rh;
         req->recvb = handle->buffer;
         req->length = 512;
@@ -44,10 +44,10 @@ static int do_fcp_listen(struct raw1394_handle *handle)
 
 int raw1394_start_fcp_listen(struct raw1394_handle *handle)
 {
-        return do_fcp_listen(handle);
+        return do_fcp_listen(handle, 1);
 }
 
 int raw1394_stop_fcp_listen(struct raw1394_handle *handle)
 {
-        return do_fcp_listen(handle);
+        return do_fcp_listen(handle, 0);
 }
