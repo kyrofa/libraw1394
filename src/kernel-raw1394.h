@@ -143,7 +143,7 @@ struct raw1394_iso_config {
 	__u32 max_packet_size;
 	__u32 channel;
 	__u32 speed; /* xmit only */
-	__u32 irq_interval;
+	__s32 irq_interval;
 };
 
 /* argument to RAW1394_ISO_XMIT/RECV_INIT and RAW1394_ISO_GET_STATUS */
