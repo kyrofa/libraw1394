@@ -1,0 +1,10 @@
+
+Version 0.4:
+
+- isochronous receive support
+
+Version 0.3:
+
+- first release of new libraw1394 for new raw1394 driver
+- supports 1394 async reads/writes
+- maintainer: Andreas Bombe <andreas.bombe@munich.netsurf.de>

@@ -64,6 +64,10 @@ int raw1394_set_port(raw1394handle_t handle, int port);
  * registering functions.  This function will return -1 for an error or the
  * return value of the handler which got executed.  Default handlers always
  * return zero.
+ *
+ * Note that some other library functions may call this function multiple times
+ * to wait for their completion, some handler return values may get lost if you
+ * use these.
  */
 int raw1394_loop_iterate(raw1394handle_t handle);
 
@@ -88,8 +92,6 @@ tag_handler_t raw1394_set_tag_handler(raw1394handle_t handle,
  * Set the handler that will be called when an iso packet arrives (data points
  * to the iso packet header).  The default action is to do nothing.  Returns old
  * handler.
- *
- * Iso receive is not implemented yet.
  */
 typedef int (*iso_handler_t)(raw1394handle_t, int channel, size_t length,
                              quadlet_t *data);
@@ -112,23 +114,27 @@ struct raw1394_reqhandle {
  * Passes custom tag.  Use pointer to raw1394_reqhandle if you use the standard
  * tag handler.
  */
-int raw1394_start_read(struct raw1394_handle *handle, nodeid_t node,
-                       nodeaddr_t addr, size_t length, quadlet_t *buffer,
-                       unsigned long tag);
-int raw1394_start_write(struct raw1394_handle *handle, nodeid_t node,
-                        nodeaddr_t addr, size_t length, quadlet_t *data,
-                        unsigned long tag);
+int raw1394_start_read(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
+                       size_t length, quadlet_t *buffer, unsigned long tag);
+int raw1394_start_write(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
+                        size_t length, quadlet_t *data, unsigned long tag);
 
 /*
  * This does the complete transaction and will return when it's finished.  It
  * will call raw1394_loop_iterate() as often as necessary, return values of
  * handlers called will be therefore lost.
  */
-int raw1394_read(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,
+int raw1394_read(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
                  size_t length, quadlet_t *buffer);
-int raw1394_write(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,
+int raw1394_write(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
                   size_t length, quadlet_t *data);
 
+/*
+ * Start and stop receiving a certain isochronous channel.  You have to set an
+ * iso handler (see above).  You can receive multiple channels simultaneously.
+ */
+int raw1394_start_iso_rcv(raw1394handle_t handle, unsigned int channel);
+int raw1394_stop_iso_rcv(raw1394handle_t handle, unsigned int channel);
 
 #ifdef __cplusplus
 }

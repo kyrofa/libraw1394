@@ -33,6 +33,16 @@ static int iso_handler_default(struct raw1394_handle *handle, int channel,
         return 0;
 }
 
+int _raw1394_sync_cb(struct raw1394_handle *unused, struct sync_cb_data *data,
+                     int error)
+{
+        data->errcode = error;
+        data->done = 1;
+        return 0;
+}
+
+
+
 
 static unsigned int init_rawdevice(struct raw1394_handle *h)
 {

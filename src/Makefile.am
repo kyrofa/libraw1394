@@ -3,12 +3,13 @@
 
 lib_LTLIBRARIES = libraw1394.la
 
-libraw1394_la_LDFLAGS = -version-info 0:0:0
+libraw1394_la_LDFLAGS = -version-info 1:0:1
 
 libraw1394_la_SOURCES =   \
 	main.c            \
 	eventloop.c       \
 	readwrite.c       \
+	iso.c             \
 	kernel-raw1394.h  \
 	raw1394_private.h
 

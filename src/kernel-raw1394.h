@@ -65,6 +65,11 @@ struct raw1394_khost_list {
 
 #ifdef __KERNEL__
 
+struct iso_block_store {
+        atomic_t refcount;
+        quadlet_t data[0];
+};
+
 struct file_info {
         struct list_head list;
 
@@ -79,6 +84,8 @@ struct file_info {
         wait_queue_head_t poll_wait_complete;
 
         u64 listen_channels;
+        quadlet_t *iso_buffer;
+        size_t iso_buffer_length;
 };
 
 struct pending_request {
@@ -86,6 +93,7 @@ struct pending_request {
         struct file_info *file_info;
         struct hpsb_packet *packet;
         struct tq_struct tq;
+        struct iso_block_store *ibs;
         quadlet_t *data;
         int free_data;
         struct raw1394_request req;

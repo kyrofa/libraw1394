@@ -6,20 +6,6 @@
 #include "raw1394_private.h"
 
 
-struct sync_cb_data {
-        int done;
-        int errcode;
-};
-
-static int sync_cb(struct raw1394_handle *unused, 
-                   struct sync_cb_data *data, int error)
-{
-        data->errcode = error;
-        data->done = 1;
-        return 0;
-}
-
-
 int raw1394_start_read(struct raw1394_handle *handle, nodeid_t node,
                        nodeaddr_t addr, size_t length, quadlet_t *buffer,
                        unsigned long tag)
@@ -60,14 +46,17 @@ int raw1394_start_write(struct raw1394_handle *handle, nodeid_t node,
 
 
 
-#define SYNCFUNC_VARS                                                   \
-        struct sync_cb_data sd = { 0, 0 };                              \
-        struct raw1394_reqhandle rh = { (req_callback_t)sync_cb, &sd }; \
+#define SYNCFUNC_VARS                                                     \
+        struct sync_cb_data sd = { 0, 0 };                                \
+        struct raw1394_reqhandle rh = { (req_callback_t)_raw1394_sync_cb, \
+                                        &sd };                            \
         int err
 
-#define SYNCFUNC_BODY                                  \
-        if (err < 0) return err;                       \
-        while (!sd.done) raw1394_loop_iterate(handle); \
+#define SYNCFUNC_BODY                               \
+        while (!sd.done) {                          \
+                if (err < 0) return err;            \
+                err = raw1394_loop_iterate(handle); \
+        }                                           \
         return sd.errcode
 
 int raw1394_read(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,
