@@ -115,14 +115,19 @@ struct raw1394_reqhandle {
 int raw1394_start_read(struct raw1394_handle *handle, nodeid_t node,
                        nodeaddr_t addr, size_t length, quadlet_t *buffer,
                        unsigned long tag);
+int raw1394_start_write(struct raw1394_handle *handle, nodeid_t node,
+                        nodeaddr_t addr, size_t length, quadlet_t *data,
+                        unsigned long tag);
 
 /*
  * This does the complete transaction and will return when it's finished.  It
  * will call raw1394_loop_iterate() as often as necessary, return values of
- * handlers called will be lost.
+ * handlers called will be therefore lost.
  */
 int raw1394_read(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,
                  size_t length, quadlet_t *buffer);
+int raw1394_write(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,
+                  size_t length, quadlet_t *data);
 
 
 #ifdef __cplusplus
