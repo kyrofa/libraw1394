@@ -971,6 +971,12 @@
    Allocates all user and kernel resources necessary for isochronous transmission.
  </para>
 </refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
 </refentry>
 
 <refentry>
@@ -1044,7 +1050,7 @@
    <term><parameter>mode</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      bufferfill or packet per buffer mode
     </para>
    </listitem>
   </varlistentry>
@@ -1063,6 +1069,12 @@
  <title>Description</title>
  <para>
    Allocates all user and kernel resources necessary for isochronous reception.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
  </para>
 </refsect1>
 </refentry>
@@ -1140,6 +1152,12 @@
    Allocates all user and kernel resources necessary for isochronous reception.
  </para>
 </refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
 </refentry>
 
 <refentry>
@@ -1175,7 +1193,7 @@
    <term><parameter>channel</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      the channel to start listening
     </para>
    </listitem>
   </varlistentry>
@@ -1184,7 +1202,13 @@
 <refsect1>
  <title>Description</title>
  <para>
-   listen/unlisten on a specific channel (multi-channel mode ONLY)	
+   listen/unlisten on a specific channel (multi-channel mode ONLY)
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
  </para>
 </refsect1>
 </refentry>
@@ -1222,11 +1246,17 @@
    <term><parameter>channel</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      the channel to stop listening to
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
 </refsect1>
 </refentry>
 
@@ -1274,6 +1304,12 @@
  <title>Description</title>
  <para>
    for multi-channel reception mode only
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success, -1 on failure (sets errno)
  </para>
 </refsect1>
 </refentry>
@@ -1327,6 +1363,12 @@
    </listitem>
   </varlistentry>
  </variablelist>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
 </refsect1>
 </refentry>
 
@@ -1387,6 +1429,12 @@
    </listitem>
   </varlistentry>
  </variablelist>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
 </refsect1>
 </refentry>
 
@@ -1465,6 +1513,12 @@
    errno = EAGAIN
  </para>
 </refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
 </refentry>
 
 <refentry>
@@ -1496,6 +1550,12 @@
    </listitem>
   </varlistentry>
  </variablelist>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
 </refsect1>
 </refentry>
 
@@ -1540,6 +1600,12 @@
    that there should be more packets at this moment, you can call this
    function and all iso packets which are already received by the kernel
    will be flushed out to user space.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
  </para>
 </refsect1>
 </refentry>
@@ -1641,15 +1707,18 @@
 <refsect1>
  <title>Description</title>
  <para>
-   Returns the error code of the last <function>raw1394_read</function>, <function>raw1394_write</function>,
-   <function>raw1394_lock</function> or <function>raw1394_iso_write</function>.  The error code is either an internal
-   error (i.e. not a bus error) or a combination of acknowledge code and
-   response code, as appropriate.
-   </para><para>
-
    Some macros are available to extract information from the error code,
    <function>raw1394_errcode_to_errno</function> can be used to convert it to an errno number of
    roughly the same meaning.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    the error code of the last <function>raw1394_read</function>, <function>raw1394_write</function>,
+   <function>raw1394_lock</function> or <function>raw1394_iso_write</function>.  The error code is either an internal
+   error (i.e. not a bus error) or a combination of acknowledge code and
+   response code, as appropriate.
  </para>
 </refsect1>
 </refentry>
@@ -1697,9 +1766,12 @@
    the conversion.  However the returned errnos are equivalent in source code
    meaning only, the associated text of e.g. <function>perror</function> is not necessarily
    meaningful.
-   </para><para>
-
-   Returned values are <constant>EAGAIN</constant> (retrying might succeed, also generation number
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    <constant>EAGAIN</constant> (retrying might succeed, also generation number
    mismatch), <constant>EREMOTEIO</constant> (other node had internal problems), <constant>EPERM</constant> (operation
    not allowed on this address, e.g. write on read-only location), <constant>EINVAL</constant>
    (invalid argument) and <constant>EFAULT</constant> (invalid pointer).
@@ -1746,9 +1818,12 @@
    port.  It is not allowed to use the same handle in multiple threads or forked
    processes.  It is allowed to create and use multiple handles, however.  Use
    one handle per thread which needs it in the multithreaded case.
-   </para><para>
-
-   Returns the created handle or <constant>NULL</constant> when initialization fails.  In the latter
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    the created handle or <constant>NULL</constant> when initialization fails. In the latter
    case errno either contains some OS specific error code or <constant>0</constant> if the error is
    that libraw1394 and raw1394 don't support each other's protocol versions.
  </para>
@@ -1835,6 +1910,12 @@
    <function>raw1394_set_port</function> returns ESTALE, retries automatically.
  </para>
 </refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    the new handle on success or NULL on failure
+ </para>
+</refsect1>
 </refentry>
 
 <refentry>
@@ -1870,18 +1951,16 @@
    <term><parameter>off_on_switch</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      RAW1394_NOTIFY_OFF or RAW1394_NOTIFY_ON
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>returns</title>
+ <title>Returns</title>
  <para>
-   ==0 success 
-   !=0 failure
-   off_on_switch .... RAW1394_NOTIFY_OFF or RAW1394_NOTIFY_ON
+    0 on success or -1 on failure (sets errno)
  </para>
 </refsect1>
 </refentry>
@@ -1919,12 +1998,17 @@
 <refsect1>
  <title>Description</title>
  <para>
-   Returns the fd used for communication with the raw1394 kernel module.  This
-   can be used for <function>select</function>/<function>poll</function> calls if you wait on other fds or can be
+   This can be used for <function>select</function>/<function>poll</function> calls if you wait on other fds or can be
    integrated into another event loop (e.g. from a GUI application framework).
    It can also be used to set/remove the O_NONBLOCK flag using <function>fcntl</function> to modify
    the blocking behaviour in <function>raw1394_loop_iterate</function>.  It must not be used for
    anything else.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    the fd used for communication with the raw1394 kernel module.
  </para>
 </refsect1>
 </refentry>
@@ -2010,9 +2094,9 @@
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
+ <title>Returns</title>
  <para>
-   Returns the user data pointer associated with the handle using
+    the user data pointer associated with the handle using
    <function>raw1394_set_userdata</function>.
  </para>
 </refsect1>
@@ -2049,9 +2133,9 @@
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
+ <title>Returns</title>
  <para>
-   Returns the node ID of the local node connected to which the handle is
+    the node ID of the local node connected to which the handle is
    connected.  This value can change with every bus reset.
  </para>
 </refsect1>
@@ -2088,9 +2172,9 @@
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
+ <title>Returns</title>
  <para>
-   Returns the node ID of the isochronous resource manager of the bus the handle
+    the node ID of the isochronous resource manager of the bus the handle
    is connected to.  This value may change with every bus reset.
  </para>
 </refsect1>
@@ -2129,10 +2213,16 @@
 <refsect1>
  <title>Description</title>
  <para>
-   Returns the number of nodes on the bus to which the handle is connected.
-   This value can change with every bus reset.  Since the root node always has
+   Since the root node always has
    the highest node ID, this number can be used to determine that ID (it's
    LOCAL_BUS|(count-1)).
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    the number of nodes on the bus to which the handle is connected.
+   This value can change with every bus reset.
  </para>
 </refsect1>
 </refentry>
@@ -2195,12 +2285,15 @@
    If your program is interactive, you should present the user with this list to
    let them decide which port to use if there is more than one.  A
    non-interactive program (and probably interactive ones, too) should provide a
-   command line option to choose the port.
-   </para><para>
-
-   Returns the number of ports and writes information about them into <parameter>pinf</parameter>, but
-   not into more than <parameter>maxports</parameter> elements.  If <parameter>maxports</parameter> is <constant>0</constant>, <parameter>pinf</parameter> can be
+   command line option to choose the port. If <parameter>maxports</parameter> is <constant>0</constant>, <parameter>pinf</parameter> can be
    <constant>NULL</constant>, too.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    the number of ports and writes information about them into <parameter>pinf</parameter>, but
+   not into more than <parameter>maxports</parameter> elements.
  </para>
 </refsect1>
 </refentry>
@@ -2252,9 +2345,12 @@
    <function>raw1394_set_port</function> are not allowed to be called afterwards on this handle.
    To make up for this, all the other functions (those handling asynchronous and
    isochronous transmissions) can now be called.
-   </para><para>
-
-   Returns <constant>0</constant> for success and -1 for failure with errno set appropriately.  A
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    <constant>0</constant> for success or -1 for failure with errno set appropriately.  A
    possible failure mode is with errno = <constant>ESTALE</constant>, in this case the configuration
    has changed since the call to <function>raw1394_get_port_info</function> and it has to be called
    again to update your view of the available ports.
@@ -2303,7 +2399,7 @@
 <refsect1>
  <title>Returns</title>
  <para>
-    <constant>0</constant> for success and -1 for failure with errno set appropriately.
+    <constant>0</constant> for success or -1 for failure with errno set appropriately
  </para>
 </refsect1>
 </refentry>
@@ -2341,18 +2437,16 @@
    <term><parameter>type</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      RAW1394_SHORT_RESET or RAW1394_LONG_RESET
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>returns</title>
+ <title>Returns</title>
  <para>
-   -1 failure 
-   0  success
-   type .... RAW1394_SHORT_RESET or RAW1394_LONG_RESET
+    <constant>0</constant> for success or -1 for failure 
  </para>
 </refsect1>
 </refentry>
@@ -2391,13 +2485,16 @@
  <title>Description</title>
  <para>
    Get one new message through handle and process it with the registered message
-   handler.  This function will return <constant>-1</constant> for an error or the return value of
-   the handler which got executed.  The default handlers always return zero.
-   </para><para>
-
-   Note that some other library functions may call this function multiple times
-   to wait for their completion, some handler return values may get lost if you
-   use these.
+   handler. Note that some other library functions may call this function 
+   multiple times to wait for their completion, some handler return values may 
+   get lost if you use these.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    <constant>-1</constant> for an error or the return value of
+   the handler which got executed. The default handlers always return zero.
  </para>
 </refsect1>
 </refentry>
@@ -2444,8 +2541,14 @@
 <refsect1>
  <title>Description</title>
  <para>
-   Sets the handler to be called on every bus reset to <parameter>new_h</parameter> and returns the
-   old handler. The default handler just calls <function>raw1394_update_generation</function>.
+   Sets the handler to be called on every bus reset to <parameter>new_h</parameter>.
+   The default handler just calls <function>raw1394_update_generation</function>.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    the old handler
  </para>
 </refsect1>
 </refentry>
@@ -2483,14 +2586,17 @@
 <refsect1>
  <title>Description</title>
  <para>
-   This function returns the generation number associated with the handle.  The
-   generation number is incremented on every bus reset, and every transaction
+   The generation number is incremented on every bus reset, and every transaction
    started by raw1394 is tagged with the stored generation number.  If these
    don't match, the transaction will abort with an error.
-   </para><para>
-
    The generation number of the handle is not automatically updated,
    <function>raw1394_update_generation</function> has to be used for this.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    the generation number associated with the handle 
  </para>
 </refsect1>
 </refentry>
@@ -2591,8 +2697,8 @@
 <refsect1>
  <title>Description</title>
  <para>
-   Sets the handler to be called whenever a request completes to <parameter>new_h</parameter> and
-   returns the old handler.  The default handler interprets the tag as a pointer
+   Sets the handler to be called whenever a request completes to <parameter>new_h</parameter>.
+   The default handler interprets the tag as a pointer
    to a &amp;struct raw1394_reqhandle and calls the callback in there.
    </para><para>
 
@@ -2600,6 +2706,12 @@
    versions of the transaction functions (i.e. <function>raw1394_read</function>, <function>raw1394_write</function>,
    <function>raw1394_lock</function>, <function>raw1394_iso_write</function>) since these do pass pointers to &amp;struct
    raw1394_reqhandle as the tag and expect the callback to be invoked.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    the old handler
  </para>
 </refsect1>
 </refentry>
@@ -2648,7 +2760,13 @@
  <para>
    Set the handler that will be called when an async read/write/lock arm_request
    arrived. The default action is to call the arm_callback in the 
-   raw1394_arm_reqhandle pointed to by arm_tag.  Returns old handler.
+   raw1394_arm_reqhandle pointed to by arm_tag.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    old handler
  </para>
 </refsect1>
 </refentry>
@@ -2699,12 +2817,15 @@
    </para><para>
 
    Sets the handler to be called when either FCP command or FCP response
-   registers get written to <parameter>new_h</parameter> and returns the old handler.  The default
-   handler does nothing.
-   </para><para>
-
+   registers get written to <parameter>new_h</parameter>.  The default handler does nothing.
    In order to actually get FCP events, you have to enable it with
    <function>raw1394_start_fcp_listen</function> and can stop it with <function>raw1394_stop_fcp_listen</function>.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    the old handler
  </para>
 </refsect1>
 </refentry>
@@ -2733,7 +2854,7 @@
    <term><parameter>req_callback_t</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      This is the general request handler
     </para>
    </listitem>
   </varlistentry>
@@ -2742,8 +2863,6 @@
 <refsect1>
  <title>Description</title>
  <para>
-   </para><para>
-
    It is used by the default tag handler
    when a request completes, it calls the callback and passes it the data
    pointer and the error code of the request.
@@ -2775,7 +2894,7 @@
    <term><parameter>arm_req_callback_t</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      This is the general arm-request handle
     </para>
    </listitem>
   </varlistentry>
@@ -2904,10 +3023,9 @@
  </para>
 </refsect1>
 <refsect1>
- <title>returns</title>
+ <title>Returns</title>
  <para>
-               0  ... success
-   &lt;0 ... failure
+    0 on success or -1 on failure (sets errno)
  </para>
 </refsect1>
 </refentry>
@@ -2954,10 +3072,9 @@
  </variablelist>
 </refsect1>
 <refsect1>
- <title>returns</title>
+ <title>Returns</title>
  <para>
-              0  ... success
-   &lt;0 ... failure
+    0 on success or -1 on failure (sets errno)
  </para>
 </refsect1>
 </refentry>
@@ -2989,7 +3106,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -3028,10 +3145,9 @@
  </para>
 </refsect1>
 <refsect1>
- <title>returns</title>
+ <title>Returns</title>
  <para>
-          0  ... success
-   &lt;0 ... failure, and errno - error code
+    0 on success or -1 on failure (sets errno)
  </para>
 </refsect1>
 </refentry>
@@ -3102,10 +3218,9 @@
  </para>
 </refsect1>
 <refsect1>
- <title>returns</title>
+ <title>Returns</title>
  <para>
-          0  ... success
-   &lt;0 ... failure, and errno - error code
+    0 on success or -1 on failure (sets errno)
  </para>
 </refsect1>
 </refentry>
@@ -3158,10 +3273,9 @@
  </para>
 </refsect1>
 <refsect1>
- <title>returns</title>
+ <title>Returns</title>
  <para>
-          0 .... success
-   &lt;0 ... failure
+    0 on success or -1 on failure (sets errno)
  </para>
 </refsect1>
 </refentry>
@@ -3204,10 +3318,9 @@
  </para>
 </refsect1>
 <refsect1>
- <title>returns</title>
+ <title>Returns</title>
  <para>
-          0 .... success
-   &lt;0 ... failure
+    0 on success or -1 on failure (sets errno)
  </para>
 </refsect1>
 </refentry>
@@ -3245,7 +3358,7 @@
    <term><parameter>data</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      the contents of the packet
     </para>
    </listitem>
   </varlistentry>
@@ -3258,10 +3371,71 @@
  </para>
 </refsect1>
 <refsect1>
- <title>returns</title>
+ <title>Returns</title>
  <para>
-          0 .... success
-   &lt;0 ... failure
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-start-phy-packet-write">raw1394_start_phy_packet_write</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_start_phy_packet_write</refname>
+ <refpurpose>
+      initiate sending a physical request
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_start_phy_packet_write </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>quadlet_t <parameter>data</parameter></paramdef>
+   <paramdef>unsigned long <parameter>tag</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>data</parameter></term>
+   <listitem>
+    <para>
+      the contents of the packet
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>tag</parameter></term>
+   <listitem>
+    <para>
+      data to identify the request to completion handler
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   examples of physical requests are linkon, physicalconfigurationpacket, etc.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
  </para>
 </refsect1>
 </refentry>
@@ -3344,8 +3518,7 @@
 <refsect1>
  <title>Description</title>
  <para>
-   This function starts the specified read request and returns <constant>0</constant> for success
-   and a negative number for an error, in which case errno will be set.  If
+   This function starts the specified read request. If
    <parameter>length</parameter> is <constant>4</constant> a quadlet read is initiated and a block read otherwise.
    </para><para>
 
@@ -3355,6 +3528,12 @@
    error code of the transaction.  <parameter>tag</parameter> should therefore be set to something
    that uniquely identifies this transaction (e.g. a struct pointer casted to
    unsigned long).
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
  </para>
 </refsect1>
 </refentry>
@@ -3437,8 +3616,7 @@
 <refsect1>
  <title>Description</title>
  <para>
-   This function starts the specified write request and returns <constant>0</constant> for success
-   and a negative number for an error, in which case errno will be set.  If
+   This function starts the specified write request. If
    <parameter>length</parameter> is <constant>4</constant> a quadlet write is initiated and a block write otherwise.
    </para><para>
 
@@ -3448,6 +3626,12 @@
    error code of the transaction.  <parameter>tag</parameter> should therefore be set to something
    that uniquely identifies this transaction (e.g. a struct pointer casted to
    unsigned long).
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
  </para>
 </refsect1>
 </refentry>
@@ -3548,16 +3732,19 @@
 <refsect1>
  <title>Description</title>
  <para>
-   This function starts the specified lock request and returns <constant>0</constant> for success
-   and a negative number for an error, in which case errno will be set.
-   </para><para>
-
+   This function starts the specified lock request.
    The transaction is only started, no success of the transaction is implied
    with a successful return of this function.  When the transaction completes, a
    <function>raw1394_loop_iterate</function> will call the tag handler and pass it the tag and
    error code of the transaction.  <parameter>tag</parameter> should therefore be set to something
    that uniquely identifies this transaction (e.g. a struct pointer casted to
    unsigned long).
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
  </para>
 </refsect1>
 </refentry>
@@ -3658,16 +3845,19 @@
 <refsect1>
  <title>Description</title>
  <para>
-   This function starts the specified lock request and returns <constant>0</constant> for success
-   and a negative number for an error, in which case errno will be set.
-   </para><para>
-
+   This function starts the specified lock request.
    The transaction is only started, no success of the transaction is implied
    with a successful return of this function.  When the transaction completes, a
    <function>raw1394_loop_iterate</function> will call the tag handler and pass it the tag and
    error code of the transaction.  <parameter>tag</parameter> should therefore be set to something
    that uniquely identifies this transaction (e.g. a struct pointer casted to
    unsigned long).
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
  </para>
 </refsect1>
 </refentry>
@@ -3711,7 +3901,7 @@
    <term><parameter>channel</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      the isochronous channel number to send on
     </para>
    </listitem>
   </varlistentry>
@@ -3719,7 +3909,7 @@
    <term><parameter>tag</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      data to be put into packet's tag field
     </para>
    </listitem>
   </varlistentry>
@@ -3727,7 +3917,7 @@
    <term><parameter>sy</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      data to be put into packet's sy field
     </para>
    </listitem>
   </varlistentry>
@@ -3735,7 +3925,7 @@
    <term><parameter>speed</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      speed at which to send
     </para>
    </listitem>
   </varlistentry>
@@ -3743,7 +3933,7 @@
    <term><parameter>length</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      amount of data to send
     </para>
    </listitem>
   </varlistentry>
@@ -3751,7 +3941,7 @@
    <term><parameter>data</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      pointer to data to send
     </para>
    </listitem>
   </varlistentry>
@@ -3759,7 +3949,7 @@
    <term><parameter>rawtag</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      data to identify the request to completion handler
     </para>
    </listitem>
   </varlistentry>
@@ -3770,6 +3960,12 @@
  <para>
    Passes custom tag.  Use pointer to raw1394_reqhandle if you use the standard
    tag handler.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
  </para>
 </refsect1>
 </refentry>
@@ -3811,7 +4007,7 @@
    <term><parameter>length</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      the amount of quadlets of data to send
     </para>
    </listitem>
   </varlistentry>
@@ -3819,7 +4015,7 @@
    <term><parameter>header_length</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      the number of quadlets in the header
     </para>
    </listitem>
   </varlistentry>
@@ -3827,7 +4023,7 @@
    <term><parameter>expect_response</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      indicate with a 0 or 1 whether to receive a completion event
     </para>
    </listitem>
   </varlistentry>
@@ -3835,7 +4031,7 @@
    <term><parameter>data</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      pointer to data to send
     </para>
    </listitem>
   </varlistentry>
@@ -3843,7 +4039,7 @@
    <term><parameter>rawtag</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      data to identify the request to completion handler
     </para>
    </listitem>
   </varlistentry>
@@ -3863,6 +4059,12 @@
    transactions, that are handled by the application.
    Do not use that function, unless you really know, what you do! Sending 
    corrupt packet may lead to weird results.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
  </para>
 </refsect1>
 </refentry>
@@ -3903,7 +4105,7 @@
    <term><parameter>node</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      target node
     </para>
    </listitem>
   </varlistentry>
@@ -3911,7 +4113,7 @@
    <term><parameter>addr</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      address to read from
     </para>
    </listitem>
   </varlistentry>
@@ -3919,7 +4121,7 @@
    <term><parameter>length</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      amount of data to read in quadlets
     </para>
    </listitem>
   </varlistentry>
@@ -3927,7 +4129,7 @@
    <term><parameter>buffer</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      pointer to buffer where data will be saved
     </para>
    </listitem>
   </varlistentry>
@@ -3939,6 +4141,12 @@
    This does the complete transaction and will return when it's finished.  It
    will call <function>raw1394_loop_iterate</function> as often as necessary, return values of
    handlers called will be therefore lost.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
  </para>
 </refsect1>
 </refentry>
@@ -3979,7 +4187,7 @@
    <term><parameter>node</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      target node
     </para>
    </listitem>
   </varlistentry>
@@ -3987,7 +4195,7 @@
    <term><parameter>addr</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      address to write to
     </para>
    </listitem>
   </varlistentry>
@@ -3995,7 +4203,7 @@
    <term><parameter>length</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      amount of data to write in quadlets
     </para>
    </listitem>
   </varlistentry>
@@ -4003,7 +4211,7 @@
    <term><parameter>data</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      pointer to data to be sent
     </para>
    </listitem>
   </varlistentry>
@@ -4015,6 +4223,12 @@
    This does the complete transaction and will return when it's finished.  It
    will call <function>raw1394_loop_iterate</function> as often as necessary, return values of
    handlers called will be therefore lost.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
  </para>
 </refsect1>
 </refentry>
@@ -4057,7 +4271,7 @@
    <term><parameter>node</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      target node
     </para>
    </listitem>
   </varlistentry>
@@ -4065,7 +4279,7 @@
    <term><parameter>addr</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      address to read from
     </para>
    </listitem>
   </varlistentry>
@@ -4073,7 +4287,7 @@
    <term><parameter>extcode</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      extended transaction code determining the lock operation
     </para>
    </listitem>
   </varlistentry>
@@ -4081,7 +4295,7 @@
    <term><parameter>data</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      data part of lock parameters
     </para>
    </listitem>
   </varlistentry>
@@ -4089,7 +4303,7 @@
    <term><parameter>arg</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      arg part of lock parameters
     </para>
    </listitem>
   </varlistentry>
@@ -4097,7 +4311,7 @@
    <term><parameter>result</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      address where return value will be written
     </para>
    </listitem>
   </varlistentry>
@@ -4109,6 +4323,12 @@
    This does the complete transaction and will return when it's finished.  It
    will call <function>raw1394_loop_iterate</function> as often as necessary, return values of
    handlers called will be therefore lost.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
  </para>
 </refsect1>
 </refentry>
@@ -4151,7 +4371,7 @@
    <term><parameter>node</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      target node
     </para>
    </listitem>
   </varlistentry>
@@ -4159,7 +4379,7 @@
    <term><parameter>addr</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      address to read from
     </para>
    </listitem>
   </varlistentry>
@@ -4167,7 +4387,7 @@
    <term><parameter>extcode</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      extended transaction code determining the lock operation
     </para>
    </listitem>
   </varlistentry>
@@ -4175,7 +4395,7 @@
    <term><parameter>data</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      data part of lock parameters
     </para>
    </listitem>
   </varlistentry>
@@ -4183,7 +4403,7 @@
    <term><parameter>arg</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      arg part of lock parameters
     </para>
    </listitem>
   </varlistentry>
@@ -4191,7 +4411,7 @@
    <term><parameter>result</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      address where return value will be written
     </para>
    </listitem>
   </varlistentry>
@@ -4203,6 +4423,12 @@
    This does the complete transaction and will return when it's finished.  It
    will call <function>raw1394_loop_iterate</function> as often as necessary, return values of
    handlers called will be therefore lost.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
  </para>
 </refsect1>
 </refentry>
@@ -4244,7 +4470,7 @@
    <term><parameter>channel</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      the isochronous channel number to send on
     </para>
    </listitem>
   </varlistentry>
@@ -4252,7 +4478,7 @@
    <term><parameter>tag</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      data to be put into packet's tag field
     </para>
    </listitem>
   </varlistentry>
@@ -4260,7 +4486,7 @@
    <term><parameter>sy</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      data to be put into packet's sy field
     </para>
    </listitem>
   </varlistentry>
@@ -4268,7 +4494,7 @@
    <term><parameter>speed</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      speed at which to send
     </para>
    </listitem>
   </varlistentry>
@@ -4276,7 +4502,7 @@
    <term><parameter>length</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      amount of data to send
     </para>
    </listitem>
   </varlistentry>
@@ -4284,11 +4510,17 @@
    <term><parameter>data</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      pointer to data to send
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
 </refsect1>
 </refentry>
 
@@ -4327,7 +4559,7 @@
    <term><parameter>length</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      the amount of quadlets of data to send
     </para>
    </listitem>
   </varlistentry>
@@ -4335,7 +4567,7 @@
    <term><parameter>header_length</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      the number of quadlets in the header
     </para>
    </listitem>
   </varlistentry>
@@ -4343,7 +4575,7 @@
    <term><parameter>expect_response</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      indicate with a 0 or 1 whether to receive a completion event
     </para>
    </listitem>
   </varlistentry>
@@ -4351,11 +4583,17 @@
    <term><parameter>data</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      pointer to data to send
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
 </refsect1>
 </refentry>
 
@@ -4398,6 +4636,12 @@
    callback specified with <function>raw1394_set_fcp_handler</function>.
  </para>
 </refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
 </refentry>
 
 <refentry>
@@ -4435,6 +4679,12 @@
  <para>
    Stops the reception of FCP events (writes to the FCP_COMMAND or
    FCP_RESPONSE address ranges) on <parameter>handle</parameter>.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
  </para>
 </refsect1>
 </refentry>
@@ -4478,6 +4728,12 @@
    Might be useful for an application.
  </para>
 </refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    a pointer to a string containing the version number
+ </para>
+</refsect1>
 </refentry>
 
 <refentry>
@@ -4487,7 +4743,7 @@
 <refnamediv>
  <refname>raw1394_update_config_rom</refname>
  <refpurpose>
-      updates the configuration rom of a host
+      updates the configuration ROM of a host
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -4515,7 +4771,7 @@
    <term><parameter>new_rom</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      a pointer to the new ROM image
     </para>
    </listitem>
   </varlistentry>
@@ -4523,7 +4779,7 @@
    <term><parameter>size</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      the size of the new ROM image in quadlets
     </para>
    </listitem>
   </varlistentry>
@@ -4531,7 +4787,7 @@
    <term><parameter>rom_version</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      the version numer of the current version, not the new
     </para>
    </listitem>
   </varlistentry>
@@ -4542,8 +4798,14 @@
  <para>
    <parameter>rom_version</parameter> must be the current
    version, otherwise it will fail with return value -1. 
-   Return value -2 indicates that the new rom version is too big.
-   Return value 0 indicates success
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    -1 (failure) if the version is incorrect, 
+   -2 (failure) if the new rom version is too big, or
+   0 for success
  </para>
 </refsect1>
 </refentry>
@@ -4555,7 +4817,7 @@
 <refnamediv>
  <refname>raw1394_get_config_rom</refname>
  <refpurpose>
-      reads the current version of the configuration rom of a host
+      reads the current version of the configuration ROM of a host
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -4584,7 +4846,7 @@
    <term><parameter>buffer</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      the memory address at which to store the copy of the ROM
     </para>
    </listitem>
   </varlistentry>
@@ -4600,7 +4862,7 @@
    <term><parameter>rom_size</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      upon successful return, contains the size of the ROM
     </para>
    </listitem>
   </varlistentry>
@@ -4608,7 +4870,7 @@
    <term><parameter>rom_version</parameter></term>
    <listitem>
     <para>
-     -- undescribed --
+      upon successful return, contains the version of the rom
     </para>
    </listitem>
   </varlistentry>
@@ -4619,8 +4881,12 @@
  <para>
    returns the size of the current rom image. <parameter>rom_version</parameter> is the
    version number of the fetched rom.
-   return value -1 indicates, that the buffer was too small, 
-   0 indicates success.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Return</title>
+ <para>
+    -1 (failure) if the buffer was too small or 0 for success
  </para>
 </refsect1>
 </refentry>
