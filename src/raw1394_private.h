@@ -2,6 +2,9 @@
 #ifndef _RAW1394_PRIVATE_H
 #define _RAW1394_PRIVATE_H
 
+#define HBUF_SIZE      8192
+#define ARM_REC_LENGTH 4096 
+
 struct raw1394_handle {
         int fd;
         int protocol_version;
@@ -15,12 +18,13 @@ struct raw1394_handle {
         void *userdata;
 
         bus_reset_handler_t bus_reset_handler;
-        tag_handler_t tag_handler;
-        fcp_handler_t fcp_handler;
-        iso_handler_t iso_handler[64];
+        tag_handler_t     tag_handler;
+        arm_tag_handler_t arm_tag_handler;
+        fcp_handler_t     fcp_handler;
+        iso_handler_t     iso_handler[64];
 
         struct raw1394_request req;
-        quadlet_t buffer[2048];
+        quadlet_t buffer[HBUF_SIZE/4]; /* 2048 */
 };
 
 struct sync_cb_data {
@@ -30,7 +34,6 @@ struct sync_cb_data {
 
 int _raw1394_sync_cb(struct raw1394_handle*, struct sync_cb_data*, int);
 
-#define HBUF_SIZE 8192
 #define CLEAR_REQ(reqp) memset((reqp), 0, sizeof(struct raw1394_request))
 
 #if SIZEOF_VOID_P == 4

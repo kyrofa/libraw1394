@@ -2,10 +2,23 @@
  * libraw1394 - library for raw access to the 1394 bus with the Linux subsystem.
  *
  * Copyright (C) 1999,2000,2001,2002 Andreas Bombe
+ *               2001, 2002 Manfred Weihs <weihs@ict.tuwien.ac.at>
+ *                     2002 Christian Toegel <christian.toegel@gmx.at>
  *
  * This library is licensed under the GNU Lesser General Public License (LGPL),
  * version 2.1 or later. See the file COPYING.LIB in the distribution for
  * details.
+ *
+ *
+ * Contributions:
+ *
+ * Manfred Weihs <weihs@ict.tuwien.ac.at>
+ *        configuration ROM manipulation
+ *        address range mapping
+ * Christian Toegel <christian.toegel@gmx.at>
+ *        address range mapping
+ *        reset notification control (switch on/off)
+ *        reset with selection of type (short/long)
  */
 
 #include <config.h>
@@ -35,6 +48,25 @@ static int tag_handler_default(struct raw1394_handle *handle, unsigned long tag,
                 rh = (struct raw1394_reqhandle *)tag;
                 return rh->callback(handle, rh->data, error);
         } else {
+                return -1;
+        }
+}
+
+static int arm_tag_handler_default(struct raw1394_handle *handle, unsigned long tag,
+                               byte_t request_type, unsigned int requested_length,
+			       void *data)
+{
+        struct raw1394_arm_reqhandle *rh;
+        struct arm_request_response *arm_req_resp;
+
+        if (tag) {
+                rh = (struct raw1394_arm_reqhandle *)tag;
+                arm_req_resp  = (struct arm_request_response *) data;
+                return rh->arm_callback(handle, arm_req_resp, 
+                                        requested_length, rh->pcontext, 
+                                        request_type);
+        } else {
+                /* error ... */
                 return -1;
         }
 }
@@ -115,6 +147,7 @@ struct raw1394_handle *raw1394_new_handle(void)
         handle->err = 0;
         handle->bus_reset_handler = bus_reset_default;
         handle->tag_handler = tag_handler_default;
+        handle->arm_tag_handler = arm_tag_handler_default;
         memset(handle->iso_handler, 0, sizeof(handle->iso_handler));
         return handle;
 }
@@ -356,6 +389,21 @@ int raw1394_set_port(struct raw1394_handle *handle, int port)
         }
 }
 
+int raw1394_reset_bus_new(struct raw1394_handle *handle, int type)
+{
+        struct raw1394_request *req = &handle->req;
+
+        CLEAR_REQ(req);
+
+        req->type = RAW1394_REQ_RESET_BUS;
+        req->generation = handle->generation;
+        req->misc = type;
+	
+        if (write(handle->fd, req, sizeof(*req)) < 0) return -1;
+
+        return 0; /* success */
+}
+
 
 /**
  * raw1394_reset_bus - initiate bus reset
@@ -368,14 +416,60 @@ int raw1394_set_port(struct raw1394_handle *handle, int port)
  **/
 int raw1394_reset_bus(struct raw1394_handle *handle)
 {
+        return raw1394_reset_bus_new (handle, RAW1394_LONG_RESET);
+}
+
+int raw1394_busreset_notify (struct raw1394_handle *handle, 
+                             int off_on_switch)
+{
         struct raw1394_request *req = &handle->req;
 
         CLEAR_REQ(req);
 
-        req->type = RAW1394_REQ_RESET_BUS;
+        req->type = RAW1394_REQ_RESET_NOTIFY;
         req->generation = handle->generation;
+        req->misc = off_on_switch;
 
         if (write(handle->fd, req, sizeof(*req)) < 0) return -1;
 
-        return 0;
+        return 0; /* success */
+}
+
+int raw1394_update_config_rom(raw1394handle_t handle, const quadlet_t
+        *new_rom, size_t size, unsigned char rom_version)
+{
+        struct raw1394_request *req = &handle->req;
+        int status;
+
+        CLEAR_REQ(req);
+
+        req->type = RAW1394_REQ_UPDATE_ROM;
+        req->sendb = (unsigned long) new_rom;
+        req->length = size;
+        req->misc = rom_version;
+        req->recvb = (unsigned long) &status;
+
+        if (write(handle->fd, req, sizeof(*req)) < 0) return -8;
+
+        return status;
+}
+
+int raw1394_get_config_rom(raw1394handle_t handle, quadlet_t *buffer,
+        size_t buffersize, size_t *rom_size, unsigned char *rom_version)
+{
+        struct raw1394_request *req = &handle->req;
+        int status;
+
+        CLEAR_REQ(req);
+
+        req->type = RAW1394_REQ_GET_ROM;
+        req->recvb = (unsigned long) buffer;
+        req->length = buffersize;
+        req->tag = (unsigned long) rom_size;
+        req->address = (unsigned long) rom_version;
+        req->sendb = (unsigned long) &status;
+
+        if (write(handle->fd, req, sizeof(*req)) < 0) return -8;
+
+        return status;
 }

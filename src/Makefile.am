@@ -12,9 +12,10 @@ libraw1394_la_SOURCES =   \
 	readwrite.c       \
 	iso.c             \
 	fcp.c             \
+	arm.c             \	      
 	version.c         \
 	kernel-raw1394.h  \
 	raw1394_private.h
 
 # headers to be installed
-pkginclude_HEADERS = raw1394.h csr.h ieee1394.h
+pkginclude_HEADERS = raw1394.h csr.h ieee1394.h kernel-raw1394.h

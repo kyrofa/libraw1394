@@ -1,5 +1,9 @@
 - add sendiso and dumpiso tools with man files
 - fix wrong error mapping on local transactions in raw1394_errcode_to_errno().
+- added comment headers for most exported functions
+- merged in weihs branch which brings new functionality including address
+  range mapping, reading and writing configROM images, additional bus reset
+  handling, and others.
 
 Version 0.9:
 

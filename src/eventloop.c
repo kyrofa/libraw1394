@@ -2,10 +2,20 @@
  * libraw1394 - library for raw access to the 1394 bus with the Linux subsystem.
  *
  * Copyright (C) 1999,2000,2001,2002 Andreas Bombe
+ *                     2002 Manfred Weihs <weihs@ict.tuwien.ac.at>
+ *                     2002 Christian Toegel <christian.toegel@gmx.at>
  *
  * This library is licensed under the GNU Lesser General Public License (LGPL),
  * version 2.1 or later. See the file COPYING.LIB in the distribution for
  * details.
+ *
+ *
+ * Contributions:
+ *
+ * Manfred Weihs <weihs@ict.tuwien.ac.at>
+ *        address range mapping
+ * Christian Toegel <christian.toegel@gmx.at>
+ *        address range mapping
  */
 
 #include <config.h>
@@ -76,6 +86,17 @@ int raw1394_loop_iterate(struct raw1394_handle *handle)
                 }
                 break;
 
+        case RAW1394_REQ_ARM:
+                if (handle->arm_tag_handler) {
+                        retval = handle->arm_tag_handler(handle, req->tag,
+                                 (req->misc & (0xFF)), 
+                                 ((req->misc >> 16) & (0xFFFF)),
+                                 int2ptr(req->recvb));
+                } 
+                break;
+        case RAW1394_REQ_ECHO:
+                retval=req->misc;
+                break;
         default:
                 if (handle->tag_handler) {
                         retval = handle->tag_handler(handle, req->tag,
@@ -129,6 +150,18 @@ tag_handler_t raw1394_set_tag_handler(struct raw1394_handle *handle,
 
         return old;
 }
+
+arm_tag_handler_t raw1394_set_arm_tag_handler(struct raw1394_handle *handle, 
+                                      arm_tag_handler_t new)
+{
+        arm_tag_handler_t old;
+
+        old = handle->arm_tag_handler;
+        handle->arm_tag_handler = new;
+
+        return old;
+}
+
 
 /**
  * raw1394_set_iso_handler - set isochronous packet handler

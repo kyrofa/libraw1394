@@ -12,6 +12,7 @@
 #include <errno.h>
 #include <string.h>
 #include <sys/poll.h>
+#include <stdlib.h>
 
 #include "../src/raw1394.h"
 #include "../src/csr.h"
@@ -73,6 +74,9 @@ int main(int argc, char **argv)
         
         struct pollfd pfd;
         unsigned char fcp_test[] = { 0x1, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef };
+        quadlet_t rom[0x100];
+        size_t rom_size;
+        unsigned char rom_version;
 
         handle = raw1394_new_handle();
 
@@ -155,6 +159,24 @@ int main(int argc, char **argv)
         raw1394_write(handle, raw1394_get_local_id(handle),
                       CSR_REGISTER_BASE + CSR_FCP_RESPONSE, sizeof(fcp_test),
                       (quadlet_t *)fcp_test);
+
+
+
+        printf("testing config rom stuff\n");
+        retval=raw1394_get_config_rom(handle, rom, 0x100, &rom_size, &rom_version);
+        printf("get_config_rom returned %d, romsize %d, rom_version %d\n",retval,rom_size,rom_version);
+        printf("here are the first 10 quadlets:\n");
+        for (i = 0; i < 10; i++)
+                printf("%d. quadlet: 0x%08x\n",i,rom[i]);
+
+        /* some manipulation */
+/*        printf("incrementing 2nd quadlet\n");
+        rom[0x02/4]++; 
+*/
+        retval=raw1394_update_config_rom(handle, rom, rom_size, rom_version);
+        printf("update_config_rom returned %d\n",retval);
+
+
 
         printf("\npolling for leftover messages\n");
         pfd.fd = raw1394_get_fd(handle);
