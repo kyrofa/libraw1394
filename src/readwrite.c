@@ -255,20 +255,20 @@ int raw1394_start_async_stream(struct raw1394_handle *handle,
                                unsigned int speed, size_t length, quadlet_t *data,
                                unsigned long rawtag)
 {
-        struct raw1394_request *req = &handle->req;
+        struct raw1394_request req;
 
-        CLEAR_REQ(req);
+        CLEAR_REQ(&req);
 
-        req->type = RAW1394_REQ_ASYNC_STREAM;
-        req->generation = handle->generation;
-        req->tag = rawtag;
+        req.type = RAW1394_REQ_ASYNC_STREAM;
+        req.generation = handle->generation;
+        req.tag = rawtag;
 
-        req->address = ((__u64)channel << 48) | speed;
-        req->misc = (tag << 16) | sy;
-        req->length = length;
-        req->sendb = ptr2int(data);
+        req.address = ((__u64)channel << 48) | speed;
+        req.misc = (tag << 16) | sy;
+        req.length = length;
+        req.sendb = ptr2int(data);
 
-        return (int)write(handle->fd, req, sizeof(*req));
+        return (int)write(handle->fd, &req, sizeof(req));
 }
 
 int raw1394_start_async_send(struct raw1394_handle *handle,
