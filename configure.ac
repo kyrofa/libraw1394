@@ -25,6 +25,7 @@ AC_SUBST(lt_age)
 CFLAGS=${CFLAGS:-"-Wall -O2"}
 AC_OUTPUT([
 Makefile
+libraw1394.pc
 src/Makefile
 tools/Makefile
 doc/Makefile

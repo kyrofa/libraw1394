@@ -5,7 +5,10 @@ SUBDIRS = src tools doc debian
 aclocaldir = @datadir@/aclocal
 aclocal_DATA = libraw1394.m4
 
-EXTRA_DIST = libraw1394.m4
+pkgconfigdir = @libdir@/pkgconfig
+pkgconfig_DATA = libraw1394.pc
+
+EXTRA_DIST = libraw1394.m4 libraw1394.pc
 
 doc: psdoc pdfdoc htmldoc
 
