@@ -47,6 +47,66 @@ typedef struct arm_request_response {
         struct arm_response *response;
 } *arm_request_response_t;
 
+/* new ISO API */
+
+enum raw1394_iso_speed {
+	RAW1394_ISO_SPEED_100 = 0,
+	RAW1394_ISO_SPEED_200 = 1,
+	RAW1394_ISO_SPEED_400 = 2,
+};
+
+/* return values from xmit/recv handlers */
+
+enum raw1394_iso_disposition {
+	/* continue on to the next packet */
+	RAW1394_ISO_OK = 0,
+
+	/* no error, but return from raw1394_loop_iterate() immediately */
+	RAW1394_ISO_DEFER = 1,
+
+	/* return from raw1394_loop_iterate() immediately, which will return an error */
+	RAW1394_ISO_ERROR = 2,
+};
+
+typedef int (*raw1394_iso_xmit_handler_t)(raw1394handle_t,
+					  unsigned char *data,
+					  unsigned int *len,
+					  unsigned char *tag,
+					  unsigned char *sy,
+					  unsigned int cycle,
+					  unsigned int dropped);
+	
+typedef int (*raw1394_iso_recv_handler_t)(raw1394handle_t,
+					  unsigned char *data,
+					  unsigned int len,
+					  unsigned char channel,
+					  unsigned char tag,
+					  unsigned char sy,
+					  unsigned int cycle,
+					  unsigned int dropped);
+	
+int raw1394_iso_xmit_init(raw1394handle_t handle,
+			  raw1394_iso_xmit_handler_t handler,
+			  unsigned int buf_packets,
+			  unsigned int max_packet_size,
+			  int channel,
+			  enum raw1394_iso_speed speed,
+			  int irq_interval);
+
+int raw1394_iso_recv_init(raw1394handle_t handle,
+			  raw1394_iso_recv_handler_t handler,
+			  unsigned int buf_packets,
+			  unsigned int max_packet_size,
+			  int channel,
+			  int irq_interval);
+
+
+int raw1394_iso_xmit_start(raw1394handle_t handle, int start_on_cycle, int prebuffer_packets);
+int raw1394_iso_recv_start(raw1394handle_t handle, int start_on_cycle);
+	
+void raw1394_iso_stop(raw1394handle_t handle);
+void raw1394_iso_shutdown(raw1394handle_t handle);
+
 #ifdef __cplusplus
 extern "C" {
 #endif

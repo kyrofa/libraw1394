@@ -23,6 +23,20 @@ struct raw1394_handle {
         fcp_handler_t     fcp_handler;
         iso_handler_t     iso_handler[64];
 
+	/* new ISO API */
+
+	/* memory mapping of the DMA buffer */
+	unsigned char *iso_buffer;
+	unsigned long  iso_buffer_bytes;
+	
+	/* status buffer, updated from _raw1394_iso_iterate() */
+	struct raw1394_iso_status iso_status;
+	unsigned int iso_packets_dropped;
+
+	/* user-supplied handlers */
+	raw1394_iso_xmit_handler_t iso_xmit_handler;
+	raw1394_iso_recv_handler_t iso_recv_handler;
+	
         struct raw1394_request req;
         quadlet_t buffer[HBUF_SIZE/4]; /* 2048 */
 };
@@ -33,6 +47,7 @@ struct sync_cb_data {
 };
 
 int _raw1394_sync_cb(struct raw1394_handle*, struct sync_cb_data*, int);
+int _raw1394_iso_iterate(raw1394handle_t handle);
 
 #define CLEAR_REQ(reqp) memset((reqp), 0, sizeof(struct raw1394_request))
 

@@ -94,9 +94,15 @@ int raw1394_loop_iterate(struct raw1394_handle *handle)
                                  int2ptr(req->recvb));
                 } 
                 break;
+                
         case RAW1394_REQ_ECHO:
                 retval=req->misc;
                 break;
+
+        case RAW1394_REQ_RAWISO_ACTIVITY:
+                retval = _raw1394_iso_iterate(handle);
+                break;
+        
         default:
                 if (handle->tag_handler) {
                         retval = handle->tag_handler(handle, req->tag,
