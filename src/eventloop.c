@@ -36,6 +36,15 @@ int raw1394_loop_iterate(struct raw1394_handle *handle)
                 }
                 break;
 
+        case RAW1394_REQ_FCP_REQUEST:
+                if (handle->fcp_handler) {
+                        retval = handle->fcp_handler(handle, req->misc & 0xffff,
+                                                     req->misc >> 16,
+                                                     req->length,
+                                                     (char *)handle->buffer);
+                }
+                break;
+
         default:
                 if (handle->tag_handler) {
                         retval = handle->tag_handler(handle, req->tag,
@@ -89,4 +98,15 @@ iso_handler_t raw1394_set_iso_handler(struct raw1394_handle *handle,
 
         handle->iso_handler[channel] = new;
         return NULL;
+}
+
+fcp_handler_t raw1394_set_fcp_handler(struct raw1394_handle *handle,
+                                      fcp_handler_t new)
+{
+        fcp_handler_t old;
+
+        old = handle->fcp_handler;
+        handle->fcp_handler = new;
+
+        return old;
 }

@@ -11,6 +11,7 @@ struct raw1394_handle {
 
         bus_reset_handler_t bus_reset_handler;
         tag_handler_t tag_handler;
+        fcp_handler_t fcp_handler;
         iso_handler_t iso_handler[64];
 
         struct raw1394_request req;

@@ -10,6 +10,7 @@ libraw1394_la_SOURCES =   \
 	eventloop.c       \
 	readwrite.c       \
 	iso.c             \
+	fcp.c             \
 	kernel-raw1394.h  \
 	raw1394_private.h
 
