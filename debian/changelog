@@ -1,3 +1,9 @@
+libraw1394 (0.8.2) unstable; urgency=low
+
+  * Create device file in /dev instead of / (closes: #81158).
+
+ -- Andreas Bombe <bombe@informatik.tu-muenchen.de>  Thu,  4 Jan 2001 02:37:57 +0100
+
 libraw1394 (0.8.1) unstable; urgency=low
 
   * Use and require makedev (>= 2.3.1-49) which includes /dev/raw1394

@@ -15,8 +15,8 @@ EOF
 
 		case "$REPLY" in
 		y|yes|"")
-			MAKEDEV raw1394
-			cat <<EOF
+			if (cd /dev && ./MAKEDEV raw1394); then
+			    cat <<EOF
 
 Device file created.  You may want to fix the group/permission to
 something appropriate for you.  Note however that anyone who can open
@@ -25,6 +25,7 @@ unrestricted, including harddisks and other probably sensitive
 devices.
 
 EOF
+			fi
 			;;
 		*)
 			cat <<EOF
