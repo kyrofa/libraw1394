@@ -256,7 +256,7 @@ int raw1394_iso_multichannel_recv_init(raw1394handle_t handle,
  **/
 int raw1394_iso_recv_listen_channel(raw1394handle_t handle, unsigned char channel)
 {
-	if(handle->iso_mode != ISO_RECV) {
+	if (handle->iso_mode != ISO_RECV) {
 		errno = EINVAL;
 		return -1;
 	}
@@ -269,12 +269,32 @@ int raw1394_iso_recv_listen_channel(raw1394handle_t handle, unsigned char channe
  **/
 int raw1394_iso_recv_unlisten_channel(raw1394handle_t handle, unsigned char channel)
 {
-	if(handle->iso_mode != ISO_RECV) {
+	if (handle->iso_mode != ISO_RECV) {
 		errno = EINVAL;
 		return -1;
 	}
 
 	return ioctl(handle->fd, RAW1394_IOC_ISO_RECV_UNLISTEN_CHANNEL, channel);
+}
+
+/**
+ * raw1394_iso_recv_flush - if you specified an irq_interval > 1 in
+ * iso_recv_init, you won't be notified for every single iso packet, but
+ * for groups of them. Now e.g. if irq_interval is 100, and you were just
+ * notified about iso packets and after them only 20 more packets arrived,
+ * no notification will be generated (20 < 100). In the case that you know
+ * that there should be more packets at this moment, you can call this
+ * function and all iso packets which are already received by the kernel
+ * will be flushed out to user space.
+ */
+int raw1394_iso_recv_flush(raw1394handle_t handle)
+{
+	if (handle->iso_mode != ISO_RECV) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	return ioctl(handle->fd, RAW1394_IOC_ISO_RECV_FLUSH, 0);
 }
 
 /**
@@ -286,7 +306,7 @@ int raw1394_iso_recv_unlisten_channel(raw1394handle_t handle, unsigned char chan
  **/
 int raw1394_iso_recv_set_channel_mask(raw1394handle_t handle, u_int64_t mask)
 {
-	if(handle->iso_mode != ISO_RECV) {
+	if (handle->iso_mode != ISO_RECV) {
 		errno = EINVAL;
 		return -1;
 	}
