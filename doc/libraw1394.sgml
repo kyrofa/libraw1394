@@ -73,8 +73,9 @@
     </para>
 
     <para>
-      If you are familiar with CSR architectures (as defined in --FIXME--), then
-      you already know most of 1394, which is a CSR implementation.
+      If you are familiar with CSR architectures (as defined in IEEE 1212
+      (FIXME?)), then you already know most of 1394, which is a CSR
+      implementation.
     </para>
 
     <sect1>
@@ -85,9 +86,9 @@
 	document are the quadlet (32 bit quantity) and the octlet (64 bit
 	quantity) and blocks (any quantity of bytes).  The bus byte ordering is
 	big endian.  A transmission can be sent at one of multiple possible
-	speeds, from the slowest 100 Mbit/s over 200 and 400 Mbit/s up to 3.2
-	Gbit/s in the future (these speeds are also referred to as S100, S200,
-	...).
+	speeds, which are 100, 200 and 400 Mbit/s for the currently mostly used
+	IEEE 1394a spec and up to 3.2 Gbit/s in the recently finalized 1394.b
+	standard (these speeds are also referred to as S100, S200, ...).
       </para>
 
       <para>
@@ -188,16 +189,8 @@
 	later time from the targetted node to the source node (this is called a
 	split transaction).  Only writes can succeed and complete in the ack
 	code, reads and locks require a response.  Error and packet pending can
-	happen for every transaction.
-      </para>
-
-      <para>
-	The response packets contain a response code (rcode) which signifies
-	success or type of error.  libraw1394 contains a function to convert
-	ack/rcode pairs into errno codes which convey roughly the same meaning.
-	This is done automatically for the synchronous read/write/lock wrapper
-	functions, i.e. they return a negative value for failure and a standard
-	error code can be found in the global variable <symbol>errno</symbol>.
+	happen for every transaction.  The response packets contain a response
+	code (rcode) which signifies success or type of error.
       </para>
 
       <para>
@@ -411,15 +404,15 @@
       </para>
 
       <para>
-	A list of available ports together with some information about it
-	(name of the hardware, number of connected nodes) is available via
+	A list of available ports together with some information about it (name
+	of the hardware, number of connected nodes) is available via
 	<function>raw1394_get_port_info()</function>, which is to be called
-	right getting a fresh handle.  The user should be presented with a
+	right after getting a fresh handle.  The user should be presented with a
 	choice of available ports if there is more than one.  It may be good
 	practice to do that even if there is only one port, since that may
-	result from a normally configured port just not being available,
-	making it confusing to be dropped right into the application attached
-	to a port without a choice and notion of anything going wrong.
+	result from a normally configured port just not being available, making
+	it confusing to be dropped right into the application attached to a port
+	without a choice and notion of anything going wrong.
       </para>
 
       <para>
@@ -551,6 +544,64 @@
       </para>
     </sect1>
 
+    <sect1>
+      <title>Generation Numbers</title>
+
+      <para>
+	libraw1394 and the kernel code use generation numbers to identify the
+	current bus configuration and increment those on every configuration
+	change.  The most important generation number is stored per connected
+	1394 bus and incremented on every bus reset.  There is another number
+	managed by raw1394 which identifies global changes (like a complete port
+	being added or removed), which is used for the
+	<function>raw1394_set_port()</function> function to make sure you don't
+	use stale port numbers.  This is done transparently to you.
+      </para>
+
+      <para>
+	The bus generation number is more relevant for your work.  Since nodes
+	can change IDs with every bus reset, it is very likely that you don't
+	want to send a packet you constructed with the old ID before you noticed
+	the bus reset.  This does not apply to isochronous transmissions, since
+	they are broadcast and do not depend on bus configuration.  Therefore
+	every packet is automatically tagged with the expected generation
+	number, and it will fail to send if that does not match the number
+	managed in the kernel for the port in question.
+      </para>
+
+      <para>
+	You get the current generation number through the bus reset handler.  If
+	you don't set a custom bus reset handler, the default handler will
+	update the generation number automatically.  If you set your own
+	handler, you can update the generation number to be used through
+	<function>raw1394_update_generation()</function> directly in the handler
+	or later.
+      </para>
+    </sect1>
+
+    <sect1>
+      <title>Error and Success Codes</title>
+
+      <para>
+	libraw1394 returns the ack/rcode pair in most transaction cases.  The
+	rcode is undefined in cases where the ack code is not equal to
+	<symbol>ack_pending</symbol>.  This is stored in a type
+	<type>raw1394_errcode_t</type>, from which the ack and rcode parts can
+	be extracted using two macros.
+      </para>
+
+      <para>
+	With the function <function>raw1394_errcode_to_errno()</function> it is
+	possible to convert this to an errno number that conveys roughly the
+	same meaning.  Many developers will find that easier to handle.  This is
+	done automatically for the synchronous read/write/lock wrapper
+	functions, i.e. they return 0 for success and a negative value for
+	failure, in which case they also set the <symbol>errno</symbol> variable
+	to the appropriate code.  The raw ack/rcode pair can then still be
+	retrieved using <function>raw1394_get_errcode()</function>.
+      </para>
+    </sect1>
+
   </chapter>
 
   <chapter id="functions">
@@ -563,7 +614,7 @@
       </refmeta>
 
       <refnamediv>
-	<refname>raw1394_net_handle</refname>
+	<refname>raw1394_new_handle</refname>
 	<refpurpose>create new handle</refpurpose>
       </refnamediv>
 
@@ -643,6 +694,87 @@
 	</para>
       </refsect1>
     </refentry>
+
+    <refentry>
+      <refmeta>
+	<refentrytitle>raw1394_get_port_info</refentrytitle>
+	<manvolnum>3</manvolnum>
+      </refmeta>
+
+      <refnamediv>
+	<refname>raw1394_get_port_info</refname>
+	<refpurpose>get information about connected ports</refpurpose>
+      </refnamediv>
+
+      <refsynopsisdiv>
+	<funcsynopsis>
+	  <funcprototype>
+	    <funcdef>int <function>raw1394_get_port_info</function></funcdef>
+	    <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+	    <paramdef>struct raw1394_port_info *<parameter>pinf</parameter></paramdef>
+	    <paramdef>int <parameter>maxports</parameter></paramdef>
+	  </funcprototype>
+	</funcsynopsis>
+      </refsynopsisdiv>
+
+      <refsect1>
+	<title>Arguments</title>
+
+	<variablelist>
+	  <varlistentry>
+	    <term><parameter>pinf</parameter></term>
+	    <listitem>
+	      <para>Pointer to an array of structure of type
+	      <structname>raw1394_port_info</structname> which will be filled in
+	      by the function.</para>
+	    </listitem>
+	  </varlistentry>
+	  <varlistentry>
+	    <term><parameter>maxports</parameter></term>
+	    <listitem>
+	      <para>Maximum number of <parameter>pinf</parameter> structures to
+	      fill in.  Zero is valid.</para>
+	    </listitem>
+	  </varlistentry>
+	</variablelist>
+      </refsect1>
+
+      <refsect1>
+	<title>Return Value</title>
+
+	<para>
+	  The number of ports currently existing.
+	</para>
+      </refsect1>
+
+      <refsect1>
+	<title>Description</title>
+
+	<para>
+	  Before you can set which port to use, you use this function to find
+	  out which ports exist. The <structname>raw1394_port_info</structname>
+	  structure looks like this:
+
+	  <programlisting>
+struct <structname>raw1394_portinfo</structname> {
+        int <structfield>nodes</structfield>;
+        char <structfield>name</structfield>[32];
+};
+	  </programlisting>
+	</para>
+
+	<para>
+	  The field <structfield>nodes</structfield> contains the number of
+	  nodes that are currently connected to that port, the field
+	  <structfield>name</structfield> contains the name of the hardware
+	  type.  If your program is interactive, you should present the user
+	  with this list to let them decide which port to use.  A
+	  non-interactive program (and probably interactive ones, too) should
+	  provide a command line option to choose the port.
+	</para>
+      </refsect1>
+    </refentry>
+
 
     <refentry>
       <refmeta>
