@@ -3,7 +3,7 @@
 
 /* header for the raw1394 API that is exported to user-space */
 
-#define RAW1394_KERNELAPI_VERSION 5
+#define RAW1394_KERNELAPI_VERSION 4
 
 /* state: opened */
 #define RAW1394_REQ_INITIALIZE    1
