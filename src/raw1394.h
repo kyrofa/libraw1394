@@ -423,6 +423,10 @@ int raw1394_start_iso_write(raw1394handle_t handle, unsigned int channel,
                             unsigned int tag, unsigned int sy,
                             unsigned int speed, size_t length, quadlet_t *data,
                             unsigned long rawtag);
+int raw1394_start_async_stream(raw1394handle_t handle, unsigned int channel,
+                               unsigned int tag, unsigned int sy,
+                               unsigned int speed, size_t length, quadlet_t *data,
+                               unsigned long rawtag);
 
 
 /* This starts sending an arbitrary async packet. It gets an array of quadlets consisting of
@@ -458,6 +462,9 @@ int raw1394_lock64(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 int raw1394_iso_write(raw1394handle_t handle, unsigned int channel,
                       unsigned int tag, unsigned int sy, unsigned int speed,
                       size_t length, quadlet_t *data);
+int raw1394_async_stream(raw1394handle_t handle, unsigned int channel,
+                         unsigned int tag, unsigned int sy, unsigned int speed,
+                         size_t length, quadlet_t *data);
 int raw1394_async_send(raw1394handle_t handle,
                              size_t length, size_t header_length, unsigned int expect_response,
                              quadlet_t *data);
