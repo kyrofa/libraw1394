@@ -18,6 +18,8 @@
 
 #include "../src/raw1394.h"
 
+#define BUFFER 1000
+#define PACKET_MAX 4096
 
 unsigned long which_port;
 char *filename;
@@ -86,15 +88,15 @@ void parse_args(int argc, char **argv)
                         switch (speed) {
                         case 1:
                         case 100:
-                                speed = 0;
+                                speed = RAW1394_ISO_SPEED_100;
                                 break;
                         case 2:
                         case 200:
-                                speed = 1;
+                                speed = RAW1394_ISO_SPEED_200;
                                 break;
                         case 4:
                         case 400:
-                                speed = 2;
+                                speed = RAW1394_ISO_SPEED_400;
                                 break;
                         default:
                                 fprintf(stderr,
@@ -134,66 +136,72 @@ void parse_args(int argc, char **argv)
         if (argc) filename = *argv;
 }
 
-
-static int dec_int_callback(raw1394handle_t unused, void *counter, raw1394_errcode_t unused_errcode)
-{
-	(*(int *)counter)--;
-	return 0;
-}
-static int pend_req;
-
-#define BUF_SIZE 65536
-#define BUF_OVER BUF_SIZE
+#define BUF_SIZE 4096
+#define BUF_HEAD 8
 void send_file_once(raw1394handle_t handle, int file)
 {
         int count, i, ret;
         unsigned channel, tag, sy;
         size_t length;
-        static char buffer[BUF_SIZE + BUF_OVER];
-
-        static struct raw1394_reqhandle rh = {
-                dec_int_callback,
-                &pend_req
-        };
+        static char buffer[BUF_SIZE + BUF_HEAD];
+        static unsigned int counter = 0;
+        static int inited = 0;
 
         while (1) {
-                while (pend_req > 30) raw1394_loop_iterate(handle);
-
-                count = read(file, buffer, BUF_SIZE);
+                count = read(file, buffer, BUF_HEAD);
                 if (count < 0) {
                         perror("read");
                         exit(1);
                 }
-                if (count < 4) return;
+                if (count < BUF_HEAD)
+                        return;
         
                 i = 0;
-                while (i < count) {
-                        length = (buffer[i] << 8) | buffer[i + 1];
-                        channel = buffer[i + 2] & 0x3f;
-                        tag = buffer[i + 2] >> 6;
-                        sy = buffer[i + 3] & 0xf;
-                
-                        i += 4;
-                        while (i + length > count) {
-                                ret = read(file, buffer + BUF_SIZE,
-                                           i + length - BUF_SIZE);
+                length = ((unsigned int *)buffer)[i];
+                channel = buffer[i + 4];
+                tag = buffer[i + 5];
+                sy = buffer[i + 6];
+        
+                i += BUF_HEAD;
+                while (count < length + BUF_HEAD) {
+                        ret = read(file, buffer + count,
+                                   length - count + BUF_HEAD);
 
-                                if (ret < 0) {
-                                        perror("read");
-                                        exit(1);
-                                }
+                        if (ret < 0) {
+                                perror("read");
+                                exit(1);
 
-                                if (ret == 0) return;
-
-                                count += ret;
                         }
-                        
-                        raw1394_start_iso_write(handle, channel, tag, sy,
-                                                speed, length,
-                                                (quadlet_t *)(buffer + i),
-                                                (unsigned long)&rh);
-                        i += length;
-                        pend_req++;
+                        if (ret == 0)
+                                return;
+
+                        count += ret;
+                }
+                
+                if (inited == 0) {
+                        /*
+                        fprintf(stderr, "transmitting first packet with length "
+                             "%d on channel %d with tag %d and sy %d\n",
+                                length, channel, tag, sy);
+                        */
+                        ret = raw1394_iso_xmit_init(handle, NULL, BUFFER,
+                                PACKET_MAX, channel, speed, -1);
+                        if (ret < 0) {
+                                perror("raw1394_iso_xmit_init");
+                                exit(1);
+                        }
+                        raw1394_iso_xmit_start(handle, -1, -1);
+                        inited = 1;
+                }
+
+                if (++counter % 1000 == 0)
+                        fprintf(stderr, "\r%uK packets", counter/1000);
+
+                ret = raw1394_iso_xmit_write(handle, &buffer[i],
+                        length, tag, sy);
+                if (ret < 0) {
+                        perror("\nraw1394_iso_xmit_write");
+                        exit(1);
                 }
         }
 }
@@ -298,6 +306,10 @@ int main(int argc, char **argv)
 
         if (filename)
                 send_iso_file(handle);
+
+        fprintf(stderr, "\n");
+        raw1394_iso_shutdown(handle);
+        raw1394_destroy_handle(handle);
 
         return 0;
 }

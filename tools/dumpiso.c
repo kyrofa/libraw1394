@@ -1,3 +1,13 @@
+/*
+ * libraw1394 - library for raw access to the 1394 bus with the Linux subsystem.
+ *
+ * Copyright (C) 1999,2000 Andreas Bombe
+ *
+ * This library is licensed under the GNU Lesser General Public License (LGPL),
+ * version 2.1 or later. See the file COPYING.LIB in the distribution for
+ * details.
+ */
+ 
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -7,13 +17,14 @@
 
 #include "../src/raw1394.h"
 
+#define BUFFER 1000
+#define PACKET_MAX 4096
 
 u_int64_t listen_channels;
 unsigned long which_port;
 char *filename;
 int file;
-
-int done;
+enum raw1394_iso_dma_recv_mode mode = RAW1394_DMA_DEFAULT;
 
 void usage_exit(int exitcode)
 {
@@ -70,6 +81,8 @@ void parse_args(int argc, char **argv)
                                                 optarg);
                                         usage_exit(1);
                                 }
+                        } else {
+                                mode = RAW1394_DMA_PACKET_PER_BUFFER;
                         }
 
                         if (chan2 < chan1) {
@@ -160,28 +173,38 @@ void open_dumpfile()
         write_header();
 }
 
-int iso_packet_handler(raw1394handle_t handle, int channel, size_t length,
-                       quadlet_t *data)
+static enum raw1394_iso_disposition 
+iso_handler(raw1394handle_t handle, unsigned char *data, 
+        unsigned int length, unsigned char channel,
+        unsigned char tag, unsigned char sy, unsigned int cycle, 
+        unsigned int dropped)
 {
         int ret;
-        static unsigned int count;
+        static unsigned int counter = 0;
 
-        count++;
-        fprintf(stderr, "\r%u", count);
-        fflush(stderr);
+        if (++counter % 1000 == 0)
+                fprintf(stderr, "\r%uK packets", counter/1000);
+
+        /* write header */
+        write(file, &length, sizeof(length));
+        write(file, &channel, sizeof(channel));
+        write(file, &tag, sizeof(tag));
+        write(file, &sy, sizeof(sy));
+        sy = 0;
+        write(file, &sy, sizeof(sy));
 
         while (length) {
                 ret = write(file, data, length);
                 if (ret < 0) {
                         perror("data write");
-                        exit(1);
+                        return RAW1394_ISO_ERROR;
                 }
 
                 length -= ret;
-                data = (quadlet_t *)(((char *)data) + ret);
+                data += ret;
         }
 
-        return 0;
+        return RAW1394_ISO_OK;
 }
 
 int main(int argc, char **argv)
@@ -221,16 +244,24 @@ int main(int argc, char **argv)
 
         open_dumpfile();
 
-        for (i = 0; i < 64; i++) {
-                if (!(listen_channels & 1ULL << i)) continue;
+        if (mode == RAW1394_DMA_DEFAULT) {
+                raw1394_iso_multichannel_recv_init(handle, iso_handler,
+                        BUFFER, 2048, -1); /* >2048 makes rawiso stall! */
+                raw1394_iso_recv_set_channel_mask(handle, listen_channels);
 
-                raw1394_set_iso_handler(handle, i, iso_packet_handler);
-                raw1394_start_iso_rcv(handle, i);
+        } else for (i = 0; i < 64; i++) {
+                if (!(listen_channels & 1ULL << i))
+                        continue;
+                raw1394_iso_recv_init(handle, iso_handler, BUFFER, PACKET_MAX,
+                        i, mode, -1);
         }
+        raw1394_iso_recv_start(handle, -1, -1, 0);
 
-        /* This should actually do something with the done variable, and set up
-           signal handlers. */
-        while (!done) raw1394_loop_iterate(handle);
+        while (raw1394_loop_iterate(handle) == 0);
+
+        fprintf(stderr, "\n");
+        raw1394_iso_shutdown(handle);
+        raw1394_destroy_handle(handle);
 
         return 0;
 }

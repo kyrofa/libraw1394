@@ -14,6 +14,7 @@ Version 1.1.0:
 - deprecate old isochronous API.
 - move API comment documentation to header and reformat header comments as
   kernel-doc (use linux/scripts/kernel-doc to extract and format them).
+- updated tools/dumpiso and tools/sendiso to new isochronous API.
 
 Version 0.10:
 

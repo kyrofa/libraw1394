@@ -146,7 +146,7 @@ int raw1394_iso_xmit_init(raw1394handle_t handle,
  * @max_packet_size: largest packet you need to handle, in bytes (not including
  * the isochronous header)
  * @channel: isochronous channel to receive
- * @speed: speed at which to receive
+ * @mode: bufferfill or packet per buffer mode
  * @irq_interval: maximum latency of wake-ups, in packets
  * (-1 if you don't care)
  *
