@@ -7,6 +7,19 @@ aclocal_DATA = libraw1394.m4
 
 EXTRA_DIST = libraw1394.m4
 
+doc: psdoc pdfdoc htmldoc
+
+psdoc:
+	$(MAKE) -C doc psdoc
+
+pdfdoc:
+	$(MAKE) -C doc pdfdoc
+
+htmldoc:
+	$(MAKE) -C doc htmldoc
+
+.PHONY: doc psdoc pdfdoc htmldoc
+
 # make required device file
 dev:
 	mknod -m 600 /dev/raw1394 c 171 0

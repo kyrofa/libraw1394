@@ -4,9 +4,13 @@ Version 0.9:
   mainly raw1394_read(), raw1394_write(), raw1394_lock;
   Source incompatibility!  Parts need to be adapted in application code, but
   it's well worth it.
+- the generation number is not unconditionally updated on bus reset in the event
+  loop anymore, the new function raw1394_update_generation() has to be used
+  (unless the default bus reset handler is used) so that transactions won't fail
 - iso handlers used to get the iso header quadlet in host endian, now they get
   it in big endian like the rest of the packet for consistency
 - testlibraw gets installed now, man page also included
+- (not yet complete) documentation in Docbook format included
 - libraw1394.m4 autoconf macro added
 
 Version 0.8:

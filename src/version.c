@@ -12,7 +12,8 @@
 
 /* Variables to find version by linking (avoid need for test program) */
 
-char __libraw1394_version_0_8_99;
+char __libraw1394_version_0_9;
+char __libraw1394_version_0_9_0;
 
 /* This function is to be used by the autoconf macro to find the lib version */
 const char *raw1394_get_libversion()

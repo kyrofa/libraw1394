@@ -20,8 +20,9 @@
 #include "raw1394_private.h"
 
 
-static int bus_reset_default(struct raw1394_handle *handle)
+static int bus_reset_default(struct raw1394_handle *handle, unsigned int gen)
 {
+        raw1394_update_generation(handle, gen);
         return 0;
 }
 
@@ -122,6 +123,11 @@ int raw1394_get_fd(struct raw1394_handle *handle)
 unsigned int raw1394_get_generation(struct raw1394_handle *handle)
 {
         return handle->generation;
+}
+
+void raw1394_update_generation(struct raw1394_handle *handle, unsigned int gen)
+{
+        handle->generation = gen;
 }
 
 int raw1394_get_nodecount(struct raw1394_handle *handle)

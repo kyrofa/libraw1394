@@ -28,34 +28,10 @@ files.
 
 3. API documentation
 
-	There is currently no external document describing the library
-functions, but you can find documentation for all functions in the header file
-raw1394.h.  Some real documentation will come Real Soon Now.
-
-	To clear up some confusion (it wasn't documented before, what was I
-thinking), here is a description of the return values of the
-raw1394_(read|write|lock) functions and also the errcode parameter of
-tag_handler_t or reeqhandler_t:
-
-	If it is negative it signals an error in handling the request locally
-(1394 target node not reached) and errno contains a Unix error code just like
-with other library functions.  If it is positive it still does not signal
-success of the request itself, just that it was properly communicated to the
-1394 target node.  To know whether it succeeded the lower 32 bits have to be
-further decoded.
-
-	The upper 16 bits contain the acknowledge code from the other node, the
-lower 16 bits the response code.  Both of these codes are the standard codes
-from the 1394 standard with the exception of 0x10 for the ack which is set on an
-access to the local node (there is no 1394 bus involved and therefore no ack
-exists).  Most of the acks completely determine the success of the request
-(ack_complete or one of the error codes).  The response code has to be
-interpreted if the ack is ack_pending or the dummy ack 0x10.  Only in this case
-is the response code valid.
-
-	This way of reporting errors will be replaced by a more sensible
-approach with (one of the, but hopefully) the next version of libraw.
-Documented here only for those who can't wait.
+	Finally there is something, in the doc subdirectory.  The file is
+libraw1394.sgml (it's Docbook format), and there are preformatted PostScript and
+HTML available.  This documentation is not complete yet!  I hopefully will have
+a libraw1394 0.9.1 out soon with finished documentation.
 
 
 4. Multithreading
@@ -66,7 +42,20 @@ operating on the same handle would royally mess up the kernel-user protocol.
 Simply use separate handles for each thread in which you need to use libraw1394.
 
 
-5. Maintainer
+5. Autoconf macro
+
+	Along with the library an autoconf macro gets installed (in
+$prefix/share/aclocal).  It is called the following way:
+
+AC_LIB_RAW1394(MINIMUMVERSION[,ACTION_IF_FOUND[,ACTION_IF_NOT_FOUND]])
+
+	Versions prior to 0.9 can not be checked and appear as "not found".
+This macro sets the variables LIBRAW1394_CPPFLAGS, LIBRAW1394_CFLAGS and
+LIBRAW1394_LIBS.  You have to include those into your build variables so that
+the build process correctly links with libraw1394.
+
+
+6. Maintainer
 
 	Maintainer of libraw1394 is currently Andreas Bombe.  Send suggestions,
 bug reports and fixes to andreas.bombe@munich.netsurf.de.  See the file AUTHORS
@@ -77,4 +66,4 @@ http://sourceforge.net/project/?group_id=2514 for more information.  You can
 also submit bugs through this page.
 
 
-2000-11-25  Andreas Bombe
+2001-05-14  Andreas Bombe

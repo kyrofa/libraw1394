@@ -45,7 +45,6 @@ int raw1394_get_fd(raw1394handle_t handle);
 void *raw1394_get_userdata(raw1394handle_t handle);
 void raw1394_set_userdata(raw1394handle_t handle, void *data);
 
-unsigned int raw1394_get_generation(raw1394handle_t handle);
 nodeid_t raw1394_get_local_id(raw1394handle_t handle);
 nodeid_t raw1394_get_irm_id(raw1394handle_t handle);
 
@@ -92,11 +91,24 @@ int raw1394_loop_iterate(raw1394handle_t handle);
 
 /*
  * Set the handler that will be called when a bus reset message is encountered.
- * The default action is to do nothing.  Returns old handler.
+ * The default action is to just call raw1394_update_generation().  Returns old
+ * handler.
  */
-typedef int (*bus_reset_handler_t)(raw1394handle_t);
+typedef int (*bus_reset_handler_t)(raw1394handle_t, unsigned int generation);
 bus_reset_handler_t raw1394_set_bus_reset_handler(raw1394handle_t handle,
                                                   bus_reset_handler_t new_h);
+
+/*
+ * Since node IDs may change during a bus reset, generation numbers incremented
+ * every bus reset are used to verify if a transaction request is intended for
+ * this configuration.  If numbers don't match, they will fail immediately.
+ *
+ * raw1394_get_generation() returns the generation number in use by the handle,
+ * not the current generation number.  The current generation number is passed
+ * to the bus reset handler.
+ */
+unsigned int raw1394_get_generation(raw1394handle_t handle);
+void raw1394_update_generation(raw1394handle_t handle, unsigned int generation);
 
 /*
  * Set the handler that will be called when an async read/write/lock returns.
