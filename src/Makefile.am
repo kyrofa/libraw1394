@@ -20,5 +20,5 @@ libraw1394_la_SOURCES =   \
 pkginclude_HEADERS = raw1394.h csr.h ieee1394.h
 
 # testlibraw
-noinst_PROGRAMS = testlibraw
+bin_PROGRAMS = testlibraw
 testlibraw_LDADD = libraw1394.la

@@ -1,6 +1,6 @@
 # process this file with automake to create a Makefile.in
 
-SUBDIRS = src debian
+SUBDIRS = src doc debian
 
 
 # make required device file
