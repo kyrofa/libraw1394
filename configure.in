@@ -8,4 +8,15 @@ AC_PROG_CC
 AM_PROG_LIBTOOL
 AC_PROG_INSTALL
 
+# set the libtool so version numbers
+lt_major=4
+lt_revision=0
+lt_age=0
+
+AC_SUBST(lt_major)
+AC_SUBST(lt_revision)
+AC_SUBST(lt_age)
+
+
+CFLAGS="$CFLAGS -Wall -Wunused"
 AC_OUTPUT([ Makefile src/Makefile debian/Makefile ])

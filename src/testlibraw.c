@@ -53,6 +53,8 @@ int my_fcp_handler(raw1394handle_t handle, nodeid_t nodeid, int response,
         }
 
         printf("\n");
+
+        return 0;
 }
 
 

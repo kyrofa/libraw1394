@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 #include "raw1394.h"
 #include "kernel-raw1394.h"
@@ -84,7 +85,7 @@ struct raw1394_handle *raw1394_get_handle(void)
         }
 
         handle->generation = init_rawdevice(handle);
-        if (handle->generation < 0) {
+        if (handle->generation == -1) {
                 close(handle->fd);
                 free(handle);
                 return NULL;

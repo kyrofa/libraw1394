@@ -3,7 +3,7 @@
 
 lib_LTLIBRARIES = libraw1394.la
 
-libraw1394_la_LDFLAGS = -version-info 4:0:0
+libraw1394_la_LDFLAGS = -version-info @lt_major@:@lt_revision@:@lt_age@
 
 libraw1394_la_SOURCES =   \
 	main.c            \
