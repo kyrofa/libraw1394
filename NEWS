@@ -1,3 +1,13 @@
+Version 0.9:
+
+- error reporting reworked to be more C library style; functions affected are
+  mainly raw1394_read(), raw1394_write(), raw1394_lock;
+  Source incompatibility!  Parts need to be adapted in application code, but
+  it's well worth it.
+- iso handlers used to get the iso header quadlet in host endian, now they get
+  it in big endian like the rest of the packet for consistency
+- testlibraw gets installed now, man page also included
+- libraw1394.m4 autoconf macro added
 
 Version 0.8:
 

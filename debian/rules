@@ -9,6 +9,7 @@ fullversionname	= $(shell grep library_names src/libraw1394.la | cut -d"'" -f 2 
 major 		= $(shell echo $(majorname) | cut -d"." -f 3)
 
 libraw		= libraw1394-$(major)
+source-version	= $(shell dpkg-parsechangelog | grep ^Version | cut -d" " -f 2)
 
 autoclean-files:
 	echo $@ >$@
@@ -64,9 +65,12 @@ binary-arch: build install autoclean-files
 	else								\
 		cp debian/libraw1394.postinst.in			\
 			debian/$(libraw).postinst;			\
-		echo "makedev-depend=makedev (>= 2.3.1-49), "		\
+		echo "makedev-depend=, makedev (>= 2.3.1-49)"		\
 			>>debian/$(libraw).substvars;			\
 	fi
+
+	echo >>autoclean-files debian/shlibs.local
+	echo >debian/shlibs.local "libraw1394 $(major) $(libraw) (= $(source-version))"
 
 	dh_installdocs README NEWS
 	dh_installchangelogs

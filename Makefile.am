@@ -5,6 +5,8 @@ SUBDIRS = src doc debian
 aclocaldir = @datadir@/aclocal
 aclocal_DATA = libraw1394.m4
 
+EXTRA_DIST = libraw1394.m4
+
 # make required device file
 dev:
 	mknod -m 600 /dev/raw1394 c 171 0
