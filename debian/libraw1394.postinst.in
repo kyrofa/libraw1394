@@ -4,7 +4,7 @@
 db_version 2.0
 
 if [ "$1" = "configure" ]; then
-    db_get libraw1394/dev/create_node
+    db_get libraw1394/dev/create_node || true
 
     if [ "$RET" = "true" ]; then
 	echo -n "Creating device node /dev/raw1394... "
