@@ -61,7 +61,8 @@ int raw1394_errcode_to_errno(raw1394_errcode_t errcode)
         };
 
         if (!raw1394_internal_err(errcode)) {
-                if (raw1394_get_ack(errcode) == L1394_ACK_PENDING)
+                if (raw1394_get_ack(errcode) == 0x10
+                    || raw1394_get_ack(errcode) == L1394_ACK_PENDING)
                         return rcode2errno[raw1394_get_rcode(errcode)];
                 else
                         return ack2errno[raw1394_get_ack(errcode)];

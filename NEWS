@@ -1,4 +1,5 @@
 - add sendiso and dumpiso tools with man files
+- fix wrong error mapping on local transactions in raw1394_errcode_to_errno().
 
 Version 0.9:
 
