@@ -11,6 +11,9 @@ struct raw1394_handle {
         int num_of_nodes;
         nodeid_t irm_id;
 
+        raw1394_errcode_t err;
+        void *userdata;
+
         bus_reset_handler_t bus_reset_handler;
         tag_handler_t tag_handler;
         fcp_handler_t fcp_handler;
@@ -18,8 +21,6 @@ struct raw1394_handle {
 
         struct raw1394_request req;
         quadlet_t buffer[2048];
-
-        void *userdata;
 };
 
 struct sync_cb_data {

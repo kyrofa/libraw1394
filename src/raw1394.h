@@ -8,21 +8,28 @@ typedef u_int64_t octlet_t;
 typedef u_int64_t nodeaddr_t;
 typedef u_int16_t nodeid_t;
 
-
 typedef struct raw1394_handle *raw1394handle_t;
 
-
 #ifdef __cplusplus
-extern "C" {
+//extern "C" {
 #endif
+
+typedef int raw1394_errcode_t;
+#define raw1394_make_errcode(ack, rcode) (((ack) << 16) | rcode)
+#define raw1394_internal_err(errcode) ((errcode) < 0)
+#define raw1394_get_ack(errcode) ((errcode) >> 16)
+#define raw1394_get_rcode(errcode) ((errcode) & 0xf)
+#define raw1394_get_internal(errcode) (errcode)
+raw1394_errcode_t raw1394_get_errcode(raw1394handle_t);
+int raw1394_errcode_to_errno(raw1394_errcode_t);
 
 /*
  * Required as initialization.  One handle can control one port, it is possible
- * to use multiple handles.  raw1394_get_handle returns NULL for failure,
- * raw1394_destroy_handle accepts NULL.  If raw1394_get_handle returns NULL and
+ * to use multiple handles.  raw1394_new_handle returns NULL for failure,
+ * raw1394_destroy_handle accepts NULL.  If raw1394_new_handle returns NULL and
  * errno is 0, this version of libraw1394 is incompatible with the kernel.  
  */
-raw1394handle_t raw1394_get_handle(void);
+raw1394handle_t raw1394_new_handle(void);
 void raw1394_destroy_handle(raw1394handle_t handle);
 
 /*
@@ -96,7 +103,8 @@ bus_reset_handler_t raw1394_set_bus_reset_handler(raw1394handle_t handle,
  * The default action is to call the callback in the raw1394_reqhandle pointed
  * to by tag.  Returns old handler.
  */
-typedef int (*tag_handler_t)(raw1394handle_t, unsigned long tag, int errcode);
+typedef int (*tag_handler_t)(raw1394handle_t, unsigned long tag,
+                             raw1394_errcode_t err);
 tag_handler_t raw1394_set_tag_handler(raw1394handle_t handle,
                                       tag_handler_t new_h);
 
@@ -132,7 +140,8 @@ fcp_handler_t raw1394_set_fcp_handler(raw1394handle_t, fcp_handler_t);
  * when a request completes, it calls the callback and passes it the data
  * pointer and the error code of the request.
  */
-typedef int (*req_callback_t)(raw1394handle_t, void *data, int errcode);
+typedef int (*req_callback_t)(raw1394handle_t, void *data,
+                              raw1394_errcode_t err);
 struct raw1394_reqhandle {
         req_callback_t callback;
         void *data;
@@ -146,10 +155,10 @@ int raw1394_start_read(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
                        size_t length, quadlet_t *buffer, unsigned long tag);
 int raw1394_start_write(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
                         size_t length, quadlet_t *data, unsigned long tag);
-int raw1394_start_lock(struct raw1394_handle *handle, nodeid_t node,
-                       nodeaddr_t addr, unsigned int extcode, quadlet_t data,
-                       quadlet_t arg, quadlet_t *result, unsigned long tag);
-int raw1394_start_iso_write(struct raw1394_handle *handle, unsigned int channel,
+int raw1394_start_lock(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
+                       unsigned int extcode, quadlet_t data, quadlet_t arg,
+                       quadlet_t *result, unsigned long tag);
+int raw1394_start_iso_write(raw1394handle_t handle, unsigned int channel,
                             unsigned int tag, unsigned int sy,
                             unsigned int speed, size_t length, quadlet_t *data,
                             unsigned long rawtag);
@@ -163,10 +172,10 @@ int raw1394_read(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
                  size_t length, quadlet_t *buffer);
 int raw1394_write(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
                   size_t length, quadlet_t *data);
-int raw1394_lock(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,
+int raw1394_lock(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
                  unsigned int extcode, quadlet_t data, quadlet_t arg,
                  quadlet_t *result);
-int raw1394_iso_write(struct raw1394_handle *handle, unsigned int channel,
+int raw1394_iso_write(raw1394handle_t handle, unsigned int channel,
                       unsigned int tag, unsigned int sy, unsigned int speed,
                       size_t length, quadlet_t *data);
 

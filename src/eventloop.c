@@ -45,6 +45,9 @@ int raw1394_loop_iterate(struct raw1394_handle *handle)
 
         case RAW1394_REQ_ISO_RECEIVE:
                 channel = (handle->buffer[0] >> 8) & 0x3f;
+#ifndef WORDS_BIGENDIAN
+                /* swap(buffer[0]); */
+#endif
 
                 if (handle->iso_handler[channel]) {
                         retval = handle->iso_handler[channel](handle, channel,

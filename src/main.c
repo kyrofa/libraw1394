@@ -76,7 +76,7 @@ static unsigned int init_rawdevice(struct raw1394_handle *h)
 }
 
 
-struct raw1394_handle *raw1394_get_handle(void)
+struct raw1394_handle *raw1394_new_handle(void)
 {
         struct raw1394_handle *handle;
 
@@ -99,6 +99,7 @@ struct raw1394_handle *raw1394_get_handle(void)
                 return NULL;
         }
 
+        handle->err = 0;
         handle->bus_reset_handler = bus_reset_default;
         handle->tag_handler = tag_handler_default;
         memset(handle->iso_handler, 0, sizeof(handle->iso_handler));

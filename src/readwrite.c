@@ -120,14 +120,16 @@ int raw1394_start_iso_write(struct raw1394_handle *handle, unsigned int channel,
         struct sync_cb_data sd = { 0, 0 };                                \
         struct raw1394_reqhandle rh = { (req_callback_t)_raw1394_sync_cb, \
                                         &sd };                            \
-        int err
+        int err = 0
 
-#define SYNCFUNC_BODY                               \
-        while (!sd.done) {                          \
-                if (err < 0) return err;            \
-                err = raw1394_loop_iterate(handle); \
-        }                                           \
-        return sd.errcode
+#define SYNCFUNC_BODY                                 \
+        while (!sd.done) {                            \
+                if (err < 0) return err;              \
+                err = raw1394_loop_iterate(handle);   \
+        }                                             \
+        handle->err = sd.errcode;                     \
+        errno = raw1394_errcode_to_errno(sd.errcode); \
+        return (errno ? -1 : 0)
 
 int raw1394_read(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,
                  size_t length, quadlet_t *buffer)

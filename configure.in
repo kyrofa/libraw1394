@@ -1,7 +1,7 @@
 # process this file with autoconf to get a configure script
 
 AC_INIT(Makefile.am)
-AM_INIT_AUTOMAKE(libraw1394, 0.8.2)
+AM_INIT_AUTOMAKE(libraw1394, 0.9pre)
 AM_CONFIG_HEADER(config.h)
 
 AC_PROG_CC
@@ -9,11 +9,13 @@ AM_PROG_LIBTOOL
 AC_PROG_INSTALL
 
 AC_CHECK_SIZEOF(void *, 8)
+AC_C_CONST
+AC_C_BIGENDIAN
 
 # set the libtool so version numbers
 lt_major=5
-lt_revision=0
-lt_age=1
+lt_revision=1
+lt_age=0
 
 AC_SUBST(lt_major)
 AC_SUBST(lt_revision)
