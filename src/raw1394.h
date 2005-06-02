@@ -824,9 +824,9 @@ int raw1394_start_phy_packet_write(raw1394handle_t handle,
 /**
  * raw1394_start_read - initiate a read transaction
  * @handle: libraw1394 handle
- * @node: target node
+ * @node: target node ID
  * @addr: address to read from
- * @length: amount of data to read
+ * @length: amount of bytes of data to read
  * @buffer: pointer to buffer where data will be saved
  * @tag: data to identify the request to completion handler
  *
@@ -848,9 +848,9 @@ int raw1394_start_read(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 /**
  * raw1394_start_write - initiate a write transaction
  * @handle: libraw1394 handle
- * @node: target node
+ * @node: target node ID
  * @addr: address to write to
- * @length: amount of data to write
+ * @length: amount of bytes of data to write
  * @data: pointer to data to be sent
  * @tag: data to identify the request to completion handler
  *
@@ -872,7 +872,7 @@ int raw1394_start_write(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 /**
  * raw1394_start_lock - initiate a 32-bit compare-swap lock transaction
  * @handle: libraw1394 handle
- * @node: target node
+ * @node: target node ID
  * @addr: address to read from
  * @extcode: extended transaction code determining the lock operation
  * @data: data part of lock parameters
@@ -897,7 +897,7 @@ int raw1394_start_lock(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 /**
  * raw1394_start_lock64 - initiate a 64-bit compare-swap lock transaction
  * @handle: libraw1394 handle
- * @node: target node
+ * @node: target node ID
  * @addr: address to read from
  * @extcode: extended transaction code determining the lock operation
  * @data: data part of lock parameters
@@ -920,13 +920,13 @@ int raw1394_start_lock64(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
                        octlet_t *result, unsigned long tag);
 
 /**
- * raw1394_start_read - initiate asynchronous stream
+ * raw1394_start_async_stream - initiate asynchronous stream
  * @handle: libraw1394 handle
  * @channel: the isochronous channel number to send on
  * @tag: data to be put into packet's tag field
  * @sy: data to be put into packet's sy field
  * @speed: speed at which to send
- * @length: amount of data to send
+ * @length: amount of data to send, in bytes
  * @data: pointer to data to send
  * @rawtag: data to identify the request to completion handler
  *
@@ -944,8 +944,8 @@ int raw1394_start_async_stream(raw1394handle_t handle, unsigned int channel,
 /**
  * raw1394_start_async_send - send an asynchronous packet
  * @handle: libraw1394 handle
- * @length: the amount of quadlets of data to send
- * @header_length: the number of quadlets in the header
+ * @length: the amount of bytes of data to send
+ * @header_length: the number of bytes in the header
  * @expect_response: indicate with a 0 or 1 whether to receive a completion event
  * @data: pointer to data to send
  * @rawtag: data to identify the request to completion handler
@@ -972,10 +972,12 @@ int raw1394_start_async_send(raw1394handle_t handle,
 /**
  * raw1394_read - send async read request to a node and wait for response.
  * @handle: libraw1394 handle
- * @node: target node
+ * @node: target node ID
  * @addr: address to read from
- * @length: amount of data to read in quadlets
+ * @length: amount of bytes of data to read
  * @buffer: pointer to buffer where data will be saved
+ *
+ * If @length is %4, a quadlet read request is used.
  *
  * This does the complete transaction and will return when it's finished.  It
  * will call raw1394_loop_iterate() as often as necessary, return values of
@@ -989,10 +991,12 @@ int raw1394_read(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 /**
  * raw1394_write - send async write request to a node and wait for response.
  * @handle: libraw1394 handle
- * @node: target node
+ * @node: target node ID
  * @addr: address to write to
- * @length: amount of data to write in quadlets
+ * @length: amount of bytes of data to write
  * @data: pointer to data to be sent
+ *
+ * If @length is %4, a quadlet write request is used.
  *
  * This does the complete transaction and will return when it's finished.  It
  * will call raw1394_loop_iterate() as often as necessary, return values of
@@ -1006,7 +1010,7 @@ int raw1394_write(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 /**
  * raw1394_lock - send 32-bit compare-swap lock request and wait for response.
  * @handle: libraw1394 handle
- * @node: target node
+ * @node: target node ID
  * @addr: address to read from
  * @extcode: extended transaction code determining the lock operation
  * @data: data part of lock parameters
@@ -1026,7 +1030,7 @@ int raw1394_lock(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 /**
  * raw1394_lock64 - send 64-bit compare-swap lock request and wait for response.
  * @handle: libraw1394 handle
- * @node: target node
+ * @node: target node ID
  * @addr: address to read from
  * @extcode: extended transaction code determining the lock operation
  * @data: data part of lock parameters
@@ -1050,7 +1054,7 @@ int raw1394_lock64(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
  * @tag: data to be put into packet's tag field
  * @sy: data to be put into packet's sy field
  * @speed: speed at which to send
- * @length: amount of data to send
+ * @length: amount of bytes of data to send
  * @data: pointer to data to send
  *
  * Returns: 0 on success or -1 on failure (sets errno)
@@ -1062,8 +1066,8 @@ int raw1394_async_stream(raw1394handle_t handle, unsigned int channel,
 /**
  * raw1394_async_send
  * @handle: libraw1394 handle
- * @length: the amount of quadlets of data to send
- * @header_length: the number of quadlets in the header
+ * @length: the amount of bytes of data to send
+ * @header_length: the number of bytes in the header
  * @expect_response: indicate with a 0 or 1 whether to receive a completion event
  * @data: pointer to data to send
  *

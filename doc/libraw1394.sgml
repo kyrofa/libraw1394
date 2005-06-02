@@ -73,9 +73,9 @@
     </para>
 
     <para>
-      If you are familiar with CSR architectures (as defined in IEEE 1212
-      (FIXME?)), then you already know most of 1394, which is a CSR
-      implementation.
+      If you are familiar with CSR architectures (as defined in ISO/IEC 13213
+      (ANSI/IEEE 1212)), then you already know quite a bit of 1394, which is a
+      CSR implementation.
     </para>
 
     <sect1>
@@ -94,20 +94,30 @@
       <para>
 	A 1394 bus consists of up to 64 nodes (with multiple buses possibly
 	being connected, but that is outside of the scope of this document and
-	not completely standardized yet), each having a local address space with
-	48 bit wide addressing.  Each node is addressed with a 16 bit address,
-	which is further divided into a 10 bit bus ID and a 6 bit local node ID.
-	The highest value for both is a special value.  Bus ID equal to 1023
-	means "local bus" (the bus the node is connected to), node ID equal to
-	63 means "all nodes" (broadcast).
+	not completely standardized yet).  Each node is addressed with a 16 bit
+	address, which is further divided into a 10 bit bus ID and a 6 bit local
+	node number, the so-called physical ID.  The physical IDs are completely
+	dynamic and determined during the bus reset.  The highest values for
+	both are special values.  Bus ID equal to 1023 means "local bus" (the
+	bus the node is connected to), physical ID equal to 63 means "all nodes"
+	(broadcast).
       </para>
 
       <para>
+	The local bus ID 1023 is the only one that can be used unless IEEE
+	1394.1 bridge portals to more buses were available. Therefore the node
+	IDs have to be given as (1023&lt;&lt;6) | phy_ID.  (This is also true
+	if libraw1394 runs at a host which contains multiple 1394 bus adapters.
+	The local ID 1023 is valid on each of these buses. The Linux host
+	itself is no IEEE 1394.1 bridge.)
+      </para>
+
+      <para>
+	Each node has a local address space with 48 bit wide addressing.
 	The whole bus can thus be seen as a linear 64 bit address space by
-	concatenating the node address (most significant bits) and and node
+	concatenating the node ID (most significant bits) and local
 	address (least significant bits).  libraw1394 treats them separately in
 	function arguments to save the application some fiddling with the bits.
-	The node IDs are completely dynamic and determined during the bus reset.
       </para>
 
       <para>
@@ -156,23 +166,23 @@
 	The root node sends a SelfID grant on its first port connected to a
 	child.  If that is not a leaf node, it will itself forward the grant to
 	its first child.  When a leaf node gets a grant, it will pick the lowest
-	node ID not yet in use (starting with 0) and send out a SelfID packet
-	with its node ID and more information, then acknowledge the SelfID grant
-	to its parent, which will send a grant to its next child until it
-	configured all its children, then pick a node ID itself, send SelfID
+	physical ID not yet in use (starting with 0) and send out a SelfID packet
+	with its physical ID and more information, then acknowledge the SelfID
+	grant to its parent, which will send a grant to its next child until it
+	configured all its children, then pick a physical ID itself, send SelfID
 	packet and ack to parent.
       </para>
 
       <para>
-	After bus reset the used node IDs are in a sequential range with no
-	holes starting from 0 with the root node having the highest ID.  This
-	also means that node IDs can change for many or all nodes with the
+	After bus reset the used physical IDs are in a sequential range with no
+	holes starting from 0 up to the root node having the highest ID.  This
+	also means that physical IDs can change for many or all nodes with the
 	insertion of a new node or moving the role of root to another node.  In
 	libraw1394 all transactions are tagged automatically with a generation
 	number which is increased in every bus reset and transactions with an
 	obsolete generation will fail in order to avoid targetting the wrong
 	node.  Nodes have to be identified in a different way than their
-	volatile node IDs, namely by reading their globally unique ID (GUID)
+	volatile physical IDs, namely by reading their globally unique ID (GUID)
 	contained in the configuration ROM.
       </para>
     </sect1>
@@ -304,11 +314,11 @@
 	values (all channels free, all bandwidth minus some amount set aside for
 	asynchronous communication available), this has to happen since the
 	isochronous manager may have moved to another node.  Isochronous
-	transmissions may continue with the old allocations for a certain
-	(FIXME) amount of time.  During that time, the nodes have to reallocate
-	their resources and no new allocations are allowed to occur.  Only after
-	this period new allocations may be done, this avoids nodes losing their
-	allocations over a bus reset.
+	transmissions may continue with the old allocations for 1000ms. During
+	that time, the nodes have to reallocate	their resources and no new
+	allocations are allowed to occur.  Only after this period new
+	allocations may be done, this avoids nodes losing their	allocations over
+	a bus reset.
       </para>
 
       <para>
