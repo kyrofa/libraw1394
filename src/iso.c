@@ -288,7 +288,7 @@ static int _raw1394_iso_xmit_queue_packets(raw1394handle_t handle)
 	if(packets.infos == NULL)
 		goto out;
 
-	while(stat->n_packets > 0) {
+	while(stat->n_packets > 1) {
 		enum raw1394_iso_disposition disp;
 		unsigned int len;
 		

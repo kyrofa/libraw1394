@@ -1,6 +1,6 @@
 # process this file with autoconf to get a configure script
 
-AC_INIT(libraw1394, 1.2.0)
+AC_INIT(libraw1394, 1.2.1)
 AC_CONFIG_SRCDIR(src/raw1394.h)
 AM_CONFIG_HEADER(config.h)
 
@@ -17,7 +17,7 @@ AC_C_BIGENDIAN
 
 # set the libtool so version numbers
 lt_major=9
-lt_revision=0
+lt_revision=1
 lt_age=1
 
 AC_SUBST(lt_major)
