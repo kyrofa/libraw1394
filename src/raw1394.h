@@ -151,6 +151,7 @@ typedef enum raw1394_iso_disposition (*raw1394_iso_recv_handler_t)(
  * @irq_interval: maximum latency of wake-ups, in packets (-1 if you don't care)
  *
  * Allocates all user and kernel resources necessary for isochronous transmission.
+ * Channel and bandwidth allocation at the IRM is not performed.
  *
  * Returns: 0 on success or -1 on failure (sets errno)
  **/
