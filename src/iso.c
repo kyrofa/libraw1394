@@ -269,7 +269,6 @@ int raw1394_iso_recv_start(raw1394handle_t handle, int start_on_cycle, int tag_m
 	return 0;
 }
 
-
 static int _raw1394_iso_xmit_queue_packets(raw1394handle_t handle)
 {
 	struct raw1394_iso_status *stat = &handle->iso_status;
@@ -281,6 +280,10 @@ static int _raw1394_iso_xmit_queue_packets(raw1394handle_t handle)
 		errno = EINVAL;
 		goto out;
 	}
+
+	/* ensure stat->n_packets is sane */
+	if (stat->n_packets > stat->config.buf_packets)
+		stat->n_packets = stat->config.buf_packets;
 
 	/* we could potentially send up to stat->n_packets packets */
 	packets.n_packets = 0;

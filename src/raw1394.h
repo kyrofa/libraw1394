@@ -1207,7 +1207,9 @@ typedef int (*iso_handler_t)(raw1394handle_t, int channel, size_t length,
  **/
 iso_handler_t raw1394_set_iso_handler(raw1394handle_t handle,
                                       unsigned int channel,
-                                      iso_handler_t new_h);
+                                      iso_handler_t new_h)
+__attribute__ ((deprecated));
+
 /**
  * raw1394_start_iso_rcv - enable isochronous receiving (DEPRECATED)
  * @handle: libraw1394 handle
@@ -1219,7 +1221,8 @@ iso_handler_t raw1394_set_iso_handler(raw1394handle_t handle,
  * Isochronous packets are then passed to the callback specified with
  * raw1394_set_iso_handler().
  **/
-int raw1394_start_iso_rcv(raw1394handle_t handle, unsigned int channel);
+int raw1394_start_iso_rcv(raw1394handle_t handle, unsigned int channel)
+__attribute__ ((deprecated));
 
 /**
  * raw1394_stop_iso_rcv - stop isochronous receiving (DEPRECATED)
@@ -1230,7 +1233,8 @@ int raw1394_start_iso_rcv(raw1394handle_t handle, unsigned int channel);
  *
  * Stops the reception of isochronous packets in @channel on @handle.
  **/
-int raw1394_stop_iso_rcv(raw1394handle_t handle, unsigned int channel);
+int raw1394_stop_iso_rcv(raw1394handle_t handle, unsigned int channel)
+__attribute__ ((deprecated));
 
 /**
  * raw1394_start_iso_write - initiate an isochronous packet write (DEPRECATED)
@@ -1259,7 +1263,8 @@ int raw1394_stop_iso_rcv(raw1394handle_t handle, unsigned int channel);
 int raw1394_start_iso_write(raw1394handle_t handle, unsigned int channel,
                             unsigned int tag, unsigned int sy,
                             unsigned int speed, size_t length, quadlet_t *data,
-                            unsigned long rawtag);
+                            unsigned long rawtag)
+__attribute__ ((deprecated));
 
 /**
  * raw1394_iso_write - DEPRECATED
@@ -1269,7 +1274,8 @@ int raw1394_start_iso_write(raw1394handle_t handle, unsigned int channel,
  **/
 int raw1394_iso_write(raw1394handle_t handle, unsigned int channel,
                       unsigned int tag, unsigned int sy, unsigned int speed,
-                      size_t length, quadlet_t *data);
+                      size_t length, quadlet_t *data)
+__attribute__ ((deprecated));
 
 #ifdef __cplusplus
 }
