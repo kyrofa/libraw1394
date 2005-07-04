@@ -363,7 +363,7 @@ int raw1394_iso_xmit_write(raw1394handle_t handle, unsigned char *data, unsigned
 	}
 
 	/* wait until buffer space is available */
-	while(handle->iso_status.n_packets == 0) {
+	while(handle->iso_status.n_packets <= 1) {
 		/* if the file descriptor has been set non-blocking,
 		   return immediately */
 		if(fcntl(handle->fd, F_GETFL) & O_NONBLOCK) {
