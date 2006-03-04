@@ -320,6 +320,14 @@ static int _raw1394_iso_xmit_queue_packets(raw1394handle_t handle)
 			if(ioctl(handle->fd, RAW1394_IOC_ISO_QUEUE_ACTIVITY, 0))
 				goto out_produce;
 			break;
+		} else if(disp == RAW1394_ISO_AGAIN) {
+			/* the last packet was not ready, decrement counter */
+			packets.n_packets--;
+			
+			/* queue an event so that we don't hang in the next read() */
+			if(ioctl(handle->fd, RAW1394_IOC_ISO_QUEUE_ACTIVITY, 0))
+				goto out_produce;
+			break;
 		} else if(disp == RAW1394_ISO_STOP) {
 			stop_sync = 1;
 			break;

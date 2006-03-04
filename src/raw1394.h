@@ -106,6 +106,11 @@ enum raw1394_iso_disposition {
 
 	/* (transmission only) - like ISO_STOP, but don't wait for the buffer to empty */
 	RAW1394_ISO_STOP_NOSYNC = 4,
+	
+	/* (transmission only) - use this if the data you need for the packet was not ready yet
+	 * The packet queueing will retry at a later point
+	 */
+	RAW1394_ISO_AGAIN = 5,
 };
 
 enum raw1394_modify_mode {
