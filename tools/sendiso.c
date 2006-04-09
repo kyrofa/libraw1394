@@ -143,7 +143,7 @@ void send_file_once(raw1394handle_t handle, int file)
         int count, i, ret;
         unsigned channel, tag, sy;
         size_t length;
-        static char buffer[BUF_SIZE + BUF_HEAD];
+        static unsigned char buffer[BUF_SIZE + BUF_HEAD];
         static unsigned int counter = 0;
         static int inited = 0;
 

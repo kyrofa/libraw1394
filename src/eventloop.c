@@ -71,7 +71,7 @@ int raw1394_loop_iterate(struct raw1394_handle *handle)
                         retval = handle->fcp_handler(handle, req.misc & 0xffff,
                                                      req.misc >> 16,
                                                      req.length,
-                                                     (char *)handle->buffer);
+                                                     (unsigned char *)handle->buffer);
                 }
                 break;
 
