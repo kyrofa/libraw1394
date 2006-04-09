@@ -1,3 +1,7 @@
+Version 1.2.1:
+- generate compiler warnings on deprecated functions (legacy isochronous).
+- bugfixes and optimizations.
+
 Version 1.2.0:
 - added constants useful for ARM: transaction and response return codes.
 - added raw1394_bandwidth_modify() and raw1394_channel_modify().
