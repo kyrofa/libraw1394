@@ -152,7 +152,15 @@ static int do_iso_init(raw1394handle_t handle,
 
 	handle->iso_state = ISO_STOP;
 
-	return 0;			
+	handle->iso_packet_infos = malloc(buf_packets * sizeof(struct raw1394_iso_packet_info));
+	if(handle->iso_packet_infos == NULL) {
+		munmap(handle->iso_buffer, handle->iso_status.config.data_buf_size);
+		handle->iso_buffer = NULL;
+		ioctl(handle->fd, RAW1394_IOC_ISO_SHUTDOWN, 0);
+		return -1;
+	}
+
+	return 0;
 }
 
 int raw1394_iso_xmit_init(raw1394handle_t handle,
@@ -287,7 +295,7 @@ static int _raw1394_iso_xmit_queue_packets(raw1394handle_t handle)
 
 	/* we could potentially send up to stat->n_packets packets */
 	packets.n_packets = 0;
-	packets.infos = malloc(stat->n_packets * sizeof(struct raw1394_iso_packet_info));
+	packets.infos = handle->iso_packet_infos;
 	if(packets.infos == NULL)
 		goto out;
 
@@ -347,7 +355,6 @@ out_produce:
 		if(ioctl(handle->fd, RAW1394_IOC_ISO_XMIT_PACKETS, &packets))
 			retval = -1;
 	}
-	free(packets.infos);
 out:
 	if(stop_sync) {
 		if(raw1394_iso_xmit_sync(handle))
@@ -456,6 +463,11 @@ void raw1394_iso_shutdown(raw1394handle_t handle)
 		ioctl(handle->fd, RAW1394_IOC_ISO_SHUTDOWN, 0);
 	}
 
+	if(handle->iso_packet_infos) {
+		free(handle->iso_packet_infos);
+		handle->iso_packet_infos = NULL;
+	}
+
 	handle->iso_mode = ISO_INACTIVE;
 }
 
@@ -473,12 +485,12 @@ static int _raw1394_iso_recv_packets(raw1394handle_t handle)
 	
 	/* ask the kernel to fill an array with packet info structs */
 	packets.n_packets = stat->n_packets;
-	packets.infos = malloc(packets.n_packets * sizeof(struct raw1394_iso_packet_info));
+	packets.infos = handle->iso_packet_infos;
 	if(packets.infos == NULL)
 		goto out;
 
 	if(ioctl(handle->fd, RAW1394_IOC_ISO_RECV_PACKETS, &packets) < 0)
-		goto out_free;
+		goto out;
 
 	while(stat->n_packets > 0) {
 		struct raw1394_iso_packet_info *info;
@@ -519,8 +531,6 @@ out_consume:
 		if(ioctl(handle->fd, RAW1394_IOC_ISO_RECV_RELEASE_PACKETS, packets_done))
 			retval = -1;
 	}
-out_free:
-	free(packets.infos);
 out:	
 	return retval;
 }

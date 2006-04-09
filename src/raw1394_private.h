@@ -43,7 +43,8 @@ struct raw1394_handle {
 	raw1394_iso_xmit_handler_t iso_xmit_handler;
 	raw1394_iso_recv_handler_t iso_recv_handler;
 
-        quadlet_t buffer[HBUF_SIZE/4]; /* 2048 */
+	quadlet_t buffer[HBUF_SIZE/4]; /* 2048 */
+	void *iso_packet_infos; /* actually a struct raw1394_iso_packet_info* */
 };
 
 struct sync_cb_data {
