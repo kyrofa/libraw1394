@@ -105,6 +105,7 @@ static int do_iso_init(raw1394handle_t handle,
 		       int cmd)
 {
 	unsigned int stride;
+	int result;
 
 	/* already initialized? */
 	if(handle->iso_mode != ISO_INACTIVE)
@@ -159,7 +160,16 @@ static int do_iso_init(raw1394handle_t handle,
 		ioctl(handle->fd, RAW1394_IOC_ISO_SHUTDOWN, 0);
 		return -1;
 	}
-
+#if _POSIX_MEMLOCK > 0
+	result = mlock(handle->iso_packet_infos, buf_packets * sizeof(struct raw1394_iso_packet_info));
+	/* Ignore a permission error - app is responsible for that, */
+	if (result < 0 && result != -EPERM) {
+		munmap(handle->iso_buffer, handle->iso_status.config.data_buf_size);
+		handle->iso_buffer = NULL;
+		ioctl(handle->fd, RAW1394_IOC_ISO_SHUTDOWN, 0);
+		return -1;
+	}
+#endif
 	return 0;
 }
 
@@ -464,6 +474,11 @@ void raw1394_iso_shutdown(raw1394handle_t handle)
 	}
 
 	if(handle->iso_packet_infos) {
+#if _POSIX_MEMLOCK > 0
+		munlock(handle->iso_packet_infos,
+			handle->iso_status.config.buf_packets * 
+			sizeof(struct raw1394_iso_packet_info));
+#endif
 		free(handle->iso_packet_infos);
 		handle->iso_packet_infos = NULL;
 	}
