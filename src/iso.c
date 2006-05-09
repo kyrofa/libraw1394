@@ -22,6 +22,18 @@
 #include "kernel-raw1394.h"
 #include "raw1394_private.h"
 
+/* This implements
+   x = (x+1) % n
+   using a branch based implementation
+ */
+static inline int increment_and_wrap(int x, int n)
+{
+  ++x;
+  if (x >= n)
+    x = 0;
+  return x;
+}
+
 /* old ISO API - kept for backwards compatibility */
 
 static int do_iso_listen(struct raw1394_handle *handle, int channel)
@@ -328,9 +340,9 @@ static int _raw1394_iso_xmit_queue_packets(raw1394handle_t handle)
 		
 		/* advance packet cursors and cycle counter */
 		stat->n_packets--;
-		handle->next_packet = (handle->next_packet + 1) % stat->config.buf_packets;
+		handle->next_packet = increment_and_wrap(handle->next_packet, stat->config.buf_packets);
 		if(stat->xmit_cycle != -1)
-			stat->xmit_cycle = (stat->xmit_cycle + 1) % 8000;
+			stat->xmit_cycle = increment_and_wrap(stat->xmit_cycle, 8000);
 		packets.n_packets++;
 
 		if(disp == RAW1394_ISO_DEFER) {
@@ -416,9 +428,9 @@ int raw1394_iso_xmit_write(raw1394handle_t handle, unsigned char *data, unsigned
 		return -1;
 
 	stat->n_packets--;
-	handle->next_packet = (handle->next_packet + 1) % stat->config.buf_packets;
+	handle->next_packet = increment_and_wrap(handle->next_packet, stat->config.buf_packets);
 	if(stat->xmit_cycle != -1)
-		stat->xmit_cycle = (stat->xmit_cycle + 1) % 8000;
+		stat->xmit_cycle = increment_and_wrap(stat->xmit_cycle, 8000);
 
 	return 0;
 }
