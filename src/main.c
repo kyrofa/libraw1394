@@ -140,8 +140,9 @@ struct raw1394_handle *raw1394_new_handle(void)
         handle->tag_handler = tag_handler_default;
         handle->arm_tag_handler = arm_tag_handler_default;
         memset(handle->iso_handler, 0, sizeof(handle->iso_handler));
-	handle->iso_buffer = NULL;
-	handle->iso_mode = ISO_INACTIVE;
+        handle->iso_buffer = NULL;
+        handle->iso_mode = ISO_INACTIVE;
+        handle->iso_packet_infos = NULL;
         return handle;
 }
 
