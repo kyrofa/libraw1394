@@ -103,7 +103,7 @@ static unsigned int init_rawdevice(struct raw1394_handle *h)
         }
 
         if (req.error) {
-                errno = 0;
+                errno = EPROTO;
                 return -1;
         }
         memset(h->buffer, 0, HBUF_SIZE);

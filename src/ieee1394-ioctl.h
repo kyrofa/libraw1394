@@ -1,19 +1,13 @@
-/* Base file for all ieee1394 ioctl's. Linux-1394 has allocated base '#'
- * with a range of 0x00-0x3f. */
+/*
+ * Base file for all ieee1394 ioctl's.
+ * Linux-1394 has allocated base '#' with a range of 0x00-0x3f.
+ */
 
 #ifndef __IEEE1394_IOCTL_H
 #define __IEEE1394_IOCTL_H
 
 #include <linux/ioctl.h>
 #include <linux/types.h>
-
-
-/* AMDTP Gets 6 */
-#define AMDTP_IOC_CHANNEL	_IOW('#', 0x00, struct amdtp_ioctl)
-#define AMDTP_IOC_PLUG		_IOW('#', 0x01, struct amdtp_ioctl)
-#define AMDTP_IOC_PING		_IOW('#', 0x02, struct amdtp_ioctl)
-#define AMDTP_IOC_ZAP		_IO ('#', 0x03)
-
 
 /* DV1394 Gets 10 */
 
@@ -104,8 +98,9 @@
 	_IOW ('#', 0x27, struct raw1394_iso_packets)
 #define RAW1394_IOC_ISO_XMIT_SYNC		\
 	_IO  ('#', 0x28)
-#define RAW1394_IOC_ISO_RECV_FLUSH              \
+#define RAW1394_IOC_ISO_RECV_FLUSH		\
 	_IO  ('#', 0x29)
-
+#define RAW1394_IOC_GET_CYCLE_TIMER		\
+	_IOR ('#', 0x30, struct raw1394_cycle_timer)
 
 #endif /* __IEEE1394_IOCTL_H */

@@ -498,6 +498,20 @@ void raw1394_iso_shutdown(raw1394handle_t handle)
 	handle->iso_mode = ISO_INACTIVE;
 }
 
+int raw1394_read_cycle_timer(raw1394handle_t handle,
+			     u_int32_t *cycle_timer, u_int64_t *local_time)
+{
+	int err;
+	struct raw1394_cycle_timer ctr = { 0 };
+
+	err = ioctl(handle->fd, RAW1394_IOC_GET_CYCLE_TIMER, &ctr);
+	if (!err) {
+		*cycle_timer = ctr.cycle_timer;
+		*local_time  = ctr.local_time;
+	}
+	return err;
+}
+
 static int _raw1394_iso_recv_packets(raw1394handle_t handle)
 {
 	struct raw1394_iso_status *stat = &handle->iso_status;

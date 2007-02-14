@@ -118,7 +118,6 @@ enum raw1394_modify_mode {
 	RAW1394_MODIFY_FREE
 };
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -327,6 +326,25 @@ void raw1394_iso_stop(raw1394handle_t handle);
  * @handle: libraw1394 handle
  **/
 void raw1394_iso_shutdown(raw1394handle_t handle);
+
+/**
+ * raw1394_get_cycle_timer - get the current value of the cycle timer
+ * @handle: libraw1394 handle
+ * @cycle_timer: buffer for Isochronous Cycle Timer
+ * @local_time: buffer for local system time in microseconds since Epoch
+ *
+ * Simultaneously reads the cycle timer register together with the system clock.
+ *
+ * Format of @cycle_timer, from MSB to LSB: 7 bits cycleSeconds (seconds, or
+ * number of cycleCount rollovers), 13 bits cycleCount (isochronous cycles, or
+ * cycleOffset rollovers), 12 bits cycleOffset (24.576 MHz clock ticks, not
+ * provided on some hardware). The union of cycleSeconds and cycleCount is the
+ * current cycle number. The nominal duration of a cycle is 125 microseconds.
+ *
+ * Returns: the error code of the ioctl, or 0 if successful.
+ **/
+int raw1394_read_cycle_timer(raw1394handle_t handle,
+                             u_int32_t *cycle_timer, u_int64_t *local_time);
 
 typedef int raw1394_errcode_t;
 #define raw1394_make_errcode(ack, rcode) (((ack) << 16) | rcode)
