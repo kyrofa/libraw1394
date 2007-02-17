@@ -398,9 +398,14 @@ int raw1394_errcode_to_errno(raw1394_errcode_t errcode);
  * processes.  It is allowed to create and use multiple handles, however.  Use
  * one handle per thread which needs it in the multithreaded case.
  *
+ * The default device node is /dev/raw1394, but one can override the default
+ * by setting environment variable RAW1394DEV. However, if RAW1394DEV points to
+ * a non-existant or invalid device node, then it also attempts to open the
+ * default device node.
+ *
  * Returns: the created handle or %NULL when initialization fails. In the latter
- * case errno either contains some OS specific error code or %0 if the error is
- * that libraw1394 and raw1394 don't support each other's protocol versions.
+ * case errno either contains some OS specific error code or EPROTO if
+ * libraw1394 and raw1394 don't support each other's protocol versions.
  **/
 raw1394handle_t raw1394_new_handle(void);
 
@@ -423,6 +428,11 @@ void raw1394_destroy_handle(raw1394handle_t handle);
  * raw1394_get_port_info() and raw1394_set_port(). Useful for
  * command-line programs that already know what port they want. If
  * raw1394_set_port() returns ESTALE, retries automatically.
+ *
+ * The default device node is /dev/raw1394, but one can override the default
+ * by setting environment variable RAW1394DEV. However, if RAW1394DEV points to
+ * a non-existant or invalid device node, then it also attempts to open the
+ * default device node.
  *
  * Returns: the new handle on success or NULL on failure
  **/
