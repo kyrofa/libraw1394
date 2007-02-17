@@ -115,6 +115,7 @@ static unsigned int init_rawdevice(struct raw1394_handle *h)
 struct raw1394_handle *raw1394_new_handle(void)
 {
         struct raw1394_handle *handle;
+        const char *defaultDevice = "/dev/raw1394";
 
         handle = malloc(sizeof(struct raw1394_handle));
         if (!handle) {
@@ -122,17 +123,31 @@ struct raw1394_handle *raw1394_new_handle(void)
                 return NULL;
         }
 
-        handle->fd = open("/dev/raw1394", O_RDWR);
+        handle->fd = open(getenv("RAW1394DEV") ? getenv("RAW1394DEV"): defaultDevice, O_RDWR);
         if (handle->fd < 0) {
-                free(handle);
-                return NULL;
+                /* failover to default in attempt to idiot proof */
+                handle->fd = open(defaultDevice, O_RDWR);
+                if (handle->fd < 0) {
+                        free(handle);
+                        return NULL;
+                }
         }
 
         handle->generation = init_rawdevice(handle);
         if (handle->generation == -1) {
+                /* failover to default in attempt to idiot proof */
                 close(handle->fd);
-                free(handle);
-                return NULL;
+                handle->fd = open(defaultDevice, O_RDWR);
+                if (handle->fd < 0) {
+                        free(handle);
+                        return NULL;
+                }
+                handle->generation = init_rawdevice(handle);
+                if (handle->generation == -1) {
+                        close(handle->fd);
+                        free(handle);
+                        return NULL;
+                }
         }
 
         handle->err = 0;
