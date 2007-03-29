@@ -219,7 +219,7 @@ handle_fcp_request(raw1394handle_t handle, struct address_closure *ac,
 	struct fw_cdev_send_response response;
 	int is_response;
 
-	response.serial = request->serial;
+	response.handle = request->handle;
 	response.rcode  = RCODE_COMPLETE;
 	response.length = 0;
 	response.data   = 0;
@@ -718,6 +718,7 @@ struct request_response_block {
 struct allocation {
 	struct address_closure closure;
 	struct allocation *next;
+	__u32 handle;
 	byte_t *buffer;
 	octlet_t tag;
 	arm_options_t access_rights;
@@ -740,7 +741,7 @@ handle_arm_request(raw1394handle_t handle, struct address_closure *ac,
 	int offset;
 
 	offset = request->offset - allocation->offset;
-	response.serial = request->serial;
+	response.handle = request->handle;
 
 	switch (request->tcode) {
 	case TCODE_WRITE_QUADLET_REQUEST:
@@ -867,6 +868,7 @@ raw1394_arm_register(raw1394handle_t handle, nodeaddr_t start,
 		return -1;
 	}
 
+	allocation->handle = request.handle;
 	allocation->next = handle->allocations;
 	handle->allocations = allocation;
 
@@ -903,9 +905,8 @@ raw1394_arm_unregister(raw1394handle_t handle, nodeaddr_t start)
 		return -1;
 	}
 
+	request.handle = allocation->handle;
 	free(allocation);
-
-	request.offset = start;
 
 	return ioctl(handle->local_fd, FW_CDEV_IOC_DEALLOCATE, &request);
 }
@@ -1290,6 +1291,8 @@ raw1394_start_fcp_listen(raw1394handle_t handle)
 	if (ioctl(handle->local_fd, FW_CDEV_IOC_ALLOCATE, &request) < 0)
 		return -1;
 
+	handle->fcp_allocation_handle = request.handle;
+
 	return 0;
 }
 
@@ -1298,7 +1301,7 @@ raw1394_stop_fcp_listen(raw1394handle_t handle)
 {
 	struct fw_cdev_deallocate request;
 
-	request.offset = CSR_REGISTER_BASE + CSR_FCP_COMMAND;
+	request.handle = handle->fcp_allocation_handle;
 
 	return ioctl(handle->local_fd, FW_CDEV_IOC_DEALLOCATE, &request);
 }

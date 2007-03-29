@@ -98,6 +98,7 @@ struct raw1394_handle {
 	tag_handler_t tag_handler;
 	arm_tag_handler_t arm_tag_handler;
 	fcp_handler_t fcp_handler;
+	__u32 fcp_allocation_handle;
 	struct allocation *allocations;
 
 	int epoll_fd;
@@ -122,6 +123,7 @@ struct raw1394_handle {
 		int irq_interval;
 		int packet_index;
 		int packet_phase;
+		int packet_tail;
 		int buf_packets;
 		int max_packet_size;
 		enum raw1394_iso_dma_recv_mode recv_mode;
