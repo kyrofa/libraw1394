@@ -177,20 +177,19 @@ flush_recv_packets(raw1394handle_t handle,
 	end = (void *) interrupt->header + interrupt->header_length;
 	cycle = interrupt->cycle;
 	dropped = 0;
-
-	/* FIXME: compute real buffer index. */
 	data = handle->iso.buffer +
 		handle->iso.packet_tail * handle->iso.max_packet_size;
 
 	while (p < end) {
 		header = be32_to_cpu(*p++);
-		len = header >> 8;
-		channel = header >> 8;
-		tag = header >> 8;
-		sy = header >> 8;
+		len = header >> 16;
+		tag = (header >> 14) & 0x3;
+		channel = (header >> 8) & 0x3f;
+		sy = header & 0x0f;
 
-		printf("len=%d, channel=%d, tag=%d, sy=%d\n",
-		       len, channel, tag, sy);
+		fprintf(stderr,
+			"header: %08x, len=%d, channel=%d, tag=%d, sy=%d, packet_tail=0x%x\n",
+			header, len, channel, tag, sy, handle->iso.packet_tail);
 
 		d = handle->iso.recv_handler(handle, data, len, channel,
 					     tag, sy, cycle, dropped);
@@ -198,6 +197,10 @@ flush_recv_packets(raw1394handle_t handle,
 		data += handle->iso.max_packet_size;
 		cycle++;
 	}
+
+	handle->iso.packet_tail += interrupt->header_length / 4;
+	if (handle->iso.packet_tail >= handle->iso.buf_packets)
+			handle->iso.packet_tail -= handle->iso.buf_packets;
 
 	queue_recv_packets(handle);
 
