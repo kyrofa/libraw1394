@@ -124,6 +124,7 @@ struct raw1394_handle {
 		int packet_index;
 		int packet_phase;
 		int packet_tail;
+		int packet_count;
 		int buf_packets;
 		int max_packet_size;
 		enum raw1394_iso_dma_recv_mode recv_mode;

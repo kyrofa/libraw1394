@@ -60,6 +60,7 @@ refill_xmit_buffer(raw1394handle_t handle, struct fw_cdev_queue_iso *queue_iso)
 
 		data += handle->iso.max_packet_size;
 		handle->iso.packet_index++;
+		handle->iso.packet_count++;
 		handle->iso.packet_phase++;
 
 		if (handle->iso.packet_index == handle->iso.buf_packets) {
@@ -123,11 +124,11 @@ int raw1394_iso_xmit_start(raw1394handle_t handle, int start_on_cycle,
 static int
 queue_recv_packets(raw1394handle_t handle)
 {
-	int i;
 	struct fw_cdev_queue_iso queue_iso;
 	struct fw_cdev_iso_packet *p = handle->iso.packets;
 	unsigned int len;
 	unsigned char *data, *buffer;
+	int i;
 
 	buffer = handle->iso.buffer +
 		handle->iso.packet_index * handle->iso.max_packet_size;
@@ -143,17 +144,22 @@ queue_recv_packets(raw1394handle_t handle)
 
 		data += handle->iso.max_packet_size;
 		handle->iso.packet_index++;
+		handle->iso.packet_count++;
 		handle->iso.packet_phase++;
 
-		if (handle->iso.packet_index == handle->iso.buf_packets)
-			handle->iso.packet_index = 0;
 		if (handle->iso.packet_phase == handle->iso.irq_interval)
 			handle->iso.packet_phase = 0;
+		if (handle->iso.packet_index == handle->iso.buf_packets) {
+			handle->iso.packet_index = 0;
+			/* We can't handle wrapping payloads, so we need to
+			 * break in this case.*/
+			i++;
+			break;
+		}
 	}
 
 	queue_iso.packets = ptr_to_u64(handle->iso.packets);
-	queue_iso.size    =
-		handle->iso.irq_interval * sizeof handle->iso.packets[0];
+	queue_iso.size    = i * sizeof handle->iso.packets[0];
 	queue_iso.data    = ptr_to_u64(buffer);
 
 	len = ioctl(handle->iso.fd, FW_CDEV_IOC_QUEUE_ISO, &queue_iso);
@@ -187,22 +193,23 @@ flush_recv_packets(raw1394handle_t handle,
 		channel = (header >> 8) & 0x3f;
 		sy = header & 0x0f;
 
-		fprintf(stderr,
-			"header: %08x, len=%d, channel=%d, tag=%d, sy=%d, packet_tail=0x%x\n",
-			header, len, channel, tag, sy, handle->iso.packet_tail);
-
 		d = handle->iso.recv_handler(handle, data, len, channel,
 					     tag, sy, cycle, dropped);
 
 		data += handle->iso.max_packet_size;
 		cycle++;
+
+		handle->iso.packet_tail++;
+		handle->iso.packet_count--;
+		if (handle->iso.packet_tail == handle->iso.buf_packets) {
+			handle->iso.packet_tail = 0;
+			data = handle->iso.buffer;
+		}
 	}
 
-	handle->iso.packet_tail += interrupt->header_length / 4;
-	if (handle->iso.packet_tail >= handle->iso.buf_packets)
-			handle->iso.packet_tail -= handle->iso.buf_packets;
-
-	queue_recv_packets(handle);
+	while (handle->iso.packet_count + handle->iso.irq_interval <=
+	       handle->iso.buf_packets)
+		queue_recv_packets(handle);
 
 	return 0;
 }
@@ -212,7 +219,7 @@ int raw1394_iso_recv_start(raw1394handle_t handle, int start_on_cycle,
 {
 	struct fw_cdev_start_iso start_iso;
 
-	while (handle->iso.packet_index + handle->iso.irq_interval <
+	while (handle->iso.packet_count + handle->iso.irq_interval <=
 	       handle->iso.buf_packets)
 		queue_recv_packets(handle);
 
@@ -298,7 +305,6 @@ iso_init(raw1394handle_t handle, int type,
 	 unsigned char channel,
 	 enum raw1394_iso_speed speed,
 	 int irq_interval)
-
 {
 	struct fw_cdev_create_iso_context create;
 	struct epoll_event ep;
@@ -321,6 +327,7 @@ iso_init(raw1394handle_t handle, int type,
 	handle->iso.packet_index = 0;
 	handle->iso.packet_phase = 0;
 	handle->iso.packet_tail = 0;
+	handle->iso.packet_count = 0;
 	handle->iso.queue_iso.size = 0;
 	handle->iso.packets =
 		malloc(handle->iso.irq_interval * sizeof handle->iso.packets[0]);
@@ -441,6 +448,10 @@ int raw1394_iso_recv_set_channel_mask(raw1394handle_t handle, u_int64_t mask)
 void raw1394_iso_stop(raw1394handle_t handle)
 {
 	ioctl(handle->iso.fd, FW_CDEV_IOC_STOP_ISO);
+	handle->iso.packet_index = 0;
+	handle->iso.packet_tail = 0;
+	handle->iso.packet_phase = 0;
+	handle->iso.packet_count = 0;
 }
 
 void raw1394_iso_shutdown(raw1394handle_t handle)
