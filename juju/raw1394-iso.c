@@ -289,15 +289,6 @@ int raw1394_iso_xmit_write(raw1394handle_t handle, unsigned char *data,
 	struct fw_cdev_start_iso start_iso;
 	struct fw_cdev_iso_packet *p;
 
-	{
-		int i;
-		__u32 *p = (__u32 *) data;
-
-		for (i = 0; i < 10; i++)
-			fprintf(stderr, "0x%08x ", p[i]);
-		fprintf(stderr, "\n");
-	}
-
 	if (len > handle->iso.max_packet_size) {
 		errno = EINVAL;
 		return -1;
@@ -364,7 +355,39 @@ int raw1394_iso_xmit_write(raw1394handle_t handle, unsigned char *data,
 
 int raw1394_iso_xmit_sync(raw1394handle_t handle)
 {
-	/* FIXME: queue a skip packet and wait for that interrupt. */
+	struct fw_cdev_iso_packet skip;
+	struct fw_cdev_queue_iso queue_iso;
+	int len;
+
+	skip.payload_length = 0;
+	skip.interrupt = 1;
+	skip.skip = 1;
+	skip.tag = 0;
+	skip.sy = 0;
+	skip.header_length = 0;
+
+	queue_iso.packets = ptr_to_u64(&skip);
+	queue_iso.size    = sizeof skip;
+	queue_iso.data    = 0;
+
+	len = ioctl(handle->iso.fd, FW_CDEV_IOC_QUEUE_ISO, &queue_iso);
+	if (len < 0)
+		return -1;
+
+	/* Now that we've queued the skip packet, we'll get an
+	 * interrupt when the transmit buffer is flushed, so all we do
+	 * here is wait. */
+	while (handle->iso.packet_count > 0)
+		raw1394_loop_iterate(handle);
+
+	/* The iso mainloop thinks that interrutps indicate another
+	 * irq_interval number of packets was sent, so the skip
+	 * interrupt makes it go out of whack.  We just reset it. */
+	handle->iso.head = handle->iso.buffer;
+	handle->iso.tail = handle->iso.buffer;
+	handle->iso.first_payload = handle->iso.buffer;
+	handle->iso.packet_phase = 0;
+	handle->iso.packet_count = 0;
 
 	return 0;
 }
