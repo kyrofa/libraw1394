@@ -121,9 +121,7 @@ struct raw1394_handle {
 		int fd;
 		int type;
 		int irq_interval;
-		int packet_index;
 		int packet_phase;
-		int packet_tail;
 		int packet_count;
 		int buf_packets;
 		int max_packet_size;
@@ -133,9 +131,9 @@ struct raw1394_handle {
 		enum raw1394_iso_dma_recv_mode recv_mode;
 		raw1394_iso_xmit_handler_t xmit_handler;
 		raw1394_iso_recv_handler_t recv_handler;
-		unsigned char *buffer;
+		unsigned char *buffer, *buffer_end, *head;
+		unsigned char *tail, *first_payload;
 
-		struct fw_cdev_queue_iso queue_iso;
 		struct fw_cdev_iso_packet *packets;
 	} iso;
 
