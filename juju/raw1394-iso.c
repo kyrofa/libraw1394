@@ -30,7 +30,7 @@
 
 #include "juju.h"
 
-static int
+static enum raw1394_iso_disposition
 queue_xmit_packets(raw1394handle_t handle)
 {
 	struct fw_cdev_iso_packet *p = handle->iso.packets;
@@ -53,7 +53,8 @@ queue_xmit_packets(raw1394handle_t handle)
 
 		d = handle->iso.xmit_handler(handle, handle->iso.head,
 					     &len, &tag, &sy, cycle, dropped);
-		/* FIXME: handle the different dispositions. */
+		if (d != RAW1394_ISO_OK)
+			break;
 
 		p->payload_length = len;
 		p->interrupt =
@@ -77,14 +78,15 @@ queue_xmit_packets(raw1394handle_t handle)
 
 	len = ioctl(handle->iso.fd, FW_CDEV_IOC_QUEUE_ISO, &queue_iso);
 	if (len < 0)
-		return -1;
+		return RAW1394_ISO_ERROR;
 
-	return 0;
+	return d;
 }
 
 static int
 flush_xmit_packets(raw1394handle_t handle, int limit)
 {
+	enum raw1394_iso_disposition d;
 	int len;
 
 	if (handle->iso.xmit_handler == NULL)
@@ -93,8 +95,19 @@ flush_xmit_packets(raw1394handle_t handle, int limit)
 	if (limit < handle->iso.irq_interval)
 		limit = handle->iso.irq_interval;
 
-	while (handle->iso.packet_count + handle->iso.irq_interval <= limit)
-		queue_xmit_packets(handle);
+	while (handle->iso.packet_count + handle->iso.irq_interval <= limit) {
+		d = queue_xmit_packets(handle);
+		switch (d) {
+		case RAW1394_ISO_DEFER:
+		case RAW1394_ISO_AGAIN:
+			return 0;
+		case RAW1394_ISO_ERROR:
+			return -1;
+		case RAW1394_ISO_STOP:
+			raw1394_iso_stop(handle);
+			return 0;
+		}
+	}
 
 	return 0;
 }
@@ -168,7 +181,7 @@ queue_recv_packets(raw1394handle_t handle)
 	return 0;
 }
  
-static int
+static enum raw1394_iso_disposition
 flush_recv_packets(raw1394handle_t handle,
 		   struct fw_cdev_event_iso_interrupt *interrupt)
 {
@@ -192,12 +205,29 @@ flush_recv_packets(raw1394handle_t handle,
 
 		d = handle->iso.recv_handler(handle, handle->iso.tail, len,
 					     channel, tag, sy, cycle, dropped);
+		if (d != RAW1394_ISO_OK)
+			/* FIXME: we need to save the headers so we
+			 * can restart this loop. */
+			break;
 		cycle++;
 
 		handle->iso.tail += handle->iso.max_packet_size;
 		handle->iso.packet_count--;
 		if (handle->iso.tail == handle->iso.buffer_end)
 			handle->iso.tail = handle->iso.buffer;
+	}
+
+	switch (d) {
+	case RAW1394_ISO_OK:
+	case RAW1394_ISO_DEFER:
+		break;
+		
+	case RAW1394_ISO_ERROR:
+		return -1;
+
+	case RAW1394_ISO_STOP:
+		raw1394_iso_stop(handle);
+		return 0;		
 	}
 
 	while (handle->iso.packet_count + handle->iso.irq_interval <=
