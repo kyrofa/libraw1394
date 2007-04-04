@@ -41,6 +41,7 @@ queue_xmit_packets(raw1394handle_t handle)
 	int cycle, i;
 
 	first_payload = handle->iso.head;
+	d = RAW1394_ISO_OK;
 	for (i = 0; i < handle->iso.irq_interval; i++) {
 		cycle = -1;
 		dropped = 0;
@@ -87,7 +88,6 @@ static int
 flush_xmit_packets(raw1394handle_t handle, int limit)
 {
 	enum raw1394_iso_disposition d;
-	int len;
 
 	if (handle->iso.xmit_handler == NULL)
 		return 0;
@@ -100,6 +100,7 @@ flush_xmit_packets(raw1394handle_t handle, int limit)
 		switch (d) {
 		case RAW1394_ISO_DEFER:
 		case RAW1394_ISO_AGAIN:
+		default:
 			return 0;
 		case RAW1394_ISO_ERROR:
 			return -1;
@@ -189,12 +190,12 @@ flush_recv_packets(raw1394handle_t handle,
 	quadlet_t header, *p, *end;
 	unsigned int len, cycle, dropped;
 	unsigned char channel, tag, sy;
-	unsigned char *data;
 
 	p = interrupt->header;
 	end = (void *) interrupt->header + interrupt->header_length;
 	cycle = interrupt->cycle;
 	dropped = 0;
+	d = RAW1394_ISO_OK;
 
 	while (p < end) {
 		header = be32_to_cpu(*p++);
@@ -220,6 +221,7 @@ flush_recv_packets(raw1394handle_t handle,
 	switch (d) {
 	case RAW1394_ISO_OK:
 	case RAW1394_ISO_DEFER:
+	default:
 		break;
 		
 	case RAW1394_ISO_ERROR:
@@ -418,6 +420,18 @@ iso_init(raw1394handle_t handle, int type,
 		return -1;
 	}
 
+	switch (type) {
+	case FW_CDEV_ISO_CONTEXT_TRANSMIT:
+		prot = PROT_READ | PROT_WRITE;
+		break;
+	case FW_CDEV_ISO_CONTEXT_RECEIVE:
+		prot = PROT_READ;
+		break;
+	default:
+		errno = EINVAL;
+		return -1;
+	}
+
 	handle->iso.type = type;
 	if (irq_interval < 0)
 		handle->iso.irq_interval = 256;
@@ -461,15 +475,6 @@ iso_init(raw1394handle_t handle, int type,
 		close(handle->iso.fd);
 		free(handle->iso.packets);
 		return retval;
-	}
-
-	switch (type) {
-	case FW_CDEV_ISO_CONTEXT_TRANSMIT:
-		prot = PROT_READ | PROT_WRITE;
-		break;
-	case FW_CDEV_ISO_CONTEXT_RECEIVE:
-		prot = PROT_READ;
-		break;
 	}
 
 	handle->iso.buffer =

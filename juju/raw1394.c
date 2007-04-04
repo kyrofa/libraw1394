@@ -29,6 +29,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <arpa/inet.h> /* for ntohl and htonl */
 
 #include "juju.h"
 
