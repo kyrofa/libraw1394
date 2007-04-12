@@ -327,6 +327,18 @@ int raw1394_iso_recv_flush(raw1394handle_t handle)
 	return 0;
 }
 
+static unsigned int
+round_to_power_of_two(unsigned int value)
+{
+	unsigned int pot;
+
+	pot = 1;
+	while (pot < value)
+		pot <<= 1;
+
+	return pot;
+}
+
 static int
 iso_init(raw1394handle_t handle, int type,
 	 raw1394_iso_xmit_handler_t xmit_handler,
@@ -366,7 +378,7 @@ iso_init(raw1394handle_t handle, int type,
 	handle->iso.xmit_handler = xmit_handler;
 	handle->iso.recv_handler = recv_handler;
 	handle->iso.buf_packets = buf_packets;
-	handle->iso.max_packet_size = max_packet_size;
+	handle->iso.max_packet_size = round_to_power_of_two(max_packet_size);
 	handle->iso.packet_phase = 0;
 	handle->iso.packet_count = 0;
 	handle->iso.packets =
