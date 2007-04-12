@@ -1066,7 +1066,7 @@ setup_lock(int extcode, quadlet_t data, quadlet_t arg, quadlet_t *buffer)
 	case RAW1394_EXTCODE_WRAP_ADD:
 		buffer[0] = arg;
 		buffer[1] = data;
-		return sizeof buffer;
+		return 2 * sizeof buffer[0];
 
 	default:
 		errno = EINVAL;
@@ -1089,7 +1089,7 @@ setup_lock64(int extcode, octlet_t data, octlet_t arg, octlet_t *buffer)
 	case RAW1394_EXTCODE_WRAP_ADD:
 		buffer[0] = arg;
 		buffer[1] = data;
-		return sizeof buffer;
+		return 2 * sizeof buffer[0];
 
 	default:
 		errno = EINVAL;
