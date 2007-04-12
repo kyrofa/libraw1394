@@ -176,7 +176,8 @@ flush_recv_packets(raw1394handle_t handle,
 
 		handle->iso.tail += handle->iso.max_packet_size;
 		handle->iso.packet_count--;
-		if (handle->iso.tail == handle->iso.buffer_end)
+
+		if (handle->iso.tail + handle->iso.max_packet_size > handle->iso.buffer_end)
 			handle->iso.tail = handle->iso.buffer;
 	}
 
