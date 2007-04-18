@@ -66,6 +66,7 @@ queue_packet(raw1394handle_t handle,
 		queue_iso.packets = ptr_to_u64(handle->iso.packets);
 		queue_iso.size    = handle->iso.packet_index * sizeof handle->iso.packets[0];
 		queue_iso.data    = ptr_to_u64(handle->iso.first_payload);
+		queue_iso.handle  = 0;
 		handle->iso.packet_index = 0;
 		handle->iso.first_payload = handle->iso.head;
 
@@ -124,7 +125,8 @@ int raw1394_iso_xmit_start(raw1394handle_t handle, int start_on_cycle,
 	queue_xmit_packets(handle, prebuffer_packets);
 
 	if (handle->iso.prebuffer <= handle->iso.packet_count) {
-		start_iso.cycle = start_on_cycle;
+		start_iso.cycle  = start_on_cycle;
+		start_iso.handle = 0;
 
 		retval = ioctl(handle->iso.fd,
 			       FW_CDEV_IOC_START_ISO, &start_iso);
@@ -212,6 +214,7 @@ int raw1394_iso_recv_start(raw1394handle_t handle, int start_on_cycle,
 		tag_mask == -1 ? FW_CDEV_ISO_CONTEXT_MATCH_ALL_TAGS : tag_mask;
 	/* sync is documented as 'not used' */
 	start_iso.sync = 0;
+	start_iso.handle = 0;
 
 	return ioctl(handle->iso.fd, FW_CDEV_IOC_START_ISO, &start_iso);
 }
@@ -270,7 +273,8 @@ int raw1394_iso_xmit_write(raw1394handle_t handle, unsigned char *data,
 	    handle->iso.packet_count >= handle->iso.prebuffer) {
 		/* Set this to 0 to indicate that we're running. */
 		handle->iso.prebuffer = 0;
-		start_iso.cycle = handle->iso.start_on_cycle;
+		start_iso.cycle  = handle->iso.start_on_cycle;
+		start_iso.handle = 0;
 
 		len = ioctl(handle->iso.fd,
 			       FW_CDEV_IOC_START_ISO, &start_iso);
@@ -297,6 +301,7 @@ int raw1394_iso_xmit_sync(raw1394handle_t handle)
 	queue_iso.packets = ptr_to_u64(&skip);
 	queue_iso.size    = sizeof skip;
 	queue_iso.data    = 0;
+	queue_iso.handle  = 0;
 
 	len = ioctl(handle->iso.fd, FW_CDEV_IOC_QUEUE_ISO, &queue_iso);
 	if (len < 0)
@@ -496,7 +501,11 @@ int raw1394_iso_recv_set_channel_mask(raw1394handle_t handle, u_int64_t mask)
 
 void raw1394_iso_stop(raw1394handle_t handle)
 {
+	struct fw_cdev_stop_iso stop_iso;
+
+	stop_iso.handle = 0;
 	ioctl(handle->iso.fd, FW_CDEV_IOC_STOP_ISO);
+
 	handle->iso.head = handle->iso.buffer;
 	handle->iso.tail = handle->iso.buffer;
 	handle->iso.first_payload = handle->iso.buffer;

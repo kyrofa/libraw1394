@@ -24,7 +24,7 @@
 
 #include <stdlib.h>
 #include <byteswap.h>
-#include <fw-device-cdev.h>
+#include <linux/firewire-cdev.h>
 #include "../src/raw1394.h"
 #include "../src/csr.h"
 #include "config.h"
