@@ -30,6 +30,15 @@
 #include "kernel-raw1394.h"
 #include "raw1394_private.h"
 
+#if HAVE_VALGRIND_VALGRIND_H
+# include <valgrind/memcheck.h>
+# ifndef VALGRIND_MAKE_MEM_DEFINED_IF_ADDRESSABLE
+#  define VALGRIND_MAKE_MEM_DEFINED_IF_ADDRESSABLE(m, n) do {} while(0)
+# endif
+#else
+# define VALGRIND_MAKE_MEM_DEFINED_IF_ADDRESSABLE(m, n) do {} while(0)
+#endif
+
 
 int raw1394_start_read(struct raw1394_handle *handle, nodeid_t node,
                        nodeaddr_t addr, size_t length, quadlet_t *buffer,
@@ -218,13 +227,16 @@ int raw1394_start_async_send(struct raw1394_handle *handle,
                                         &sd };                            \
         int err = 0
 
-#define SYNCFUNC_BODY                                 \
+#define SYNCFUNC_BODY_WO_RETURN                       \
         while (!sd.done) {                            \
                 if (err < 0) return err;              \
                 err = raw1394_loop_iterate(handle);   \
         }                                             \
         handle->err = sd.errcode;                     \
-        errno = raw1394_errcode_to_errno(sd.errcode); \
+        errno = raw1394_errcode_to_errno(sd.errcode);
+
+#define SYNCFUNC_BODY                                 \
+        SYNCFUNC_BODY_WO_RETURN                       \
         return (errno ? -1 : 0)
 
 int raw1394_read(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,
@@ -235,7 +247,12 @@ int raw1394_read(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,
         err = raw1394_start_read(handle, node, addr, length, buffer, 
                                  (unsigned long)&rh);
 
-        SYNCFUNC_BODY;
+        SYNCFUNC_BODY_WO_RETURN;
+        if(!errno) {
+          VALGRIND_MAKE_MEM_DEFINED_IF_ADDRESSABLE(buffer, length);
+        }
+           
+        return (errno ? -1 : 0);
 }
 
 int raw1394_write(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,
@@ -258,7 +275,12 @@ int raw1394_lock(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,
         err = raw1394_start_lock(handle, node, addr, extcode, data, arg, result,
                                  (unsigned long)&rh);
 
-        SYNCFUNC_BODY;
+        SYNCFUNC_BODY_WO_RETURN;
+        if(!errno) {
+          VALGRIND_MAKE_MEM_DEFINED_IF_ADDRESSABLE(result, sizeof(quadlet_t));
+        }
+           
+        return (errno ? -1 : 0);
 }
 
 int raw1394_lock64(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,

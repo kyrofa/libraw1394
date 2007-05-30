@@ -24,6 +24,11 @@ AC_SUBST(lt_major)
 AC_SUBST(lt_revision)
 AC_SUBST(lt_age)
 
+dnl Check to see if valgrind is available
+AC_ARG_WITH(valgrind, AC_HELP_STRING([--with-valgrind],[compile with valgrind support]))
+if test x$with_valgrind = xyes ; then
+    AC_CHECK_HEADERS(valgrind/valgrind.h)
+fi
 
 #CFLAGS=${CFLAGS:-"-Wall"}
 AC_OUTPUT([
