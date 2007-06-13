@@ -40,13 +40,14 @@ queue_packet(raw1394handle_t handle,
 	int err;
 
 	p = &handle->iso.packets[handle->iso.packet_index];
-	p->payload_length = length;
-	p->interrupt =
-		handle->iso.packet_phase == handle->iso.irq_interval - 1;
-	p->skip = 0;
-	p->tag = tag;
-	p->sy = sy;
-	p->header_length = header_length;
+	p->control =
+		FW_CDEV_ISO_PAYLOAD_LENGTH(length) |
+		FW_CDEV_ISO_TAG(tag) |
+		FW_CDEV_ISO_SY(sy) |
+		FW_CDEV_ISO_HEADER_LENGTH(header_length);
+
+	if (handle->iso.packet_phase == handle->iso.irq_interval - 1)
+		p->control |= FW_CDEV_ISO_INTERRUPT;
 
 	handle->iso.head += length;
 	handle->iso.packet_count++;
@@ -291,13 +292,7 @@ int raw1394_iso_xmit_sync(raw1394handle_t handle)
 	struct fw_cdev_queue_iso queue_iso;
 	int len;
 
-	skip.payload_length = 0;
-	skip.interrupt = 1;
-	skip.skip = 1;
-	skip.tag = 0;
-	skip.sy = 0;
-	skip.header_length = 0;
-
+	skip.control = FW_CDEV_ISO_INTERRUPT | FW_CDEV_ISO_SKIP;
 	queue_iso.packets = ptr_to_u64(&skip);
 	queue_iso.size    = sizeof skip;
 	queue_iso.data    = 0;

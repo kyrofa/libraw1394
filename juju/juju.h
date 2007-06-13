@@ -29,8 +29,6 @@
 #include "../src/csr.h"
 #include "config.h"
 
-#define ACK_COMPLETE 1
-
 #define ptr_to_u64(p) ((__u64)(unsigned long)(p))
 #define u64_to_ptr(p) ((void *)(unsigned long)(p))
 
