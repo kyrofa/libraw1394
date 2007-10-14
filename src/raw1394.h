@@ -1152,7 +1152,7 @@ const char *raw1394_get_libversion(void);
  * raw1394_update_config_rom - updates the configuration ROM of a host
  * @handle: libraw1394 handle
  * @new_rom: a pointer to the new ROM image
- * @size: the size of the new ROM image in quadlets
+ * @size: the size of the new ROM image in bytes
  * @rom_version: the version numer of the current version, not the new
  *
  * @rom_version must be the current
