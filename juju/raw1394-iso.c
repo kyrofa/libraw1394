@@ -389,6 +389,7 @@ iso_init(raw1394handle_t handle, int type,
 	handle->iso.fd = open(handle->local_filename, O_RDWR);
 	if (handle->iso.fd < 0) {
 		free(handle->iso.packets);
+		handle->iso.packets = NULL;
 		return -1;
 	}
 
@@ -399,6 +400,7 @@ iso_init(raw1394handle_t handle, int type,
 		      handle->iso.fd, &ep) < 0) {
 		close(handle->iso.fd);
 		free(handle->iso.packets);
+		handle->iso.packets = NULL;
 		return -1;
 	}
 
@@ -412,6 +414,7 @@ iso_init(raw1394handle_t handle, int type,
 	if (retval < 0) {
 		close(handle->iso.fd);
 		free(handle->iso.packets);
+		handle->iso.packets = NULL;
 		return retval;
 	}
 
@@ -422,6 +425,7 @@ iso_init(raw1394handle_t handle, int type,
 	if (handle->iso.buffer == MAP_FAILED) {
 		close(handle->iso.fd);
 		free(handle->iso.packets);
+		handle->iso.packets = NULL;
 		return -1;
 	}
 
@@ -514,4 +518,5 @@ void raw1394_iso_shutdown(raw1394handle_t handle)
 	       handle->iso.buf_packets * handle->iso.max_packet_size);
 	close(handle->iso.fd);
 	free(handle->iso.packets);
+	handle->iso.packets = NULL;
 }
