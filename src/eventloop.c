@@ -21,7 +21,6 @@
 #include <config.h>
 #include <unistd.h>
 #include <byteswap.h>
-#include <errno.h>
 
 #include "raw1394.h"
 #include "kernel-raw1394.h"
@@ -33,8 +32,8 @@ int raw1394_loop_iterate(struct raw1394_handle *handle)
         struct raw1394_request req;
         int retval = 0, channel;
 
-        while (read(handle->fd, &req, sizeof(req)) < 0) {
-                if (errno != EINTR) return -1;
+        if (read(handle->fd, &req, sizeof(req)) < 0) {
+                return -1;
         }
 
         switch (req.type) {
