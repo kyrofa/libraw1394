@@ -1,6 +1,7 @@
 # process this file with automake to create a Makefile.in
 
-SUBDIRS = src tools doc debian
+SUBDIRS = $(LIB_SUBDIR) tools doc debian
+DIST_SUBDIRS = src juju
 
 pkgconfigdir = @libdir@/pkgconfig
 pkgconfig_DATA = libraw1394.pc

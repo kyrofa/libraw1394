@@ -1,4 +1,5 @@
-/*
+/*						-*- c-basic-offset: 8 -*-
+ *
  * libraw1394 - library for raw access to the 1394 bus with the Linux subsystem.
  *
  * Copyright (C) 1999,2000 Andreas Bombe
@@ -13,12 +14,13 @@
 #include <string.h>
 #include <sys/poll.h>
 #include <stdlib.h>
+#include <arpa/inet.h>
 
 #include "../src/raw1394.h"
 #include "../src/csr.h"
 
 
-#define TESTADDR (CSR_REGISTER_BASE + CSR_CYCLE_TIME)
+#define TESTADDR (CSR_REGISTER_BASE + CSR_CONFIG_ROM)
 
 const char not_compatible[] = "\
 This libraw1394 does not work with your version of Linux. You need a different\n\
@@ -45,11 +47,17 @@ int my_tag_handler(raw1394handle_t handle, unsigned long tag,
         return 0;
 }
 
+static const unsigned char fcp_data[] =
+	{ 0x1, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef };
+
 int my_fcp_handler(raw1394handle_t handle, nodeid_t nodeid, int response,
                    size_t length, unsigned char *data)
 {
         printf("got fcp %s from node %d of %d bytes:",
                (response ? "response" : "command"), nodeid & 0x3f, length);
+
+	if (memcmp(fcp_data, data, sizeof fcp_data) != 0)
+		printf("ERROR: fcp payload not correct\n");
 
         while (length) {
                 printf(" %02x", *data);
@@ -62,6 +70,47 @@ int my_fcp_handler(raw1394handle_t handle, nodeid_t nodeid, int response,
         return 0;
 }
 
+static void
+test_fcp(raw1394handle_t handle)
+{
+	printf("\ntesting FCP monitoring on local node\n");
+	raw1394_set_fcp_handler(handle, my_fcp_handler);
+	raw1394_start_fcp_listen(handle);
+	raw1394_write(handle, raw1394_get_local_id(handle),
+		      CSR_REGISTER_BASE + CSR_FCP_COMMAND, sizeof(fcp_data),
+		      (quadlet_t *)fcp_data);
+	raw1394_write(handle, raw1394_get_local_id(handle),
+		      CSR_REGISTER_BASE + CSR_FCP_RESPONSE, sizeof(fcp_data),
+		      (quadlet_t *)fcp_data);
+}
+
+static void
+read_topology_map(raw1394handle_t handle)
+{
+	quadlet_t map[70];
+	nodeid_t local_id;
+	int node_count, self_id_count, i, retval;
+
+	local_id = raw1394_get_local_id(handle) | 0xffc0;
+
+	retval = raw1394_read(handle, local_id,
+			      CSR_REGISTER_BASE + CSR_TOPOLOGY_MAP, 12, &map[0]);
+	if (retval < 0)
+		perror("topology map: raw1394_read failed with error");
+	
+	self_id_count = ntohl(map[2]) & 0xffff;
+	node_count = ntohl(map[2]) >> 16;
+	retval = raw1394_read(handle, local_id,
+			      CSR_REGISTER_BASE + CSR_TOPOLOGY_MAP + 12,
+			      self_id_count * sizeof map[0], &map[3]);
+	if (retval < 0)
+		perror("topology map: raw1394_read failed with error");
+
+	printf("topology map: %d nodes, %d self ids, generation %d\n",
+	       node_count, self_id_count, ntohl(map[1]));
+	for (i = 0; i < self_id_count; i++)
+		printf("  0x%08x\n", ntohl(map[3 + i]));
+}
 
 int main(int argc, char **argv)
 {
@@ -73,7 +122,6 @@ int main(int argc, char **argv)
         int retval;
         
         struct pollfd pfd;
-        unsigned char fcp_test[] = { 0x1, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef };
         quadlet_t rom[0x100];
         size_t rom_size;
         unsigned char rom_version;
@@ -150,17 +198,8 @@ int main(int argc, char **argv)
                 }
         }
 
-        printf("\ntesting FCP monitoring on local node\n");
-        raw1394_set_fcp_handler(handle, my_fcp_handler);
-        raw1394_start_fcp_listen(handle);
-        raw1394_write(handle, raw1394_get_local_id(handle),
-                      CSR_REGISTER_BASE + CSR_FCP_COMMAND, sizeof(fcp_test),
-                      (quadlet_t *)fcp_test);
-        raw1394_write(handle, raw1394_get_local_id(handle),
-                      CSR_REGISTER_BASE + CSR_FCP_RESPONSE, sizeof(fcp_test),
-                      (quadlet_t *)fcp_test);
-
-
+	test_fcp(handle);
+	read_topology_map(handle);
 
         printf("testing config rom stuff\n");
         retval=raw1394_get_config_rom(handle, rom, 0x100, &rom_size, &rom_version);
@@ -176,16 +215,19 @@ int main(int argc, char **argv)
         retval=raw1394_update_config_rom(handle, rom, rom_size, rom_version);
         printf("update_config_rom returned %d\n",retval);
 
+	printf("\nposting 0xdeadbeef as an echo request\n");
+	raw1394_echo_request(handle, 0xdeadbeef);
 
-
-        printf("\npolling for leftover messages\n");
+	printf("polling for leftover messages\n");
         pfd.fd = raw1394_get_fd(handle);
         pfd.events = POLLIN;
         pfd.revents = 0;
         while (1) {
                 retval = poll(&pfd, 1, 10);
                 if (retval < 1) break;
-                raw1394_loop_iterate(handle);
+		retval = raw1394_loop_iterate(handle);
+		if (retval != 0)
+		    printf("raw1394_loop_iterate() returned 0x%08x\n", retval);
         }
 
         if (retval < 0) perror("poll failed");
