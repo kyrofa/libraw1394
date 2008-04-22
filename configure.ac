@@ -28,6 +28,7 @@ dnl Check to see if valgrind is available
 AC_ARG_WITH(valgrind, AC_HELP_STRING([--with-valgrind],[compile with valgrind support]))
 if test x$with_valgrind = xyes ; then
     AC_CHECK_HEADERS(valgrind/valgrind.h)
+fi
 
 AC_ARG_WITH(juju-dir,[  --with-juju-dir=<dir>  Path to juju include files])
 if ! test -z "$with_juju_dir" ; then
