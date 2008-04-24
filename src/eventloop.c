@@ -28,57 +28,45 @@
 #include "raw1394_private.h"
 
 
-int raw1394_loop_iterate(struct raw1394_handle *handle)
+int ieee1394_loop_iterate(struct raw1394_handle *handle)
 {
         struct raw1394_request req;
+        ieee1394handle_t ihandle = handle->mode.ieee1394;
         int retval = 0, channel;
 
-        while (read(handle->fd, &req, sizeof(req)) < 0) {
+        while (read(ihandle->fd, &req, sizeof(req)) < 0) {
                 if (errno != EINTR) return -1;
         }
 
         switch (req.type) {
         case RAW1394_REQ_BUS_RESET:
-                if (handle->protocol_version == 3) {
-                        handle->num_of_nodes = req.misc & 0xffff;
-                        handle->local_id = req.misc >> 16;
+                if (ihandle->protocol_version == 3) {
+                        ihandle->num_of_nodes = req.misc & 0xffff;
+                        ihandle->local_id = req.misc >> 16;
                 } else {
-                        handle->num_of_nodes = req.misc & 0xff;
-                        handle->irm_id = ((req.misc >> 8) & 0xff) | 0xffc0;
-                        handle->local_id = req.misc >> 16;
+                        ihandle->num_of_nodes = req.misc & 0xff;
+                        ihandle->irm_id = ((req.misc >> 8) & 0xff) | 0xffc0;
+                        ihandle->local_id = req.misc >> 16;
                 }
 
-                if (handle->bus_reset_handler) {
-                        retval = handle->bus_reset_handler(handle,
+                if (ihandle->bus_reset_handler) {
+                        retval = ihandle->bus_reset_handler(handle,
                                                            req.generation);
                 }
                 break;
 
-        case RAW1394_REQ_ISO_RECEIVE:
-                channel = (handle->buffer[0] >> 8) & 0x3f;
-#ifndef WORDS_BIGENDIAN
-                handle->buffer[0] = bswap_32(handle->buffer[0]);
-#endif
-
-                if (handle->iso_handler[channel]) {
-                        retval = handle->iso_handler[channel](handle, channel,
-                                                              req.length,
-                                                              handle->buffer);
-                }
-                break;
-
         case RAW1394_REQ_FCP_REQUEST:
-                if (handle->fcp_handler) {
-                        retval = handle->fcp_handler(handle, req.misc & 0xffff,
+                if (ihandle->fcp_handler) {
+                        retval = ihandle->fcp_handler(handle, req.misc & 0xffff,
                                                      req.misc >> 16,
                                                      req.length,
-                                                     (unsigned char *)handle->buffer);
+                                                     (unsigned char *)ihandle->buffer);
                 }
                 break;
 
         case RAW1394_REQ_ARM:
-                if (handle->arm_tag_handler) {
-                        retval = handle->arm_tag_handler(handle, req.tag,
+                if (ihandle->arm_tag_handler) {
+                        retval = ihandle->arm_tag_handler(handle, req.tag,
                                  (req.misc & (0xFF)), 
                                  ((req.misc >> 16) & (0xFFFF)),
                                  int2ptr(req.recvb));
@@ -90,12 +78,12 @@ int raw1394_loop_iterate(struct raw1394_handle *handle)
                 break;
 
         case RAW1394_REQ_RAWISO_ACTIVITY:
-                retval = _raw1394_iso_iterate(handle);
+                retval = _ieee1394_iso_iterate(handle);
                 break;
         
         default:
-                if (handle->tag_handler) {
-                        retval = handle->tag_handler(handle, req.tag,
+                if (ihandle->tag_handler) {
+                        retval = ihandle->tag_handler(handle, req.tag,
                                                      req.error);
                 }
                 break;
@@ -108,65 +96,59 @@ int raw1394_loop_iterate(struct raw1394_handle *handle)
 bus_reset_handler_t raw1394_set_bus_reset_handler(struct raw1394_handle *handle,
                                                   bus_reset_handler_t new)
 {
-        bus_reset_handler_t old;
-
-        old = handle->bus_reset_handler;
-        handle->bus_reset_handler = new;
-
-        return old;
+	bus_reset_handler_t old;
+	if (handle && handle->is_fw) {
+		old = handle->mode.fw->bus_reset_handler;
+		handle->mode.fw->bus_reset_handler = new;
+	}
+	else {
+		old = handle->mode.ieee1394->bus_reset_handler;
+		handle->mode.ieee1394->bus_reset_handler = new;
+	}
+	return old;
 }
 
 tag_handler_t raw1394_set_tag_handler(struct raw1394_handle *handle, 
                                       tag_handler_t new)
 {
-        tag_handler_t old;
-
-        old = handle->tag_handler;
-        handle->tag_handler = new;
-
-        return old;
+	tag_handler_t old;
+	if (handle && handle->is_fw) {
+		old = handle->mode.fw->tag_handler;
+		handle->mode.fw->tag_handler = new;
+	}
+	else {
+		old = handle->mode.ieee1394->tag_handler;
+		handle->mode.ieee1394->tag_handler = new;
+	}
+	return old;
 }
 
 arm_tag_handler_t raw1394_set_arm_tag_handler(struct raw1394_handle *handle, 
                                       arm_tag_handler_t new)
 {
-        arm_tag_handler_t old;
-
-        old = handle->arm_tag_handler;
-        handle->arm_tag_handler = new;
-
-        return old;
-}
-
-
-iso_handler_t raw1394_set_iso_handler(struct raw1394_handle *handle,
-                                      unsigned int channel, iso_handler_t new)
-{
-        if (channel >= 64) {
-                return (iso_handler_t)-1;
-        }
-
-        if (new == NULL) {
-                iso_handler_t old = handle->iso_handler[channel];
-                handle->iso_handler[channel] = NULL;
-                return old;
-        }
-
-        if (handle->iso_handler[channel] != NULL) {
-                return (iso_handler_t)-1;
-        }
-
-        handle->iso_handler[channel] = new;
-        return NULL;
+	arm_tag_handler_t old;
+	if (handle && handle->is_fw) {
+		old = handle->mode.fw->arm_tag_handler;
+		handle->mode.fw->arm_tag_handler = new;
+	}
+	else {
+		old = handle->mode.ieee1394->arm_tag_handler;
+		handle->mode.ieee1394->arm_tag_handler = new;
+	}
+	return old;
 }
 
 fcp_handler_t raw1394_set_fcp_handler(struct raw1394_handle *handle,
                                       fcp_handler_t new)
 {
-        fcp_handler_t old;
-
-        old = handle->fcp_handler;
-        handle->fcp_handler = new;
-
-        return old;
+	fcp_handler_t old;
+	if (handle && handle->is_fw) {
+		old = handle->mode.fw->fcp_handler;
+		handle->mode.fw->fcp_handler = new;
+	}
+	else {
+		old = handle->mode.ieee1394->fcp_handler;
+		handle->mode.ieee1394->fcp_handler = new;
+	}
+	return old;
 }

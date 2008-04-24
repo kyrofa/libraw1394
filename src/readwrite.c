@@ -40,7 +40,7 @@
 #endif
 
 
-int raw1394_start_read(struct raw1394_handle *handle, nodeid_t node,
+int ieee1394_start_read(struct ieee1394_handle *handle, nodeid_t node,
                        nodeaddr_t addr, size_t length, quadlet_t *buffer,
                        unsigned long tag)
 {
@@ -60,7 +60,7 @@ int raw1394_start_read(struct raw1394_handle *handle, nodeid_t node,
 }
 
 
-int raw1394_start_write(struct raw1394_handle *handle, nodeid_t node,
+int ieee1394_start_write(struct ieee1394_handle *handle, nodeid_t node,
                         nodeaddr_t addr, size_t length, quadlet_t *data,
                         unsigned long tag)
 {
@@ -80,7 +80,7 @@ int raw1394_start_write(struct raw1394_handle *handle, nodeid_t node,
 }
 
 
-int raw1394_start_lock(struct raw1394_handle *handle, nodeid_t node,
+int ieee1394_start_lock(struct ieee1394_handle *handle, nodeid_t node,
                        nodeaddr_t addr, unsigned int extcode, quadlet_t data,
                        quadlet_t arg, quadlet_t *result, unsigned long tag)
 {
@@ -118,7 +118,7 @@ int raw1394_start_lock(struct raw1394_handle *handle, nodeid_t node,
         return (int)write(handle->fd, &req, sizeof(req));
 }
 
-int raw1394_start_lock64(struct raw1394_handle *handle, nodeid_t node,
+int ieee1394_start_lock64(struct ieee1394_handle *handle, nodeid_t node,
                          nodeaddr_t addr, unsigned int extcode, octlet_t data,
                          octlet_t arg, octlet_t *result, unsigned long tag)
 {
@@ -158,28 +158,7 @@ int raw1394_start_lock64(struct raw1394_handle *handle, nodeid_t node,
 }
 
 
-int raw1394_start_iso_write(struct raw1394_handle *handle, unsigned int channel,
-                            unsigned int tag, unsigned int sy,
-                            unsigned int speed, size_t length, quadlet_t *data,
-                            unsigned long rawtag)
-{
-        struct raw1394_request req;
-
-        CLEAR_REQ(&req);
-
-        req.type = RAW1394_REQ_ISO_SEND;
-        req.generation = handle->generation;
-        req.tag = rawtag;
-
-        req.address = ((__u64)channel << 48) | speed;
-        req.misc = (tag << 16) | sy;
-        req.length = length;
-        req.sendb = ptr2int(data);
-
-        return (int)write(handle->fd, &req, sizeof(req));
-}
-
-int raw1394_start_async_stream(struct raw1394_handle *handle,
+int ieee1394_start_async_stream(struct ieee1394_handle *handle,
                                unsigned int channel,
                                unsigned int tag, unsigned int sy,
                                unsigned int speed, size_t length, quadlet_t *data,
@@ -201,7 +180,7 @@ int raw1394_start_async_stream(struct raw1394_handle *handle,
         return (int)write(handle->fd, &req, sizeof(req));
 }
 
-int raw1394_start_async_send(struct raw1394_handle *handle,
+int ieee1394_start_async_send(struct ieee1394_handle *handle,
                              size_t length, size_t header_length, unsigned int expect_response,
                              quadlet_t *data, unsigned long rawtag)
 {
@@ -232,19 +211,19 @@ int raw1394_start_async_send(struct raw1394_handle *handle,
                 if (err < 0) return err;              \
                 err = raw1394_loop_iterate(handle);   \
         }                                             \
-        handle->err = sd.errcode;                     \
+        handle->mode.ieee1394->err = sd.errcode;                     \
         errno = raw1394_errcode_to_errno(sd.errcode);
 
 #define SYNCFUNC_BODY                                 \
         SYNCFUNC_BODY_WO_RETURN                       \
         return (errno ? -1 : 0)
 
-int raw1394_read(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,
+int ieee1394_read(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,
                  size_t length, quadlet_t *buffer)
 {
         SYNCFUNC_VARS;
 
-        err = raw1394_start_read(handle, node, addr, length, buffer, 
+        err = ieee1394_start_read(handle->mode.ieee1394, node, addr, length, buffer, 
                                  (unsigned long)&rh);
 
         SYNCFUNC_BODY_WO_RETURN;
@@ -255,24 +234,24 @@ int raw1394_read(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,
         return (errno ? -1 : 0);
 }
 
-int raw1394_write(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,
+int ieee1394_write(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,
                   size_t length, quadlet_t *data)
 {
         SYNCFUNC_VARS;
 
-        err = raw1394_start_write(handle, node, addr, length, data, 
+        err = ieee1394_start_write(handle->mode.ieee1394, node, addr, length, data, 
                                   (unsigned long)&rh);
 
         SYNCFUNC_BODY;
 }
 
-int raw1394_lock(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,
+int ieee1394_lock(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,
                  unsigned int extcode, quadlet_t data, quadlet_t arg,
                  quadlet_t *result)
 {
         SYNCFUNC_VARS;
 
-        err = raw1394_start_lock(handle, node, addr, extcode, data, arg, result,
+        err = ieee1394_start_lock(handle->mode.ieee1394, node, addr, extcode, data, arg, result,
                                  (unsigned long)&rh);
 
         SYNCFUNC_BODY_WO_RETURN;
@@ -283,50 +262,38 @@ int raw1394_lock(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,
         return (errno ? -1 : 0);
 }
 
-int raw1394_lock64(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,
+int ieee1394_lock64(struct raw1394_handle *handle, nodeid_t node, nodeaddr_t addr,
                  unsigned int extcode, octlet_t data, octlet_t arg,
                  octlet_t *result)
 {
         SYNCFUNC_VARS;
 
-        err = raw1394_start_lock64(handle, node, addr, extcode, data, arg, result,
+        err = ieee1394_start_lock64(handle->mode.ieee1394, node, addr, extcode, data, arg, result,
                                  (unsigned long)&rh);
 
         SYNCFUNC_BODY;
 }
 
 
-int raw1394_iso_write(struct raw1394_handle *handle, unsigned int channel,
-                      unsigned int tag, unsigned int sy, unsigned int speed,
-                      size_t length, quadlet_t *data)
-{
-        SYNCFUNC_VARS;
-
-        err = raw1394_start_iso_write(handle, channel, tag, sy, speed, length,
-                                      data, (unsigned long)&rh);
-
-        SYNCFUNC_BODY;
-}
-
-int raw1394_async_stream(struct raw1394_handle *handle, unsigned int channel,
+int ieee1394_async_stream(struct raw1394_handle *handle, unsigned int channel,
                          unsigned int tag, unsigned int sy, unsigned int speed,
                          size_t length, quadlet_t *data)
 {
         SYNCFUNC_VARS;
 
-        err = raw1394_start_async_stream(handle, channel, tag, sy, speed, length,
+        err = ieee1394_start_async_stream(handle->mode.ieee1394, channel, tag, sy, speed, length,
                                          data, (unsigned long)&rh);
 
         SYNCFUNC_BODY;
 }
 
-int raw1394_async_send(struct raw1394_handle *handle               ,
+int ieee1394_async_send(struct raw1394_handle *handle               ,
                              size_t length, size_t header_length, unsigned int expect_response,
                              quadlet_t *data)
 {
         SYNCFUNC_VARS;
 
-        err = raw1394_start_async_send(handle, length, header_length, expect_response,
+        err = ieee1394_start_async_send(handle->mode.ieee1394, length, header_length, expect_response,
                                       data, (unsigned long)&rh);
 
         SYNCFUNC_BODY;
@@ -334,7 +301,7 @@ int raw1394_async_send(struct raw1394_handle *handle               ,
 
 
 
-int raw1394_start_phy_packet_write(struct raw1394_handle *handle, 
+int ieee1394_start_phy_packet_write(struct ieee1394_handle *handle, 
 	quadlet_t data, unsigned long tag)
 {
         struct raw1394_request req;
@@ -350,16 +317,16 @@ int raw1394_start_phy_packet_write(struct raw1394_handle *handle,
         return (int)write(handle->fd, &req, sizeof(req));
 }
 
-int raw1394_phy_packet_write (struct raw1394_handle *handle, quadlet_t data)
+int ieee1394_phy_packet_write (struct raw1394_handle *handle, quadlet_t data)
 {
         SYNCFUNC_VARS;
 
-        err = raw1394_start_phy_packet_write(handle, data, (unsigned long)&rh);
+        err = ieee1394_start_phy_packet_write(handle->mode.ieee1394, data, (unsigned long)&rh);
 
         SYNCFUNC_BODY; /* return 0 on success */
 }
 
-int raw1394_echo_request(struct raw1394_handle *handle, quadlet_t data)
+int ieee1394_echo_request(struct ieee1394_handle *handle, quadlet_t data)
 {
         struct raw1394_request req;
         int retval=0;
@@ -376,9 +343,9 @@ int raw1394_echo_request(struct raw1394_handle *handle, quadlet_t data)
 	return -1;
 }	
 
-int raw1394_wake_up(raw1394handle_t handle)
+int ieee1394_wake_up(ieee1394handle_t handle)
 {
-	return raw1394_echo_request(handle, 0);
+	return ieee1394_echo_request(handle, 0);
 }
 
 #undef SYNCFUNC_VARS

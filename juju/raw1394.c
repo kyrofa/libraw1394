@@ -1,6 +1,6 @@
 /*						-*- c-basic-offset: 8 -*-
  *
- * raw1394.c -- Emulation of the raw1394 API on the juju stack
+ * raw1394.c -- Emulation of the raw1394 API on the fw stack
  *
  * Copyright (C) 2007  Kristian Hoegsberg <krh@bitplanet.net>
  *
@@ -32,15 +32,10 @@
 #include <arpa/inet.h> /* for ntohl and htonl */
 
 #include "juju.h"
-
-raw1394_errcode_t
-raw1394_get_errcode(raw1394handle_t handle)
-{
-	return handle->err;
-}
+#include "../src/raw1394_private.h"
 
 int
-raw1394_errcode_to_errno(raw1394_errcode_t errcode)
+fw_errcode_to_errno(raw1394_errcode_t errcode)
 {
 	switch (errcode) {
 
@@ -67,17 +62,17 @@ raw1394_errcode_to_errno(raw1394_errcode_t errcode)
 }
 
 static int
-juju_to_raw1394_errcode(int rcode)
+fw_to_raw1394_errcode(int rcode)
 {
-	/* Best effort matching juju extended rcodes to raw1394 err
+	/* Best effort matching fw extended rcodes to raw1394 err
 	 * code.  Since the raw1394 errcode decoding are macros we try
-	 * to convert the juju rcodes to something that looks enough
+	 * to convert the fw rcodes to something that looks enough
 	 * like the raw1394 errcodes that we retain ABI compatibility.
 	 *
 	 * Juju rcodes less than 0x10 are standard ieee1394 rcodes,
 	 * which we map to a raw1394 errcode by or'ing in an
 	 * ACK_COMPLETE ack code in the upper 16 bits.  Errors
-	 * internal to raw1394 are negative values, but juju encodes
+	 * internal to raw1394 are negative values, but fw encodes
 	 * these errors as rcodes greater than or equal to 0x10.  In
 	 * this case, we just the negated value, which will look like
 	 * an raw1394 internal error code. */
@@ -115,15 +110,15 @@ default_arm_tag_handler(raw1394handle_t handle, unsigned long arm_tag,
 }
 
 static int
-default_bus_reset_handler(struct raw1394_handle *handle, unsigned int gen)
+default_bus_reset_handler(raw1394handle_t handle, unsigned int gen)
 {
-	raw1394_update_generation(handle, gen);
+	handle->mode.fw->generation = gen;
 
 	return 0;
 }
 
 static int
-scan_devices(raw1394handle_t handle)
+scan_devices(fw_handle_t handle)
 {
 	DIR *dir;
 	struct dirent *de;
@@ -185,14 +180,14 @@ handle_echo_pipe(raw1394handle_t handle,
 {
 	quadlet_t value;
 
-	if (read(handle->pipe_fds[0], &value, sizeof value) < 0)
+	if (read(handle->mode.fw->pipe_fds[0], &value, sizeof value) < 0)
 		return -1;
 
 	return value;
 }
 
 static int
-handle_lost_device(raw1394handle_t handle, int i)
+handle_lost_device(fw_handle_t handle, int i)
 {
 	int phy_id;
 
@@ -225,13 +220,13 @@ handle_fcp_request(raw1394handle_t handle, struct address_closure *ac,
 	response.length = 0;
 	response.data   = 0;
 
-	if (handle->fcp_handler == NULL)
+	if (handle->mode.fw->fcp_handler == NULL)
 		response.rcode = RCODE_ADDRESS_ERROR;
 
 	if (request->tcode >= TCODE_WRITE_RESPONSE)
 		response.rcode = RCODE_CONFLICT_ERROR;
 
-	if (ioctl(handle->devices[i].fd,
+	if (ioctl(handle->mode.fw->devices[i].fd,
 		  FW_CDEV_IOC_SEND_RESPONSE, &response) < 0)
 		return -1;
 
@@ -240,8 +235,8 @@ handle_fcp_request(raw1394handle_t handle, struct address_closure *ac,
 
 	is_response = request->offset >= CSR_REGISTER_BASE + CSR_FCP_RESPONSE;
 
-	return handle->fcp_handler(handle,
-				   handle->devices[i].node_id,
+	return handle->mode.fw->fcp_handler(handle,
+				   handle->mode.fw->devices[i].node_id,
 				   is_response,
 				   request->length,
 				   (unsigned char *) request->data);
@@ -251,6 +246,7 @@ static int
 handle_device_event(raw1394handle_t handle,
 		    struct epoll_closure *ec, __uint32_t events)
 {
+	fw_handle_t fwhandle = handle->mode.fw;
 	union fw_cdev_event *u;
 	struct device *device = (struct device *) ec;
 	struct address_closure *ac;
@@ -259,31 +255,31 @@ handle_device_event(raw1394handle_t handle,
 	int len, phy_id;
 	int i;
 
-	i = device - handle->devices;
+	i = device - fwhandle->devices;
 	if (events == EPOLLHUP)
-		return handle_lost_device(handle, i);
+		return handle_lost_device(fwhandle, i);
 
-	len = read(handle->devices[i].fd,
-		   handle->buffer, sizeof handle->buffer);
+	len = read(fwhandle->devices[i].fd,
+		   fwhandle->buffer, sizeof fwhandle->buffer);
 	if (len < 0)
 		return -1;
 
-	u = (void *) handle->buffer;
+	u = (void *) fwhandle->buffer;
 	switch (u->common.type) {
 	case FW_CDEV_EVENT_BUS_RESET:
 		/* Clear old entry, unless it's been overwritten. */
-		phy_id = handle->devices[i].node_id & 0x3f;
-		if (handle->nodes[phy_id] == i)
-			handle->nodes[phy_id] = -1;
-		handle->nodes[u->bus_reset.node_id & 0x3f] = i;
-		handle->devices[i].node_id = u->bus_reset.node_id;
-		handle->devices[i].generation = u->bus_reset.generation;
+		phy_id = fwhandle->devices[i].node_id & 0x3f;
+		if (fwhandle->nodes[phy_id] == i)
+			fwhandle->nodes[phy_id] = -1;
+		fwhandle->nodes[u->bus_reset.node_id & 0x3f] = i;
+		fwhandle->devices[i].node_id = u->bus_reset.node_id;
+		fwhandle->devices[i].generation = u->bus_reset.generation;
 
 		if (u->bus_reset.node_id != u->bus_reset.local_node_id)
 			return 0;
 
-		memcpy(&handle->reset, &u->bus_reset, sizeof handle->reset);
-		return handle->bus_reset_handler(handle,
+		memcpy(&fwhandle->reset, &u->bus_reset, sizeof fwhandle->reset);
+		return fwhandle->bus_reset_handler(handle,
 						 u->bus_reset.generation);
 
 	case FW_CDEV_EVENT_RESPONSE:
@@ -292,9 +288,9 @@ handle_device_event(raw1394handle_t handle,
 		if (rc->data != NULL)
 			memcpy(rc->data, u->response.data, rc->length);
 
-		errcode = juju_to_raw1394_errcode(u->response.rcode);
+		errcode = fw_to_raw1394_errcode(u->response.rcode);
 
-		return handle->tag_handler(handle, rc->tag, errcode);
+		return fwhandle->tag_handler(handle, rc->tag, errcode);
 
 	case FW_CDEV_EVENT_REQUEST:
 		ac = u64_to_ptr(u->request.closure);
@@ -311,6 +307,7 @@ static int
 handle_inotify(raw1394handle_t handle, struct epoll_closure *ec,
 	       __uint32_t events)
 {
+	fw_handle_t fwhandle = handle->mode.fw;
 	struct inotify_event *event;
 	char filename[32];
 	struct fw_cdev_get_info info;
@@ -318,8 +315,8 @@ handle_inotify(raw1394handle_t handle, struct epoll_closure *ec,
 	struct epoll_event ep;
 	int i, len, fd, phy_id;
 
-	event = (struct inotify_event *) handle->buffer;
-	len = read(handle->inotify_fd, event, BUFFER_SIZE);
+	event = (struct inotify_event *) fwhandle->buffer;
+	len = read(fwhandle->inotify_fd, event, BUFFER_SIZE);
 	if (!(event->mask & IN_CREATE))
 		return -1;
 	if (strncmp(event->name,
@@ -354,7 +351,7 @@ handle_inotify(raw1394handle_t handle, struct epoll_closure *ec,
 	}
 
 	for (i = 0; i < MAX_DEVICES; i++)
-		if (handle->devices[i].node_id == -1)
+		if (fwhandle->devices[i].node_id == -1)
 			break;
 	if (i == MAX_DEVICES) {
 		close(fd);
@@ -362,16 +359,16 @@ handle_inotify(raw1394handle_t handle, struct epoll_closure *ec,
 	}
 
 	phy_id = reset.node_id & 0x3f;
-	handle->nodes[phy_id] = i;
-	handle->devices[i].node_id = reset.node_id;
-	handle->devices[i].generation = reset.generation;
-	handle->devices[i].fd = fd;
-	strncpy(handle->devices[i].filename, filename,
-		sizeof handle->devices[i].filename);
-	handle->devices[i].closure.func = handle_device_event;
+	fwhandle->nodes[phy_id] = i;
+	fwhandle->devices[i].node_id = reset.node_id;
+	fwhandle->devices[i].generation = reset.generation;
+	fwhandle->devices[i].fd = fd;
+	strncpy(fwhandle->devices[i].filename, filename,
+		sizeof fwhandle->devices[i].filename);
+	fwhandle->devices[i].closure.func = handle_device_event;
 	ep.events = EPOLLIN;
-	ep.data.ptr = &handle->devices[i].closure;
-	if (epoll_ctl(handle->epoll_fd, EPOLL_CTL_ADD, fd, &ep) < 0) {
+	ep.data.ptr = &fwhandle->devices[i].closure;
+	if (epoll_ctl(fwhandle->epoll_fd, EPOLL_CTL_ADD, fd, &ep) < 0) {
 		close(fd);
 		return -1;
 	}
@@ -379,13 +376,13 @@ handle_inotify(raw1394handle_t handle, struct epoll_closure *ec,
 	return 0;
 }
 
-int raw1394_loop_iterate(raw1394handle_t handle)
+int fw_loop_iterate(raw1394handle_t handle)
 {
 	int i, count, retval = 0;
 	struct epoll_closure *closure;
 	struct epoll_event ep[32];
 
-	count = epoll_wait(handle->epoll_fd, ep, ARRAY_LENGTH(ep), -1);
+	count = epoll_wait(handle->mode.fw->epoll_fd, ep, ARRAY_LENGTH(ep), -1);
 	if (count < 0)
 		return -1;
 
@@ -396,14 +393,14 @@ int raw1394_loop_iterate(raw1394handle_t handle)
 
 	/* It looks like we have to add this work-around to get epoll
 	 * to recompute the POLLIN status of the epoll_fd. */
-	epoll_wait(handle->epoll_fd, ep, ARRAY_LENGTH(ep), 0);
+	epoll_wait(handle->mode.fw->epoll_fd, ep, ARRAY_LENGTH(ep), 0);
 
 	return retval;
 }
 
-raw1394handle_t raw1394_new_handle(void)
+fw_handle_t fw_new_handle(void)
 {
-	raw1394handle_t handle;
+	fw_handle_t handle;
 	struct epoll_event ep;
 	int i;
 
@@ -469,7 +466,7 @@ raw1394handle_t raw1394_new_handle(void)
 	return NULL;
 }
 
-void raw1394_destroy_handle(raw1394handle_t handle)
+void fw_destroy_handle(fw_handle_t handle)
 {
 	int i;
 
@@ -491,58 +488,48 @@ void raw1394_destroy_handle(raw1394handle_t handle)
 	return;
 }
 
-raw1394handle_t raw1394_new_handle_on_port(int port)
+fw_handle_t fw_new_handle_on_port(int port)
 {
-	raw1394handle_t handle;
+	fw_handle_t handle;
 
-	handle = raw1394_new_handle();
+	handle = fw_new_handle();
 	if (handle == NULL)
 		return NULL;
 
-	if (raw1394_set_port(handle, port) < 0)
+	if (fw_set_port(handle, port) < 0)
 		return NULL;
 
 	return handle;
 }
 
-int raw1394_busreset_notify (raw1394handle_t handle, int off_on_switch)
+int fw_busreset_notify (fw_handle_t handle, int off_on_switch)
 {
 	handle->notify_bus_reset = off_on_switch;
 
 	return 0;
 }
 
-int raw1394_get_fd(raw1394handle_t handle)
+int fw_get_fd(fw_handle_t handle)
 {
 	return handle->epoll_fd;
 }
 
-void raw1394_set_userdata(raw1394handle_t handle, void *data)
-{
-	handle->user_data = data;
-}
-
-void *raw1394_get_userdata(raw1394handle_t handle)
-{
-	return handle->user_data;
-}
-
-nodeid_t raw1394_get_local_id(raw1394handle_t handle)
+nodeid_t fw_get_local_id(fw_handle_t handle)
 {
 	return handle->reset.local_node_id;
 }
 
-nodeid_t raw1394_get_irm_id(raw1394handle_t handle)
+nodeid_t fw_get_irm_id(fw_handle_t handle)
 {
 	return handle->reset.irm_node_id;
 }
 
-int raw1394_get_nodecount(raw1394handle_t handle)
+int fw_get_nodecount(fw_handle_t handle)
 {
 	return (handle->reset.root_node_id & 0x3f) + 1;
 }
 
-int raw1394_get_port_info(raw1394handle_t handle,
+int fw_get_port_info(fw_handle_t handle,
 			  struct raw1394_portinfo *pinf,
 			  int maxports)
 {
@@ -560,7 +547,7 @@ int raw1394_get_port_info(raw1394handle_t handle,
 	return handle->port_count;
 }
 
-int raw1394_set_port(raw1394handle_t handle, int port)
+int fw_set_port(fw_handle_t handle, int port)
 {
 	struct fw_cdev_get_info get_info;
 	struct fw_cdev_event_bus_reset reset;
@@ -637,12 +624,7 @@ int raw1394_set_port(raw1394handle_t handle, int port)
 	return 0;
 }
 
-int raw1394_reset_bus(raw1394handle_t handle)
-{
-	return raw1394_reset_bus_new(handle, RAW1394_LONG_RESET);
-}
-
-int raw1394_reset_bus_new(raw1394handle_t handle, int type)
+int fw_reset_bus_new(fw_handle_t handle, int type)
 {
 	struct fw_cdev_initiate_bus_reset initiate;
 
@@ -657,56 +639,6 @@ int raw1394_reset_bus_new(raw1394handle_t handle, int type)
 
 	return ioctl(handle->local_fd,
 		     FW_CDEV_IOC_INITIATE_BUS_RESET, &initiate);
-}
-
-bus_reset_handler_t raw1394_set_bus_reset_handler(raw1394handle_t handle,
-						  bus_reset_handler_t new_h)
-{
-	bus_reset_handler_t old_h = handle->bus_reset_handler;
-
-	handle->bus_reset_handler = new_h;
-
-	return old_h;
-}
-
-unsigned int raw1394_get_generation(raw1394handle_t handle)
-{
-	return handle->generation;
-}
-
-void raw1394_update_generation(raw1394handle_t handle, unsigned int generation)
-{
-	handle->generation = generation;
-}
-
-tag_handler_t
-raw1394_set_tag_handler(raw1394handle_t handle, tag_handler_t new_h)
-{
-	tag_handler_t old_h = handle->tag_handler;
-
-	handle->tag_handler = new_h;
-
-	return old_h;
-}
-
-arm_tag_handler_t
-raw1394_set_arm_tag_handler(raw1394handle_t handle, arm_tag_handler_t new_h)
-{
-	arm_tag_handler_t old_h = handle->arm_tag_handler;
-
-	handle->arm_tag_handler = new_h;
-
-	return old_h;
-}
-
-fcp_handler_t
-raw1394_set_fcp_handler(raw1394handle_t handle, fcp_handler_t new_h)
-{
-	fcp_handler_t old_h = handle->fcp_handler;
-
-	handle->fcp_handler = new_h;
-
-	return old_h;
 }
 
 struct request_response_block {
@@ -734,6 +666,7 @@ static int
 handle_arm_request(raw1394handle_t handle, struct address_closure *ac,
 		   struct fw_cdev_event_request *request, int i)
 {
+	fw_handle_t fwhandle = handle->mode.fw;
 	struct allocation *allocation = (struct allocation *) ac;
 	struct request_response_block *rrb;
 	struct fw_cdev_send_response response;
@@ -785,7 +718,7 @@ handle_arm_request(raw1394handle_t handle, struct address_closure *ac,
 		response.rcode  = RCODE_TYPE_ERROR;
 		response.length = 0;
 		response.data   = 0;
-		if (ioctl(handle->devices[i].fd,
+		if (ioctl(fwhandle->devices[i].fd,
 			  FW_CDEV_IOC_SEND_RESPONSE, &response) < 0)
 			return -1;
 	} else if (!(allocation->client_transactions & type)) {
@@ -795,7 +728,7 @@ handle_arm_request(raw1394handle_t handle, struct address_closure *ac,
 		else if (type == RAW1394_ARM_LOCK)
 			/* FIXME: do lock ops here */;
 
-		if (ioctl(handle->devices[i].fd,
+		if (ioctl(fwhandle->devices[i].fd,
 			  FW_CDEV_IOC_SEND_RESPONSE, &response) < 0)
 			return -1;
 	}
@@ -808,8 +741,8 @@ handle_arm_request(raw1394handle_t handle, struct address_closure *ac,
 	rrb->request_response.request = &rrb->request;
 	rrb->request_response.response = &rrb->response;
 
-	rrb->request.destination_nodeid = handle->reset.local_node_id;
-	rrb->request.source_nodeid = handle->devices[i].node_id;
+	rrb->request.destination_nodeid = fwhandle->reset.local_node_id;
+	rrb->request.source_nodeid = fwhandle->devices[i].node_id;
 	rrb->request.destination_offset = request->offset;
 	rrb->request.tlabel = 0;
 	if (request->tcode < 0x10) {
@@ -819,7 +752,7 @@ handle_arm_request(raw1394handle_t handle, struct address_closure *ac,
 		rrb->request.tcode = TCODE_LOCK_REQUEST;
 		rrb->request.extended_transaction_code = request->tcode - 0x10;
 	}
-	rrb->request.generation = handle->reset.generation;
+	rrb->request.generation = fwhandle->reset.generation;
 	rrb->request.buffer_length = in_length;
 	memcpy(rrb->request.buffer, request->data, in_length);
 
@@ -828,13 +761,13 @@ handle_arm_request(raw1394handle_t handle, struct address_closure *ac,
 	memcpy(rrb->response.buffer,
 	       allocation->data + offset, response.length);
 
-	return handle->arm_tag_handler(handle, allocation->tag, type,
+	return fwhandle->arm_tag_handler(handle, allocation->tag, type,
 				       request->length,
 				       &rrb->request_response);
 }
 
 int
-raw1394_arm_register(raw1394handle_t handle, nodeaddr_t start,
+fw_arm_register(fw_handle_t handle, nodeaddr_t start,
 		     size_t length, byte_t *initial_value,
 		     octlet_t arm_tag, arm_options_t access_rights,
 		     arm_options_t notification_options,
@@ -877,7 +810,7 @@ raw1394_arm_register(raw1394handle_t handle, nodeaddr_t start,
 }
 
 static struct allocation *
-lookup_allocation(raw1394handle_t handle, nodeaddr_t start, int delete)
+lookup_allocation(fw_handle_t handle, nodeaddr_t start, int delete)
 {
 	struct allocation *a, **prev;
 
@@ -895,7 +828,7 @@ lookup_allocation(raw1394handle_t handle, nodeaddr_t start, int delete)
 }
 
 int
-raw1394_arm_unregister(raw1394handle_t handle, nodeaddr_t start)
+fw_arm_unregister(fw_handle_t handle, nodeaddr_t start)
 {
 	struct fw_cdev_deallocate request;
 	struct allocation *allocation;
@@ -913,7 +846,7 @@ raw1394_arm_unregister(raw1394handle_t handle, nodeaddr_t start)
 }
 
 int
-raw1394_arm_set_buf(raw1394handle_t handle, nodeaddr_t start,
+fw_arm_set_buf(fw_handle_t handle, nodeaddr_t start,
 		    size_t length, void *buf)
 {
 	struct allocation *allocation;
@@ -930,7 +863,7 @@ raw1394_arm_set_buf(raw1394handle_t handle, nodeaddr_t start,
 }
 
 int
-raw1394_arm_get_buf(raw1394handle_t handle, nodeaddr_t start,
+fw_arm_get_buf(fw_handle_t handle, nodeaddr_t start,
 		    size_t length, void *buf)
 {
 	struct allocation *allocation;
@@ -947,24 +880,24 @@ raw1394_arm_get_buf(raw1394handle_t handle, nodeaddr_t start,
 }
 
 int
-raw1394_echo_request(raw1394handle_t handle, quadlet_t data)
+fw_echo_request(fw_handle_t handle, quadlet_t data)
 {
 	return write(handle->pipe_fds[1], &data, sizeof data);
 }
 
-int raw1394_wake_up(raw1394handle_t handle)
+int fw_wake_up(fw_handle_t handle)
 {
-	return raw1394_echo_request(handle, 0);
+	return fw_echo_request(handle, 0);
 }
 
-int raw1394_phy_packet_write (raw1394handle_t handle, quadlet_t data)
+int fw_phy_packet_write (fw_handle_t handle, quadlet_t data)
 {
 	errno = ENOSYS;
 	return -1;
 }
 
 int
-raw1394_start_phy_packet_write(raw1394handle_t handle,
+fw_start_phy_packet_write(fw_handle_t handle,
 			       quadlet_t data, unsigned long tag)
 {
 	errno = ENOSYS;
@@ -972,7 +905,7 @@ raw1394_start_phy_packet_write(raw1394handle_t handle,
 }
 
 static int
-send_request(raw1394handle_t handle, int tcode,
+send_request(fw_handle_t handle, int tcode,
 	     nodeid_t node, nodeaddr_t addr,
 	     size_t length, void *in, void *out, unsigned long tag)
 {
@@ -982,27 +915,27 @@ send_request(raw1394handle_t handle, int tcode,
 
 	if (node > handle->reset.root_node_id) {
 		handle->err = -RCODE_NO_ACK;
-		errno = raw1394_errcode_to_errno(handle->err);
+		errno = fw_errcode_to_errno(handle->err);
 		return -1;
 	}
 
 	i = handle->nodes[node & 0x3f];
 	if (i == -1) {
 		handle->err = -RCODE_NO_ACK;
-		errno = raw1394_errcode_to_errno(handle->err);
+		errno = fw_errcode_to_errno(handle->err);
 		return -1;
 	}
 
 	if (handle->generation != handle->devices[i].generation) {
 		handle->err = -RCODE_GENERATION;
-		errno = raw1394_errcode_to_errno(handle->err);
+		errno = fw_errcode_to_errno(handle->err);
 		return -1;
 	}
 
 	closure = malloc(sizeof *closure);
 	if (closure == NULL) {
 		handle->err = -RCODE_SEND_ERROR;
-		errno = raw1394_errcode_to_errno(handle->err);
+		errno = fw_errcode_to_errno(handle->err);
 		return -1;
 	}
 
@@ -1022,7 +955,7 @@ send_request(raw1394handle_t handle, int tcode,
 }
 
 int
-raw1394_start_read(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
+fw_start_read(fw_handle_t handle, nodeid_t node, nodeaddr_t addr,
 		   size_t length, quadlet_t *buffer, unsigned long tag)
 {
 	int tcode;
@@ -1037,7 +970,7 @@ raw1394_start_read(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 }
 
 int
-raw1394_start_write(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
+fw_start_write(fw_handle_t handle, nodeid_t node, nodeaddr_t addr,
 		    size_t length, quadlet_t *data, unsigned long tag)
 {
 	int tcode;
@@ -1098,7 +1031,7 @@ setup_lock64(int extcode, octlet_t data, octlet_t arg, octlet_t *buffer)
 }
 
 int
-raw1394_start_lock(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
+fw_start_lock(fw_handle_t handle, nodeid_t node, nodeaddr_t addr,
 		   unsigned int extcode, quadlet_t data, quadlet_t arg,
 		   quadlet_t *result, unsigned long tag)
 {
@@ -1114,7 +1047,7 @@ raw1394_start_lock(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 }
 
 int
-raw1394_start_lock64(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
+fw_start_lock64(fw_handle_t handle, nodeid_t node, nodeaddr_t addr,
 		     unsigned int extcode, octlet_t data, octlet_t arg,
 		     octlet_t *result, unsigned long tag)
 {
@@ -1130,7 +1063,7 @@ raw1394_start_lock64(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 }
 
 int
-raw1394_start_async_stream(raw1394handle_t handle, unsigned int channel,
+fw_start_async_stream(fw_handle_t handle, unsigned int channel,
 			   unsigned int tag, unsigned int sy,
 			   unsigned int speed, size_t length, quadlet_t *data,
 			   unsigned long rawtag)
@@ -1141,7 +1074,7 @@ raw1394_start_async_stream(raw1394handle_t handle, unsigned int channel,
 
 
 int
-raw1394_start_async_send(raw1394handle_t handle,
+fw_start_async_send(fw_handle_t handle,
 			 size_t length, size_t header_length,
 			 unsigned int expect_response,
 			 quadlet_t *data, unsigned long rawtag)
@@ -1171,6 +1104,7 @@ send_request_sync(raw1394handle_t handle, int tcode,
 		  nodeid_t node, nodeaddr_t addr,
 		  size_t length, void *in, void *out)
 {
+	fw_handle_t fwhandle = handle->mode.fw;
 	struct raw1394_reqhandle reqhandle;
 	struct sync_data sd = { 0, 0 };
 	int err;
@@ -1178,23 +1112,23 @@ send_request_sync(raw1394handle_t handle, int tcode,
 	reqhandle.callback = sync_callback;
 	reqhandle.data = &sd;
 
-	err = send_request(handle, tcode, node, addr,
+	err = send_request(fwhandle, tcode, node, addr,
 			   length, in, out, (unsigned long) &reqhandle);
 
 	while (!sd.done) {
 		if (err < 0)
 			return err;
-		err = raw1394_loop_iterate(handle);
+		err = fw_loop_iterate(handle);
 	}
 
-	handle->err = sd.err;
-	errno = raw1394_errcode_to_errno(sd.err);
+	fwhandle->err = sd.err;
+	errno = fw_errcode_to_errno(sd.err);
 
 	return (errno ? -1 : 0);
 }
 
 int
-raw1394_read(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
+fw_read(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 	     size_t length, quadlet_t *buffer)
 {
 	int tcode;
@@ -1209,7 +1143,7 @@ raw1394_read(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 }
 
 int
-raw1394_write(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
+fw_write(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 	      size_t length, quadlet_t *data)
 {
 	int tcode;
@@ -1224,7 +1158,7 @@ raw1394_write(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 }
 
 int
-raw1394_lock(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
+fw_lock(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 	     unsigned int extcode, quadlet_t data, quadlet_t arg,
 	     quadlet_t *result)
 {
@@ -1240,7 +1174,7 @@ raw1394_lock(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 }
 
 int
-raw1394_lock64(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
+fw_lock64(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 	       unsigned int extcode, octlet_t data, octlet_t arg,
 	       octlet_t *result)
 {
@@ -1256,7 +1190,7 @@ raw1394_lock64(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 }
 
 int
-raw1394_async_stream(raw1394handle_t handle, unsigned int channel,
+fw_async_stream(fw_handle_t handle, unsigned int channel,
 		     unsigned int tag, unsigned int sy, unsigned int speed,
 		     size_t length, quadlet_t *data)
 {
@@ -1265,7 +1199,7 @@ raw1394_async_stream(raw1394handle_t handle, unsigned int channel,
 }
 
 int
-raw1394_async_send(raw1394handle_t handle,
+fw_async_send(fw_handle_t handle,
 		   size_t length, size_t header_length,
 		   unsigned int expect_response,
 		   quadlet_t *data)
@@ -1275,7 +1209,7 @@ raw1394_async_send(raw1394handle_t handle,
 }
 
 int
-raw1394_start_fcp_listen(raw1394handle_t handle)
+fw_start_fcp_listen(fw_handle_t handle)
 {
 	struct fw_cdev_allocate request;
 	struct address_closure *closure;
@@ -1298,7 +1232,7 @@ raw1394_start_fcp_listen(raw1394handle_t handle)
 }
 
 int
-raw1394_stop_fcp_listen(raw1394handle_t handle)
+fw_stop_fcp_listen(fw_handle_t handle)
 {
 	struct fw_cdev_deallocate request;
 
@@ -1307,21 +1241,15 @@ raw1394_stop_fcp_listen(raw1394handle_t handle)
 	return ioctl(handle->local_fd, FW_CDEV_IOC_DEALLOCATE, &request);
 }
 
-const char *
-raw1394_get_libversion(void)
-{
-	return VERSION " (Juju)";
-}
-
 int
-raw1394_update_config_rom(raw1394handle_t handle, const quadlet_t *new_rom,
+fw_update_config_rom(fw_handle_t handle, const quadlet_t *new_rom,
 			  size_t size, unsigned char rom_version)
 {
 	return -1;
 }
 
 int
-raw1394_get_config_rom(raw1394handle_t handle, quadlet_t *buffer,
+fw_get_config_rom(fw_handle_t handle, quadlet_t *buffer,
 		       size_t buffersize, size_t *rom_size,
 		       unsigned char *rom_version)
 {
@@ -1346,13 +1274,13 @@ raw1394_get_config_rom(raw1394handle_t handle, quadlet_t *buffer,
 #define MAXIMUM_BANDWIDTH 4915
 
 int
-raw1394_bandwidth_modify (raw1394handle_t handle,
+fw_bandwidth_modify (raw1394handle_t handle,
 			  unsigned int bandwidth,
 			  enum raw1394_modify_mode mode)
 {
-        quadlet_t buffer, compare, swap;
+	quadlet_t buffer, compare, swap;
 	nodeaddr_t addr;
-        int result;
+	int result;
 
         if (bandwidth == 0)
                 return 0;
@@ -1392,7 +1320,7 @@ raw1394_bandwidth_modify (raw1394handle_t handle,
 }
 
 int
-raw1394_channel_modify (raw1394handle_t handle,
+fw_channel_modify (raw1394handle_t handle,
 			unsigned int channel,
 			enum raw1394_modify_mode mode)
 {

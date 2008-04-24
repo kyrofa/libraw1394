@@ -43,7 +43,7 @@
  * returnvalue:       0  ... success
  *                    <0 ... failure
  */
-int raw1394_arm_register(struct raw1394_handle *handle, nodeaddr_t start, 
+int ieee1394_arm_register(struct ieee1394_handle *handle, nodeaddr_t start, 
                          size_t length, byte_t *initial_value,
                          octlet_t arm_tag, arm_options_t access_rights,
                          arm_options_t notification_options,
@@ -79,7 +79,7 @@ int raw1394_arm_register(struct raw1394_handle *handle, nodeaddr_t start,
  * returnvalue:       0  ... success
  *                    <0 ... failure
  */
-int raw1394_arm_unregister (struct raw1394_handle *handle, nodeaddr_t start)
+int ieee1394_arm_unregister (struct ieee1394_handle *handle, nodeaddr_t start)
 {
         int retval;
         struct raw1394_request req;
@@ -105,7 +105,7 @@ int raw1394_arm_unregister (struct raw1394_handle *handle, nodeaddr_t start)
  * returnvalue:       0  ... success
  *                    <0 ... failure, and errno - error code
  */
-int raw1394_arm_set_buf (struct raw1394_handle *handle, nodeaddr_t start,
+int ieee1394_arm_set_buf (struct ieee1394_handle *handle, nodeaddr_t start,
                          size_t length, void *buf)
 {
         struct raw1394_request req;
@@ -135,7 +135,7 @@ int raw1394_arm_set_buf (struct raw1394_handle *handle, nodeaddr_t start,
  * returnvalue:       0  ... success
  *                    <0 ... failure, and errno - error code
  */
-int raw1394_arm_get_buf (struct raw1394_handle *handle, nodeaddr_t start,
+int ieee1394_arm_get_buf (struct ieee1394_handle *handle, nodeaddr_t start,
                          size_t length, void *buf)
 {
         struct raw1394_request req;

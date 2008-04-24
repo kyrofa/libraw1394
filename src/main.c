@@ -84,7 +84,7 @@ int _raw1394_sync_cb(struct raw1394_handle *unused, struct sync_cb_data *data,
 
 
 
-static unsigned int init_rawdevice(struct raw1394_handle *h)
+static unsigned int init_rawdevice(struct ieee1394_handle *h)
 {
         struct raw1394_request req;
 
@@ -112,12 +112,12 @@ static unsigned int init_rawdevice(struct raw1394_handle *h)
 }
 
 
-struct raw1394_handle *raw1394_new_handle(void)
+struct ieee1394_handle *ieee1394_new_handle(void)
 {
-        struct raw1394_handle *handle;
+        struct ieee1394_handle *handle;
         const char *defaultDevice = "/dev/raw1394";
 
-        handle = malloc(sizeof(struct raw1394_handle));
+        handle = malloc(sizeof(struct ieee1394_handle));
         if (!handle) {
                 errno = ENOMEM;
                 return NULL;
@@ -154,65 +154,76 @@ struct raw1394_handle *raw1394_new_handle(void)
         handle->bus_reset_handler = bus_reset_default;
         handle->tag_handler = tag_handler_default;
         handle->arm_tag_handler = arm_tag_handler_default;
-        memset(handle->iso_handler, 0, sizeof(handle->iso_handler));
         handle->iso_buffer = NULL;
         handle->iso_mode = ISO_INACTIVE;
         handle->iso_packet_infos = NULL;
         return handle;
 }
 
-void raw1394_destroy_handle(struct raw1394_handle *handle)
+void ieee1394_destroy_handle(struct ieee1394_handle *handle)
 {
 	if (handle) {
 		if(handle->iso_mode != ISO_INACTIVE) {
-			raw1394_iso_shutdown(handle);
+			ieee1394_iso_shutdown(handle);
 		}
 		close(handle->fd);
 		free(handle);
 	}
 }
 
-int raw1394_get_fd(struct raw1394_handle *handle)
+int ieee1394_get_fd(struct ieee1394_handle *handle)
 {
         return handle->fd;
 }
 
 unsigned int raw1394_get_generation(struct raw1394_handle *handle)
 {
-        return handle->generation;
+	if (handle && handle->is_fw)
+		return handle->mode.fw->generation;
+	else
+		return handle->mode.ieee1394->generation;
 }
 
 void raw1394_update_generation(struct raw1394_handle *handle, unsigned int gen)
 {
-        handle->generation = gen;
+	if (handle && handle->is_fw)
+		handle->mode.fw->generation = gen;
+	else
+		handle->mode.ieee1394->generation = gen;
 }
 
-int raw1394_get_nodecount(struct raw1394_handle *handle)
+int ieee1394_get_nodecount(struct ieee1394_handle *handle)
 {
         return handle->num_of_nodes;
 }
 
-nodeid_t raw1394_get_local_id(struct raw1394_handle *handle)
+nodeid_t ieee1394_get_local_id(struct ieee1394_handle *handle)
 {
         return handle->local_id;
 }
 
-nodeid_t raw1394_get_irm_id(struct raw1394_handle *handle)
+nodeid_t ieee1394_get_irm_id(struct ieee1394_handle *handle)
 {
         return handle->irm_id;
 }
 
 void raw1394_set_userdata(struct raw1394_handle *handle, void *data)
 {
-        handle->userdata = data;
+	if (handle && handle->is_fw)
+		handle->mode.fw->userdata = data;
+	else
+		handle->mode.ieee1394->userdata = data;
 }
 
 void *raw1394_get_userdata(struct raw1394_handle *handle)
 {
-        return handle->userdata;
+	if (handle && handle->is_fw)
+		return handle->mode.fw->userdata;
+	else
+		return handle->mode.ieee1394->userdata;
 }
 
-int raw1394_get_port_info(struct raw1394_handle *handle, 
+int ieee1394_get_port_info(struct ieee1394_handle *handle, 
                           struct raw1394_portinfo *pinf, int maxports)
 {
         int num;
@@ -248,7 +259,7 @@ int raw1394_get_port_info(struct raw1394_handle *handle,
 }
 
 
-int raw1394_set_port(struct raw1394_handle *handle, int port)
+int ieee1394_set_port(struct ieee1394_handle *handle, int port)
 {
         struct raw1394_request req;
 
@@ -286,23 +297,23 @@ int raw1394_set_port(struct raw1394_handle *handle, int port)
         }
 }
 
-raw1394handle_t raw1394_new_handle_on_port(int port)
+ieee1394handle_t ieee1394_new_handle_on_port(int port)
 {
-	raw1394handle_t handle = raw1394_new_handle();
+	ieee1394handle_t handle = ieee1394_new_handle();
 	if (!handle)
 		return NULL;
 
 tryagain:
-	if (raw1394_get_port_info(handle, NULL, 0) < 0) {
-		raw1394_destroy_handle(handle);
+	if (ieee1394_get_port_info(handle, NULL, 0) < 0) {
+		ieee1394_destroy_handle(handle);
 		return NULL;
 	}
 
-	if (raw1394_set_port(handle, port)) {
+	if (ieee1394_set_port(handle, port)) {
 		if (errno == ESTALE || errno == EINTR) {
 			goto tryagain;
 		} else {
-			raw1394_destroy_handle(handle);
+			ieee1394_destroy_handle(handle);
 			return NULL;
 		}
 	}
@@ -310,7 +321,7 @@ tryagain:
 	return handle;
 }
 
-int raw1394_reset_bus_new(struct raw1394_handle *handle, int type)
+int ieee1394_reset_bus_new(struct ieee1394_handle *handle, int type)
 {
         struct raw1394_request req;
 
@@ -331,7 +342,7 @@ int raw1394_reset_bus(struct raw1394_handle *handle)
         return raw1394_reset_bus_new (handle, RAW1394_LONG_RESET);
 }
 
-int raw1394_busreset_notify (struct raw1394_handle *handle, 
+int ieee1394_busreset_notify (struct ieee1394_handle *handle, 
                              int off_on_switch)
 {
         struct raw1394_request req;
@@ -347,7 +358,7 @@ int raw1394_busreset_notify (struct raw1394_handle *handle,
         return 0; /* success */
 }
 
-int raw1394_update_config_rom(raw1394handle_t handle, const quadlet_t
+int ieee1394_update_config_rom(ieee1394handle_t handle, const quadlet_t
         *new_rom, size_t size, unsigned char rom_version)
 {
         struct raw1394_request req;
@@ -366,7 +377,7 @@ int raw1394_update_config_rom(raw1394handle_t handle, const quadlet_t
         return status;
 }
 
-int raw1394_get_config_rom(raw1394handle_t handle, quadlet_t *buffer,
+int ieee1394_get_config_rom(ieee1394handle_t handle, quadlet_t *buffer,
         size_t buffersize, size_t *rom_size, unsigned char *rom_version)
 {
         struct raw1394_request req;
@@ -386,7 +397,7 @@ int raw1394_get_config_rom(raw1394handle_t handle, quadlet_t *buffer,
         return status;
 }
 
-int raw1394_bandwidth_modify (raw1394handle_t handle, unsigned int bandwidth,
+int ieee1394_bandwidth_modify (raw1394handle_t handle, unsigned int bandwidth,
 	enum raw1394_modify_mode mode)
 {
         quadlet_t buffer, compare, swap, new;
@@ -447,7 +458,7 @@ int raw1394_bandwidth_modify (raw1394handle_t handle, unsigned int bandwidth,
         return 0;
 }
 
-int raw1394_channel_modify (raw1394handle_t handle, unsigned int channel,
+int ieee1394_channel_modify (raw1394handle_t handle, unsigned int channel,
 	enum raw1394_modify_mode mode)
 {
         quadlet_t buffer;

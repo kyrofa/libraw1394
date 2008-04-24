@@ -3,6 +3,7 @@
  *
  * Copyright (C) 1999-2004 Andreas Bombe, Dan Maas, Manfred Weihs, and
  *    Christian Toegel
+ * Copyright (C) 2008 Dan Dennedy <dan@dennedy.org>
  *
  * This library is licensed under the GNU Lesser General Public License (LGPL),
  * version 2.1 or later. See the file COPYING.LIB in the distribution for
@@ -1214,101 +1215,6 @@ int
 raw1394_channel_modify (raw1394handle_t handle, unsigned int channel, 
 	enum raw1394_modify_mode mode);
 
-
-/**
- * iso_handler_t - DEPRECATED
- * @handle: libraw1394 handle
- *
- * DEPRECATED
- **/
-typedef int (*iso_handler_t)(raw1394handle_t, int channel, size_t length,
-                             quadlet_t *data);
- 
-/**
- * raw1394_set_iso_handler - set isochronous packet handler (DEPRECATED)
- * @handle: libraw1394 handle
- * @new_h: pointer to new handler
- *
- * DEPRECATED
- *
- * Sets the handler to be called when an isochronous packet is received to
- * @new_h and returns the old handler.  The default handler does nothing.
- *
- * In order to actually get iso packet events, receiving on a specific channel
- * first has to be enabled with raw1394_start_iso_rcv() and can be stopped again
- * with raw1394_stop_iso_rcv().
- **/
-iso_handler_t raw1394_set_iso_handler(raw1394handle_t handle,
-                                      unsigned int channel,
-                                      iso_handler_t new_h)
-__attribute__ ((deprecated));
-
-/**
- * raw1394_start_iso_rcv - enable isochronous receiving (DEPRECATED)
- * @handle: libraw1394 handle
- * @channel: channel number to start receiving on
- *
- * DEPRECATED
- *
- * Enables the reception of isochronous packets in @channel on @handle.
- * Isochronous packets are then passed to the callback specified with
- * raw1394_set_iso_handler().
- **/
-int raw1394_start_iso_rcv(raw1394handle_t handle, unsigned int channel)
-__attribute__ ((deprecated));
-
-/**
- * raw1394_stop_iso_rcv - stop isochronous receiving (DEPRECATED)
- * @handle: libraw1394 handle
- * @channel: channel to stop receiving on
- *
- * DEPRECATED
- *
- * Stops the reception of isochronous packets in @channel on @handle.
- **/
-int raw1394_stop_iso_rcv(raw1394handle_t handle, unsigned int channel)
-__attribute__ ((deprecated));
-
-/**
- * raw1394_start_iso_write - initiate an isochronous packet write (DEPRECATED)
- * @handle: libraw1394 handle
- * @channel: channel number on which to send on
- * @tag: data to be put into packet's tag field
- * @sy: data to be put into packet's sy field
- * @speed: speed at which to send
- * @length: amount of data to send
- * @data: pointer to data to send
- * @rawtag: data to identify the request to completion handler
- *
- * DEPRECATED
- *
- * This function starts the specified isochronous packet transmission and
- * returns %0 for success and a negative number for an error, in which case
- * errno will be set.
- *
- * When the send completes, a raw1394_loop_iterate() will call the tag handler
- * and pass it the tag and error code of the transaction.  @tag should therefore
- * be set to something that uniquely identifies this transaction (e.g. a struct
- * pointer casted to unsigned long).
- *
- * Isochronous packets are automatically
- **/
-int raw1394_start_iso_write(raw1394handle_t handle, unsigned int channel,
-                            unsigned int tag, unsigned int sy,
-                            unsigned int speed, size_t length, quadlet_t *data,
-                            unsigned long rawtag)
-__attribute__ ((deprecated));
-
-/**
- * raw1394_iso_write - DEPRECATED
- * @handle: libraw1394 handle
- *
- * DEPRECATED
- **/
-int raw1394_iso_write(raw1394handle_t handle, unsigned int channel,
-                      unsigned int tag, unsigned int sy, unsigned int speed,
-                      size_t length, quadlet_t *data)
-__attribute__ ((deprecated));
 
 #ifdef __cplusplus
 }

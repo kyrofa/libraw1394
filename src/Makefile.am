@@ -17,7 +17,12 @@ libraw1394_la_SOURCES =   \
 	version.c         \
 	kernel-raw1394.h  \
 	raw1394_private.h \
-	ieee1394-ioctl.h
+	ieee1394-ioctl.h  \
+	dispatch.c        \
+	../juju/raw1394.c \
+	../juju/raw1394-iso.c \
+	../juju.h
+
 
 # headers to be installed
 pkginclude_HEADERS = raw1394.h csr.h ieee1394.h

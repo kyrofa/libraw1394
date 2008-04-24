@@ -19,10 +19,13 @@
 
 raw1394_errcode_t raw1394_get_errcode(struct raw1394_handle *handle)
 {
-        return handle->err;
+	if (handle && handle->is_fw)
+		return handle->mode.fw->err;
+	else
+		return handle->mode.ieee1394->err;
 }
 
-int raw1394_errcode_to_errno(raw1394_errcode_t errcode)
+int ieee1394_errcode_to_errno(raw1394_errcode_t errcode)
 {
         static const int ack2errno[16] = {
                 0xdead,    /* invalid ack code */

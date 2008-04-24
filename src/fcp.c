@@ -19,6 +19,7 @@
 
 static int do_fcp_listen(struct raw1394_handle *handle, int startstop)
 {
+        ieee1394handle_t ihandle = handle->mode.ieee1394;
         struct sync_cb_data sd = { 0, 0 };
         struct raw1394_reqhandle rh = { (req_callback_t)_raw1394_sync_cb, &sd };
         int err;
@@ -26,16 +27,16 @@ static int do_fcp_listen(struct raw1394_handle *handle, int startstop)
 
         CLEAR_REQ(&req);
         req.type = RAW1394_REQ_FCP_LISTEN;
-        req.generation = handle->generation;
+        req.generation = ihandle->generation;
         req.misc = startstop;
         req.tag = ptr2int(&rh);
-        req.recvb = ptr2int(handle->buffer);
+        req.recvb = ptr2int(ihandle->buffer);
         req.length = 512;
 
-        err = write(handle->fd, &req, sizeof(req));
+        err = write(ihandle->fd, &req, sizeof(req));
         while (!sd.done) {
                 if (err < 0) return err;
-                err = raw1394_loop_iterate(handle);
+                err = ieee1394_loop_iterate(handle);
         }
 
         switch (sd.errcode) {
@@ -54,12 +55,12 @@ static int do_fcp_listen(struct raw1394_handle *handle, int startstop)
 }
 
 
-int raw1394_start_fcp_listen(struct raw1394_handle *handle)
+int ieee1394_start_fcp_listen(struct raw1394_handle *handle)
 {
         return do_fcp_listen(handle, 1);
 }
 
-int raw1394_stop_fcp_listen(struct raw1394_handle *handle)
+int ieee1394_stop_fcp_listen(struct raw1394_handle *handle)
 {
         return do_fcp_listen(handle, 0);
 }

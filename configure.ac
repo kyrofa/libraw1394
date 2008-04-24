@@ -1,6 +1,6 @@
 # process this file with autoconf to get a configure script
 
-AC_INIT(libraw1394, 1.3.0)
+AC_INIT(libraw1394, 2.0.0)
 AC_CONFIG_SRCDIR(src/raw1394.h)
 AM_CONFIG_HEADER(config.h)
 
@@ -16,9 +16,9 @@ AC_C_CONST
 AC_C_BIGENDIAN
 
 # set the libtool so version numbers
-lt_major=10
+lt_major=11
 lt_revision=0
-lt_age=2
+lt_age=3
 
 AC_SUBST(lt_major)
 AC_SUBST(lt_revision)
@@ -30,15 +30,11 @@ if test x$with_valgrind = xyes ; then
     AC_CHECK_HEADERS(valgrind/valgrind.h)
 fi
 
-AC_ARG_WITH(juju-dir,[  --with-juju-dir=<dir>  Path to juju include files])
-if ! test -z "$with_juju_dir" ; then
-   JUJU_DIR="$with_juju_dir"
-   LIB_SUBDIR=juju
-   AC_SUBST(JUJU_DIR)
-else
-   LIB_SUBDIR=src
+AC_ARG_WITH(fw-dir,[  --with-fw-dir=<dir>  Path to kernel firewire headers])
+if ! test -z "$with_fw_dir" ; then
+   FW_DIR="$with_fw_dir"
+   AC_SUBST(FW_DIR)
 fi
-AC_SUBST(LIB_SUBDIR)
 
 AC_ARG_WITH(fw-device-prefix,
 	[  --with-fw-device-prefix=<prefix>  Prefix of firewire device file names (default "fw").],

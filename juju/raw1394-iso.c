@@ -29,9 +29,10 @@
 #include <sys/ioctl.h>
 
 #include "juju.h"
+#include "../src/raw1394_private.h"
 
 static int
-queue_packet(raw1394handle_t handle,
+queue_packet(fw_handle_t handle,
 	     unsigned int length, unsigned int header_length,
 	     unsigned char tag, unsigned char sy)
 {
@@ -80,21 +81,22 @@ queue_packet(raw1394handle_t handle,
 static int
 queue_xmit_packets(raw1394handle_t handle, int limit)
 {
+	fw_handle_t fwhandle = handle->mode.fw;
 	enum raw1394_iso_disposition d;
 	unsigned char tag, sy;
 	int len, cycle, dropped;
 
-	if (handle->iso.xmit_handler == NULL)
+	if (fwhandle->iso.xmit_handler == NULL)
 		return 0;
 
-	while (handle->iso.packet_count < limit) {
+	while (fwhandle->iso.packet_count < limit) {
 
-		d = handle->iso.xmit_handler(handle, handle->iso.head,
+		d = fwhandle->iso.xmit_handler(handle, fwhandle->iso.head,
 					     &len, &tag, &sy, cycle, dropped);
 
 		switch (d) {
 		case RAW1394_ISO_OK:
-			queue_packet(handle, len, 0, tag, sy);
+			queue_packet(fwhandle, len, 0, tag, sy);
 			break;
 		case RAW1394_ISO_DEFER:
 		case RAW1394_ISO_AGAIN:
@@ -103,7 +105,7 @@ queue_xmit_packets(raw1394handle_t handle, int limit)
 		case RAW1394_ISO_ERROR:
 			return -1;
 		case RAW1394_ISO_STOP:
-			raw1394_iso_stop(handle);
+			fw_iso_stop(fwhandle);
 			return 0;
 		}
 	}
@@ -111,35 +113,36 @@ queue_xmit_packets(raw1394handle_t handle, int limit)
 	return 0;
 }
 
-int raw1394_iso_xmit_start(raw1394handle_t handle, int start_on_cycle,
+int fw_iso_xmit_start(raw1394handle_t handle, int start_on_cycle,
 			   int prebuffer_packets)
 {
+	fw_handle_t fwhandle = handle->mode.fw;
 	struct fw_cdev_start_iso start_iso;
 	int retval;
 
 	if (prebuffer_packets == -1)
-		prebuffer_packets = handle->iso.irq_interval;
+		prebuffer_packets = fwhandle->iso.irq_interval;
 
-	handle->iso.prebuffer = prebuffer_packets;
-	handle->iso.start_on_cycle = start_on_cycle;
+	fwhandle->iso.prebuffer = prebuffer_packets;
+	fwhandle->iso.start_on_cycle = start_on_cycle;
 
 	queue_xmit_packets(handle, prebuffer_packets);
 
-	if (handle->iso.prebuffer <= handle->iso.packet_count) {
+	if (fwhandle->iso.prebuffer <= fwhandle->iso.packet_count) {
 		start_iso.cycle  = start_on_cycle;
 		start_iso.handle = 0;
 
-		retval = ioctl(handle->iso.fd,
+		retval = ioctl(fwhandle->iso.fd,
 			       FW_CDEV_IOC_START_ISO, &start_iso);
 		if (retval < 0)
 			return retval;
 	}
 
-	return queue_xmit_packets(handle, handle->iso.buf_packets);
+	return queue_xmit_packets(handle, fwhandle->iso.buf_packets);
 }
 
 static int
-queue_recv_packets(raw1394handle_t handle)
+queue_recv_packets(fw_handle_t handle)
 {
 	while (handle->iso.packet_count <= handle->iso.buf_packets)
 		queue_packet(handle, handle->iso.max_packet_size, 4, 0, 0);
@@ -151,6 +154,7 @@ static enum raw1394_iso_disposition
 flush_recv_packets(raw1394handle_t handle,
 		   struct fw_cdev_event_iso_interrupt *interrupt)
 {
+	fw_handle_t fwhandle = handle->mode.fw;
 	enum raw1394_iso_disposition d;
 	quadlet_t header, *p, *end;
 	unsigned int len, cycle, dropped;
@@ -169,7 +173,7 @@ flush_recv_packets(raw1394handle_t handle,
 		channel = (header >> 8) & 0x3f;
 		sy = header & 0x0f;
 
-		d = handle->iso.recv_handler(handle, handle->iso.tail, len,
+		d = fwhandle->iso.recv_handler(handle, fwhandle->iso.tail, len,
 					     channel, tag, sy, cycle, dropped);
 		if (d != RAW1394_ISO_OK)
 			/* FIXME: we need to save the headers so we
@@ -177,11 +181,11 @@ flush_recv_packets(raw1394handle_t handle,
 			break;
 		cycle++;
 
-		handle->iso.tail += handle->iso.max_packet_size;
-		handle->iso.packet_count--;
+		fwhandle->iso.tail += fwhandle->iso.max_packet_size;
+		fwhandle->iso.packet_count--;
 
-		if (handle->iso.tail + handle->iso.max_packet_size > handle->iso.buffer_end)
-			handle->iso.tail = handle->iso.buffer;
+		if (fwhandle->iso.tail + fwhandle->iso.max_packet_size > fwhandle->iso.buffer_end)
+			fwhandle->iso.tail = fwhandle->iso.buffer;
 	}
 
 	switch (d) {
@@ -194,16 +198,16 @@ flush_recv_packets(raw1394handle_t handle,
 		return -1;
 
 	case RAW1394_ISO_STOP:
-		raw1394_iso_stop(handle);
+		fw_iso_stop(fwhandle);
 		return 0;		
 	}
 
-	queue_recv_packets(handle);
+	queue_recv_packets(fwhandle);
 
 	return 0;
 }
 
-int raw1394_iso_recv_start(raw1394handle_t handle, int start_on_cycle,
+int fw_iso_recv_start(fw_handle_t handle, int start_on_cycle,
 			   int tag_mask, int sync)
 {
 	struct fw_cdev_start_iso start_iso;
@@ -223,21 +227,22 @@ int raw1394_iso_recv_start(raw1394handle_t handle, int start_on_cycle,
 static int handle_iso_event(raw1394handle_t handle,
 			    struct epoll_closure *closure, __uint32_t events)
 {
+	fw_handle_t fwhandle = handle->mode.fw;
 	struct fw_cdev_event_iso_interrupt *interrupt;
 	int len;
 
-	len = read(handle->iso.fd, handle->buffer, sizeof handle->buffer);
+	len = read(fwhandle->iso.fd, fwhandle->buffer, sizeof fwhandle->buffer);
 	if (len < 0)
 		return -1;
 
-	interrupt = (struct fw_cdev_event_iso_interrupt *) handle->buffer;
+	interrupt = (struct fw_cdev_event_iso_interrupt *) fwhandle->buffer;
 	if (interrupt->type != FW_CDEV_EVENT_ISO_INTERRUPT)
 		return 0;
 
-	switch (handle->iso.type) {
+	switch (fwhandle->iso.type) {
 	case FW_CDEV_ISO_CONTEXT_TRANSMIT:
-		handle->iso.packet_count -= handle->iso.irq_interval;
-		return queue_xmit_packets(handle, handle->iso.buf_packets);
+		fwhandle->iso.packet_count -= fwhandle->iso.irq_interval;
+		return queue_xmit_packets(handle, fwhandle->iso.buf_packets);
 	case FW_CDEV_ISO_CONTEXT_RECEIVE:
 		return flush_recv_packets(handle, interrupt);
 	default:
@@ -246,38 +251,39 @@ static int handle_iso_event(raw1394handle_t handle,
 	}
 }
 
-int raw1394_iso_xmit_write(raw1394handle_t handle, unsigned char *data,
+int fw_iso_xmit_write(raw1394handle_t handle, unsigned char *data,
 			   unsigned int len, unsigned char tag,
 			   unsigned char sy)
 {
+	fw_handle_t fwhandle = handle->mode.fw;
 	struct fw_cdev_queue_iso queue_iso;
 	struct fw_cdev_start_iso start_iso;
 	struct fw_cdev_iso_packet *p;
 
-	if (len > handle->iso.max_packet_size) {
+	if (len > fwhandle->iso.max_packet_size) {
 		errno = EINVAL;
 		return -1;
 	}
 
 	/* Block until we have space for another packet. */
-	while (handle->iso.packet_count + handle->iso.irq_interval >
-	       handle->iso.buf_packets)
-		raw1394_loop_iterate(handle);
+	while (fwhandle->iso.packet_count + fwhandle->iso.irq_interval >
+	       fwhandle->iso.buf_packets)
+		fw_loop_iterate(handle);
 		
-	memcpy(handle->iso.head, data, len);
-	if (queue_packet(handle, len, 0, tag, sy) < 0)
+	memcpy(fwhandle->iso.head, data, len);
+	if (queue_packet(fwhandle, len, 0, tag, sy) < 0)
 		return -1;
 
 	/* Start the streaming if it's not already running and if
 	 * we've buffered up enough packets. */
-	if (handle->iso.prebuffer > 0 &&
-	    handle->iso.packet_count >= handle->iso.prebuffer) {
+	if (fwhandle->iso.prebuffer > 0 &&
+	    fwhandle->iso.packet_count >= fwhandle->iso.prebuffer) {
 		/* Set this to 0 to indicate that we're running. */
-		handle->iso.prebuffer = 0;
-		start_iso.cycle  = handle->iso.start_on_cycle;
+		fwhandle->iso.prebuffer = 0;
+		start_iso.cycle  = fwhandle->iso.start_on_cycle;
 		start_iso.handle = 0;
 
-		len = ioctl(handle->iso.fd,
+		len = ioctl(fwhandle->iso.fd,
 			       FW_CDEV_IOC_START_ISO, &start_iso);
 		if (len < 0)
 			return len;
@@ -286,8 +292,9 @@ int raw1394_iso_xmit_write(raw1394handle_t handle, unsigned char *data,
 	return 0;
 }
 
-int raw1394_iso_xmit_sync(raw1394handle_t handle)
+int fw_iso_xmit_sync(raw1394handle_t handle)
 {
+	fw_handle_t fwhandle = handle->mode.fw;
 	struct fw_cdev_iso_packet skip;
 	struct fw_cdev_queue_iso queue_iso;
 	int len;
@@ -298,29 +305,29 @@ int raw1394_iso_xmit_sync(raw1394handle_t handle)
 	queue_iso.data    = 0;
 	queue_iso.handle  = 0;
 
-	len = ioctl(handle->iso.fd, FW_CDEV_IOC_QUEUE_ISO, &queue_iso);
+	len = ioctl(fwhandle->iso.fd, FW_CDEV_IOC_QUEUE_ISO, &queue_iso);
 	if (len < 0)
 		return -1;
 
 	/* Now that we've queued the skip packet, we'll get an
 	 * interrupt when the transmit buffer is flushed, so all we do
 	 * here is wait. */
-	while (handle->iso.packet_count > 0)
-		raw1394_loop_iterate(handle);
+	while (fwhandle->iso.packet_count > 0)
+		fw_loop_iterate(handle);
 
 	/* The iso mainloop thinks that interrutps indicate another
 	 * irq_interval number of packets was sent, so the skip
 	 * interrupt makes it go out of whack.  We just reset it. */
-	handle->iso.head = handle->iso.buffer;
-	handle->iso.tail = handle->iso.buffer;
-	handle->iso.first_payload = handle->iso.buffer;
-	handle->iso.packet_phase = 0;
-	handle->iso.packet_count = 0;
+	fwhandle->iso.head = fwhandle->iso.buffer;
+	fwhandle->iso.tail = fwhandle->iso.buffer;
+	fwhandle->iso.first_payload = fwhandle->iso.buffer;
+	fwhandle->iso.packet_phase = 0;
+	fwhandle->iso.packet_count = 0;
 
 	return 0;
 }
 
-int raw1394_iso_recv_flush(raw1394handle_t handle)
+int fw_iso_recv_flush(fw_handle_t handle)
 {
 	/* FIXME: huh, we'll need kernel support here... */
 
@@ -340,7 +347,7 @@ round_to_power_of_two(unsigned int value)
 }
 
 static int
-iso_init(raw1394handle_t handle, int type,
+iso_init(fw_handle_t handle, int type,
 	 raw1394_iso_xmit_handler_t xmit_handler,
 	 raw1394_iso_recv_handler_t recv_handler,
 	 unsigned int buf_packets,
@@ -438,7 +445,7 @@ iso_init(raw1394handle_t handle, int type,
 	return 0;
 }
 
-int raw1394_iso_xmit_init(raw1394handle_t handle,
+int fw_iso_xmit_init(fw_handle_t handle,
 			  raw1394_iso_xmit_handler_t handler,
 			  unsigned int buf_packets,
 			  unsigned int max_packet_size,
@@ -451,7 +458,7 @@ int raw1394_iso_xmit_init(raw1394handle_t handle,
 			channel, speed, irq_interval);
 }
 
-int raw1394_iso_recv_init(raw1394handle_t handle,
+int fw_iso_recv_init(fw_handle_t handle,
 			  raw1394_iso_recv_handler_t handler,
 			  unsigned int buf_packets,
 			  unsigned int max_packet_size,
@@ -464,7 +471,7 @@ int raw1394_iso_recv_init(raw1394handle_t handle,
 			channel, 0, irq_interval);
 }
 
-int raw1394_iso_multichannel_recv_init(raw1394handle_t handle,
+int fw_iso_multichannel_recv_init(fw_handle_t handle,
 				       raw1394_iso_recv_handler_t handler,
 				       unsigned int buf_packets,
 				       unsigned int max_packet_size,
@@ -475,7 +482,7 @@ int raw1394_iso_multichannel_recv_init(raw1394handle_t handle,
 	return -1;
 }
 
-int raw1394_iso_recv_listen_channel(raw1394handle_t handle,
+int fw_iso_recv_listen_channel(fw_handle_t handle,
 				    unsigned char channel)
 {
 	/* FIXME: multichannel */
@@ -483,7 +490,7 @@ int raw1394_iso_recv_listen_channel(raw1394handle_t handle,
 	return -1;
 }
 
-int raw1394_iso_recv_unlisten_channel(raw1394handle_t handle,
+int fw_iso_recv_unlisten_channel(fw_handle_t handle,
 				      unsigned char channel)
 {
 	/* FIXME: multichannel */
@@ -491,14 +498,14 @@ int raw1394_iso_recv_unlisten_channel(raw1394handle_t handle,
 	return -1;
 }
 
-int raw1394_iso_recv_set_channel_mask(raw1394handle_t handle, u_int64_t mask)
+int fw_iso_recv_set_channel_mask(fw_handle_t handle, u_int64_t mask)
 {
 	/* FIXME: multichannel */
 	errno = ENOSYS;
 	return -1;
 }
 
-void raw1394_iso_stop(raw1394handle_t handle)
+void fw_iso_stop(fw_handle_t handle)
 {
 	struct fw_cdev_stop_iso stop_iso;
 
@@ -512,7 +519,7 @@ void raw1394_iso_stop(raw1394handle_t handle)
 	handle->iso.packet_count = 0;
 }
 
-void raw1394_iso_shutdown(raw1394handle_t handle)
+void fw_iso_shutdown(fw_handle_t handle)
 {
 	munmap(handle->iso.buffer,
 	       handle->iso.buf_packets * handle->iso.max_packet_size);
