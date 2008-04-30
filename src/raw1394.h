@@ -363,7 +363,7 @@ typedef int raw1394_errcode_t;
  * roughly the same meaning.
  *
  * Returns: the error code of the last raw1394_read(), raw1394_write(),
- * raw1394_lock() or raw1394_iso_write().  The error code is either an internal
+ * raw1394_lock().  The error code is either an internal
  * error (i.e. not a bus error) or a combination of acknowledge code and
  * response code, as appropriate.
  *
@@ -651,7 +651,7 @@ typedef int (*tag_handler_t)(raw1394handle_t, unsigned long tag,
  *
  * Care must be taken when replacing the tag handler and calling the synchronous
  * versions of the transaction functions (i.e. raw1394_read(), raw1394_write(),
- * raw1394_lock(), raw1394_iso_write()) since these do pass pointers to &struct
+ * raw1394_lock()) since these do pass pointers to &struct
  * raw1394_reqhandle as the tag and expect the callback to be invoked.
  *
  * Returns: the old handler
