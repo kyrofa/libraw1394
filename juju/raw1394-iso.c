@@ -426,7 +426,7 @@ iso_init(fw_handle_t handle, int type,
 	}
 
 	handle->iso.buffer =
-		mmap(NULL, buf_packets * max_packet_size,
+		mmap(NULL, buf_packets * handle->iso.max_packet_size,
 		     prot, MAP_SHARED, handle->iso.fd, 0);
 
 	if (handle->iso.buffer == MAP_FAILED) {
@@ -437,7 +437,7 @@ iso_init(fw_handle_t handle, int type,
 	}
 
 	handle->iso.buffer_end = handle->iso.buffer + 
-		buf_packets * max_packet_size;
+		buf_packets * handle->iso.max_packet_size;
 	handle->iso.head = handle->iso.buffer;
 	handle->iso.tail = handle->iso.buffer;
 	handle->iso.first_payload = handle->iso.buffer;
