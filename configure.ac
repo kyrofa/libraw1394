@@ -54,7 +54,6 @@ Makefile
 libraw1394.pc
 libraw1394.spec
 src/Makefile
-juju/Makefile
 tools/Makefile
 doc/Makefile
 doc/testlibraw.1

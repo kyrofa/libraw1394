@@ -1,6 +1,6 @@
 /*						-*- c-basic-offset: 8 -*-
  *
- * juju.h -- Internal header file for raw1394 emulation
+ * fw.h -- Internal header file for firewire raw1394 emulation
  *
  * Copyright (C) 2007  Kristian Hoegsberg <krh@bitplanet.net>
  *
@@ -19,14 +19,14 @@
  * Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef __juju_h
-#define __juju_h
+#ifndef LIBRAW1394_FW_H
+#define LIBRAW1394_FW_H
 
 #include <stdlib.h>
 #include <byteswap.h>
 #include <linux/firewire-cdev.h>
-#include "../src/raw1394.h"
-#include "../src/csr.h"
+#include "raw1394.h"
+#include "csr.h"
 #include "config.h"
 
 #define ptr_to_u64(p) ((__u64)(unsigned long)(p))

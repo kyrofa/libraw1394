@@ -14,7 +14,7 @@
 #include "csr.h"
 #include "kernel-raw1394.h"
 #include "raw1394_private.h"
-#include "../juju/juju.h"
+#include "fw.h"
 
 int raw1394_errcode_to_errno(raw1394_errcode_t errcode)
 {

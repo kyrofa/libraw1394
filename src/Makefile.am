@@ -6,6 +6,8 @@ lib_LTLIBRARIES = libraw1394.la
 
 libraw1394_la_LDFLAGS = -version-info @lt_major@:@lt_revision@:@lt_age@
 
+INCLUDES = -I$(FW_DIR)
+
 libraw1394_la_SOURCES =   \
 	main.c            \
 	eventloop.c       \
@@ -19,9 +21,9 @@ libraw1394_la_SOURCES =   \
 	raw1394_private.h \
 	ieee1394-ioctl.h  \
 	dispatch.c        \
-	../juju/raw1394.c \
-	../juju/raw1394-iso.c \
-	../juju.h
+	fw.c              \
+	fw-iso.c          \
+	fw.h
 
 
 # headers to be installed

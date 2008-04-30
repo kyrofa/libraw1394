@@ -1,6 +1,6 @@
 /*						-*- c-basic-offset: 8 -*-
  *
- * raw1394-iso.c -- Emulation of the raw1394 rawiso API on the juju stack
+ * raw1394-iso.c -- Emulation of the raw1394 rawiso API on the firewire stack
  *
  * Copyright (C) 2007  Kristian Hoegsberg <krh@bitplanet.net>
  *
@@ -28,8 +28,8 @@
 #include <sys/epoll.h>
 #include <sys/ioctl.h>
 
-#include "juju.h"
-#include "../src/raw1394_private.h"
+#include "fw.h"
+#include "raw1394_private.h"
 
 static int
 queue_packet(fw_handle_t handle,

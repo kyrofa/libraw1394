@@ -3,7 +3,7 @@
 
 #include "raw1394.h"
 #include "csr.h"
-#include "../juju/juju.h"
+#include "fw.h"
 #include "kernel-raw1394.h"
 
 #define HBUF_SIZE      8192

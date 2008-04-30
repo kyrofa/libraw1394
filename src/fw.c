@@ -31,8 +31,8 @@
 #include <errno.h>
 #include <arpa/inet.h> /* for ntohl and htonl */
 
-#include "juju.h"
-#include "../src/raw1394_private.h"
+#include "fw.h"
+#include "raw1394_private.h"
 
 int
 fw_errcode_to_errno(raw1394_errcode_t errcode)
