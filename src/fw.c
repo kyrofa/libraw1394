@@ -149,6 +149,8 @@ scan_devices(fw_handle_t handle)
 		fd = open(filename, O_RDWR);
 		if (fd < 0)
 			continue;
+		memset(&get_info, 0, sizeof(get_info));
+		memset(&reset, 0, sizeof(reset));
 		get_info.version = FW_CDEV_VERSION;
 		get_info.rom = 0;
 		get_info.rom_length = 0;
@@ -404,7 +406,10 @@ fw_handle_t fw_new_handle(void)
 	struct epoll_event ep;
 	int i;
 
+	memset(&ep, 0, sizeof(ep));
+
 	handle = malloc(sizeof *handle);
+	memset(handle, 0, sizeof(*handle));
 
 	handle->tag_handler = default_tag_handler;
 	handle->arm_tag_handler = default_arm_tag_handler;
@@ -580,6 +585,8 @@ int fw_set_port(fw_handle_t handle, int port)
 		if (fd < 0)
 			continue;
 
+		memset(&get_info, 0, sizeof(get_info));
+		memset(&reset, 0, sizeof(reset));
 		get_info.version = FW_CDEV_VERSION;
 		get_info.rom = 0;
 		get_info.rom_length = 0;
@@ -603,10 +610,12 @@ int fw_set_port(fw_handle_t handle, int port)
 			sizeof handle->devices[i].filename);
 
 		handle->devices[i].closure.func = handle_device_event;
+		memset(&ep, 0, sizeof(ep));
 		ep.events = EPOLLIN;
 		ep.data.ptr = &handle->devices[i].closure;
 		if (epoll_ctl(handle->epoll_fd, EPOLL_CTL_ADD, fd, &ep) < 0) {
 			close(fd);
+			closedir(dir);
 			return -1;
 		}
 
@@ -620,6 +629,8 @@ int fw_set_port(fw_handle_t handle, int port)
 
 		i++;
 	}
+
+	closedir(dir);
 
 	return 0;
 }
@@ -1220,6 +1231,7 @@ fw_start_fcp_listen(fw_handle_t handle)
 
 	closure->callback = handle_fcp_request;
 
+	memset(&request, 0, sizeof(request));
 	request.offset = CSR_REGISTER_BASE + CSR_FCP_COMMAND;
 	request.length = CSR_FCP_END - CSR_FCP_COMMAND;
 	request.closure = ptr_to_u64(closure);
@@ -1256,6 +1268,7 @@ fw_get_config_rom(fw_handle_t handle, quadlet_t *buffer,
 	struct fw_cdev_get_info get_info;
 	int err;
 
+	memset(&get_info, 0, sizeof(get_info));
 	get_info.version = FW_CDEV_VERSION;
 	get_info.rom = ptr_to_u64(buffer);
 	get_info.rom_length = buffersize;
@@ -1284,7 +1297,7 @@ fw_bandwidth_modify (raw1394handle_t handle,
 
         if (bandwidth == 0)
                 return 0;
-        
+
 	addr = CSR_REGISTER_BASE + CSR_BANDWIDTH_AVAILABLE;
         /* Read current bandwidth usage from IRM. */
         result = raw1394_read (handle, raw1394_get_irm_id (handle), addr,

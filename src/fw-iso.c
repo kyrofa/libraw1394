@@ -401,6 +401,7 @@ iso_init(fw_handle_t handle, int type,
 	}
 
 	handle->iso.closure.func = handle_iso_event;
+	memset(&ep, 0, sizeof(ep));
 	ep.events = EPOLLIN;
 	ep.data.ptr = &handle->iso.closure;
 	if (epoll_ctl(handle->epoll_fd, EPOLL_CTL_ADD,
@@ -411,6 +412,7 @@ iso_init(fw_handle_t handle, int type,
 		return -1;
 	}
 
+	memset(&create, 0, sizeof(create));
 	create.type = type;
 	create.channel = channel;
 	create.speed = speed;

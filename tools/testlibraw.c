@@ -202,6 +202,7 @@ int main(int argc, char **argv)
 	read_topology_map(handle);
 
         printf("testing config rom stuff\n");
+        memset(rom, 0, sizeof(rom));
         retval=raw1394_get_config_rom(handle, rom, 0x100, &rom_size, &rom_version);
         printf("get_config_rom returned %d, romsize %d, rom_version %d\n",retval,rom_size,rom_version);
         printf("here are the first 10 quadlets:\n");
