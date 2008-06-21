@@ -543,3 +543,14 @@ void raw1394_iso_shutdown(raw1394handle_t handle)
 	else
 		ieee1394_iso_shutdown(handle->mode.ieee1394);
 }
+
+int raw1394_read_cycle_timer(raw1394handle_t handle,
+                             u_int32_t *cycle_timer, u_int64_t *local_time)
+{
+	if (handle && handle->is_fw)
+		return fw_read_cycle_timer(handle->mode.fw,
+			cycle_timer, local_time);
+	else
+		return ieee1394_read_cycle_timer(handle->mode.ieee1394,
+			cycle_timer, local_time);
+}

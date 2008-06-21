@@ -329,7 +329,7 @@ void raw1394_iso_stop(raw1394handle_t handle);
 void raw1394_iso_shutdown(raw1394handle_t handle);
 
 /**
- * raw1394_get_cycle_timer - get the current value of the cycle timer
+ * raw1394_read_cycle_timer - get the current value of the cycle timer
  * @handle: libraw1394 handle
  * @cycle_timer: buffer for Isochronous Cycle Timer
  * @local_time: buffer for local system time in microseconds since Epoch

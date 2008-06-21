@@ -529,3 +529,22 @@ void fw_iso_shutdown(fw_handle_t handle)
 	free(handle->iso.packets);
 	handle->iso.packets = NULL;
 }
+
+int fw_read_cycle_timer(fw_handle_t handle,
+			u_int32_t *cycle_timer, u_int64_t *local_time)
+{
+#ifdef FW_CDEV_IOC_GET_CYCLE_TIMER /* added in kernel 2.6.24 */
+	int err;
+	struct fw_cdev_get_cycle_timer ctr = { 0 };
+
+	err = ioctl(handle->iso.fd, FW_CDEV_IOC_GET_CYCLE_TIMER, &ctr);
+	if (!err) {
+		*cycle_timer = ctr.cycle_timer;
+		*local_time  = ctr.local_time;
+	}
+	return err;
+#else
+	errno = ENOSYS;
+	return -1;
+#endif /* defined(FW_CDEV_IOC_GET_CYCLE_TIMER) */
+}
