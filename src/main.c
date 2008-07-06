@@ -28,6 +28,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <netinet/in.h>
+#include <limits.h>
 
 #include "raw1394.h"
 #include "csr.h"
@@ -178,7 +179,11 @@ int ieee1394_get_fd(struct ieee1394_handle *handle)
 
 unsigned int raw1394_get_generation(struct raw1394_handle *handle)
 {
-	if (handle && handle->is_fw)
+	if (!handle) {
+		errno = EINVAL;
+		return UINT_MAX;
+	}
+	if (handle->is_fw)
 		return handle->mode.fw->generation;
 	else
 		return handle->mode.ieee1394->generation;
@@ -186,7 +191,10 @@ unsigned int raw1394_get_generation(struct raw1394_handle *handle)
 
 void raw1394_update_generation(struct raw1394_handle *handle, unsigned int gen)
 {
-	if (handle && handle->is_fw)
+	if (!handle) {
+		return;
+	}
+	if (handle->is_fw)
 		handle->mode.fw->generation = gen;
 	else
 		handle->mode.ieee1394->generation = gen;
@@ -194,22 +202,37 @@ void raw1394_update_generation(struct raw1394_handle *handle, unsigned int gen)
 
 int ieee1394_get_nodecount(struct ieee1394_handle *handle)
 {
-        return handle->num_of_nodes;
+	if (!handle) {
+		errno = EINVAL;
+		return UINT_MAX;
+	}
+	return handle->num_of_nodes;
 }
 
 nodeid_t ieee1394_get_local_id(struct ieee1394_handle *handle)
 {
-        return handle->local_id;
+	if (!handle) {
+		errno = EINVAL;
+		return 0xFFFF;
+	}
+	return handle->local_id;
 }
 
 nodeid_t ieee1394_get_irm_id(struct ieee1394_handle *handle)
 {
-        return handle->irm_id;
+	if (!handle) {
+		errno = EINVAL;
+		return 0xFFFF;
+	}
+	return handle->irm_id;
 }
 
 void raw1394_set_userdata(struct raw1394_handle *handle, void *data)
 {
-	if (handle && handle->is_fw)
+	if (!handle) {
+		return;
+	}
+	if (handle->is_fw)
 		handle->mode.fw->userdata = data;
 	else
 		handle->mode.ieee1394->userdata = data;
@@ -217,7 +240,11 @@ void raw1394_set_userdata(struct raw1394_handle *handle, void *data)
 
 void *raw1394_get_userdata(struct raw1394_handle *handle)
 {
-	if (handle && handle->is_fw)
+	if (!handle) {
+		errno = EINVAL;
+		return NULL;
+	}
+	if (handle->is_fw)
 		return handle->mode.fw->userdata;
 	else
 		return handle->mode.ieee1394->userdata;
@@ -503,4 +530,3 @@ int ieee1394_channel_modify (raw1394handle_t handle, unsigned int channel,
   
         return 0;
 }
-

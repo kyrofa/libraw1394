@@ -97,7 +97,11 @@ bus_reset_handler_t raw1394_set_bus_reset_handler(struct raw1394_handle *handle,
                                                   bus_reset_handler_t new)
 {
 	bus_reset_handler_t old;
-	if (handle && handle->is_fw) {
+	if (!handle) {
+		errno = EINVAL;
+		return NULL;
+	}
+	if (handle->is_fw) {
 		old = handle->mode.fw->bus_reset_handler;
 		handle->mode.fw->bus_reset_handler = new;
 	}
@@ -112,7 +116,11 @@ tag_handler_t raw1394_set_tag_handler(struct raw1394_handle *handle,
                                       tag_handler_t new)
 {
 	tag_handler_t old;
-	if (handle && handle->is_fw) {
+	if (!handle) {
+		errno = EINVAL;
+		return NULL;
+	}
+	if (handle->is_fw) {
 		old = handle->mode.fw->tag_handler;
 		handle->mode.fw->tag_handler = new;
 	}
@@ -127,7 +135,11 @@ arm_tag_handler_t raw1394_set_arm_tag_handler(struct raw1394_handle *handle,
                                       arm_tag_handler_t new)
 {
 	arm_tag_handler_t old;
-	if (handle && handle->is_fw) {
+	if (!handle) {
+		errno = EINVAL;
+		return NULL;
+	}
+	if (handle->is_fw) {
 		old = handle->mode.fw->arm_tag_handler;
 		handle->mode.fw->arm_tag_handler = new;
 	}
@@ -142,7 +154,11 @@ fcp_handler_t raw1394_set_fcp_handler(struct raw1394_handle *handle,
                                       fcp_handler_t new)
 {
 	fcp_handler_t old;
-	if (handle && handle->is_fw) {
+	if (!handle) {
+		errno = EINVAL;
+		return NULL;
+	}
+	if (handle->is_fw) {
 		old = handle->mode.fw->fcp_handler;
 		handle->mode.fw->fcp_handler = new;
 	}

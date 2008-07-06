@@ -19,7 +19,10 @@
 
 raw1394_errcode_t raw1394_get_errcode(struct raw1394_handle *handle)
 {
-	if (handle && handle->is_fw)
+	if (!handle) {
+		return RAW1394_ERROR_INVALID_ARG;
+	}
+	if (handle->is_fw)
 		return handle->mode.fw->err;
 	else
 		return handle->mode.ieee1394->err;

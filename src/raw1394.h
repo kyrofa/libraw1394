@@ -458,7 +458,8 @@ int raw1394_busreset_notify (raw1394handle_t handle, int off_on_switch);
  * the blocking behaviour in raw1394_loop_iterate().  It must not be used for
  * anything else.
  *
- * Returns: the fd used for communication with the raw1394 kernel module.
+ * Returns: the fd used for communication with the raw1394 kernel module or -1
+ * on failure (sets errno).
  **/
 int raw1394_get_fd(raw1394handle_t handle);
 
@@ -603,7 +604,7 @@ typedef int (*bus_reset_handler_t)(raw1394handle_t, unsigned int generation);
  * Sets the handler to be called on every bus reset to @new_h.
  * The default handler just calls raw1394_update_generation().
  *
- * Returns: the old handler
+ * Returns: the old handler or NULL on failure (sets errno)
  **/
 bus_reset_handler_t raw1394_set_bus_reset_handler(raw1394handle_t handle,
                                                   bus_reset_handler_t new_h);
@@ -618,7 +619,8 @@ bus_reset_handler_t raw1394_set_bus_reset_handler(raw1394handle_t handle,
  * The generation number of the handle is not automatically updated,
  * raw1394_update_generation() has to be used for this.
  *
- * Returns: the generation number associated with the handle 
+ * Returns: the generation number associated with the handle or UINT_MAX on
+* failure.
  **/
 unsigned int raw1394_get_generation(raw1394handle_t handle);
 
@@ -654,7 +656,7 @@ typedef int (*tag_handler_t)(raw1394handle_t, unsigned long tag,
  * raw1394_lock()) since these do pass pointers to &struct
  * raw1394_reqhandle as the tag and expect the callback to be invoked.
  *
- * Returns: the old handler
+ * Returns: the old handler or NULL on failure (sets errno)
  **/
 tag_handler_t raw1394_set_tag_handler(raw1394handle_t handle,
                                       tag_handler_t new_h);
@@ -672,7 +674,7 @@ typedef int (*arm_tag_handler_t)(raw1394handle_t handle, unsigned long arm_tag,
  * arrived. The default action is to call the arm_callback in the 
  * raw1394_arm_reqhandle pointed to by arm_tag.
  *
- * Returns: old handler
+ * Returns: old handler or NULL on failure (sets errno)
  **/
 arm_tag_handler_t raw1394_set_arm_tag_handler(raw1394handle_t handle,
                                       arm_tag_handler_t new_h);
@@ -692,7 +694,7 @@ typedef int (*fcp_handler_t)(raw1394handle_t, nodeid_t nodeid, int response,
  * In order to actually get FCP events, you have to enable it with
  * raw1394_start_fcp_listen() and can stop it with raw1394_stop_fcp_listen().
  *
- * Returns: the old handler
+ * Returns: the old handler or NULL on failure (sets errno)
  **/
 fcp_handler_t raw1394_set_fcp_handler(raw1394handle_t handle, fcp_handler_t new_h);
 
