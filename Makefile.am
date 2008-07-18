@@ -48,4 +48,4 @@ install-exec-hook:
 	fi
 
 dist-hook:
-	svn log >$(distdir)/ChangeLog
+	git log >$(distdir)/ChangeLog

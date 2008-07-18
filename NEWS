@@ -1,5 +1,9 @@
 libraw1394 Release Notes
 
+Version 2.0.0:
+- added support for new firewire subsystem.
+- removed deprecated isochronous functions.
+
 Version 1.3.0:
 - added raw1394_read_cycle_timer() as used by FFADO project.
 - added support for environment variable RAW1394DEV to override default
