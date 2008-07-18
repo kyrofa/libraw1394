@@ -60,5 +60,4 @@ doc/testlibraw.1
 doc/sendiso.1
 doc/dumpiso.1
 doc/isodump.5
-debian/Makefile
 ])

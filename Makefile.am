@@ -1,7 +1,6 @@
 # process this file with automake to create a Makefile.in
 
-SUBDIRS = src tools doc debian
-DIST_SUBDIRS = src
+SUBDIRS = src tools doc
 
 pkgconfigdir = @libdir@/pkgconfig
 pkgconfig_DATA = libraw1394.pc
