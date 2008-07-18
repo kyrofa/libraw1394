@@ -18,7 +18,7 @@ AC_C_BIGENDIAN
 # set the libtool so version numbers
 lt_major=11
 lt_revision=0
-lt_age=3
+lt_age=0
 
 AC_SUBST(lt_major)
 AC_SUBST(lt_revision)
