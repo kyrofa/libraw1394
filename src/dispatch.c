@@ -61,7 +61,8 @@ void raw1394_destroy_handle(raw1394handle_t handle)
 	if (handle->is_fw)
 		fw_destroy_handle(handle->mode.fw);
 	else
-		ieee1394_destroy_handle(handle->mode.ieee1394);;
+		ieee1394_destroy_handle(handle->mode.ieee1394);
+	free(handle);
 }
 
 raw1394handle_t raw1394_new_handle_on_port(int port)
