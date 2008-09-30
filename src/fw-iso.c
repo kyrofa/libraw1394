@@ -76,6 +76,7 @@ queue_packet(fw_handle_t handle,
 		if (err < 0)
 			return -1;
 	}
+	return 0;
 }
 
 static int
