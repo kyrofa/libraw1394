@@ -260,6 +260,7 @@ int fw_iso_xmit_write(raw1394handle_t handle, unsigned char *data,
 	struct fw_cdev_queue_iso queue_iso;
 	struct fw_cdev_start_iso start_iso;
 	struct fw_cdev_iso_packet *p;
+	int retval;
 
 	if (len > fwhandle->iso.max_packet_size) {
 		errno = EINVAL;
@@ -284,10 +285,10 @@ int fw_iso_xmit_write(raw1394handle_t handle, unsigned char *data,
 		start_iso.cycle  = fwhandle->iso.start_on_cycle;
 		start_iso.handle = 0;
 
-		len = ioctl(fwhandle->iso.fd,
+		retval = ioctl(fwhandle->iso.fd,
 			       FW_CDEV_IOC_START_ISO, &start_iso);
-		if (len < 0)
-			return len;
+		if (retval < 0)
+			return retval;
 	}
 
 	return 0;

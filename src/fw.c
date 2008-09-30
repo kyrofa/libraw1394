@@ -1176,14 +1176,14 @@ fw_lock(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 	     quadlet_t *result)
 {
 	quadlet_t buffer[2];
-	size_t length;
+	ssize_t length;
 
 	length = setup_lock(extcode, data, arg, buffer);
 	if (length < 0)
 		return length;
 
 	return send_request_sync(handle, 16 + extcode, node, addr,
-				 length, buffer, result);
+				 (size_t) length, buffer, result);
 }
 
 int
@@ -1192,14 +1192,14 @@ fw_lock64(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 	       octlet_t *result)
 {
 	octlet_t buffer[2];
-	size_t length;
+	ssize_t length;
 
 	length = setup_lock64(extcode, data, arg, buffer);
 	if (length < 0)
 		return length;
 
 	return send_request_sync(handle, 16 + extcode, node, addr,
-				 length, buffer, result);
+				 (size_t) length, buffer, result);
 }
 
 int
