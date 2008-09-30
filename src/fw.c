@@ -501,8 +501,10 @@ fw_handle_t fw_new_handle_on_port(int port)
 	if (handle == NULL)
 		return NULL;
 
-	if (fw_set_port(handle, port) < 0)
+	if (fw_set_port(handle, port) < 0) {
+		fw_destroy_handle(handle);
 		return NULL;
+	}
 
 	return handle;
 }

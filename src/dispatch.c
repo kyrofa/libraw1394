@@ -48,7 +48,10 @@ raw1394handle_t raw1394_new_handle(void)
 		else if (handle) {
 			handle->is_fw = 1;
 			handle->mode.fw = fw_handle;
-		}
+		} else if (fw_handle)
+			fw_destroy_handle(fw_handle);
+		else if (ieee1394_handle)
+			ieee1394_destroy_handle(ieee1394_handle);
 	}
 	return handle;
 }
@@ -76,14 +79,16 @@ raw1394handle_t raw1394_new_handle_on_port(int port)
 		if (handle) {
 			handle->is_fw = 0;
 			handle->mode.ieee1394 = ieee1394_handle;
-		}
+		} else
+			ieee1394_destroy_handle(ieee1394_handle);
 	}
 	else if (fw_handle = fw_new_handle_on_port(port)) {
 		handle = (raw1394handle_t) malloc(sizeof(struct raw1394_handle));
 		if (handle) {
 			handle->is_fw = 1;
 			handle->mode.fw = fw_handle;
-		}
+		} else
+			fw_destroy_handle(fw_handle);
 	}
 	return handle;
 }
