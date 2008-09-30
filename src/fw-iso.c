@@ -84,7 +84,8 @@ queue_xmit_packets(raw1394handle_t handle, int limit)
 	fw_handle_t fwhandle = handle->mode.fw;
 	enum raw1394_iso_disposition d;
 	unsigned char tag, sy;
-	int len, cycle, dropped;
+	int len, cycle = -1;
+	unsigned int dropped = 0;
 
 	if (fwhandle->iso.xmit_handler == NULL)
 		return 0;
