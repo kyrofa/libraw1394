@@ -180,7 +180,8 @@ int main(int argc, char **argv)
                         perror("failed");
                         continue;
                 }
-                raw1394_loop_iterate(handle);
+                if (raw1394_loop_iterate(handle))
+			perror("failed");
         }
 
         printf("\nusing standard tag handler and synchronous calls\n");
