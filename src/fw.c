@@ -125,7 +125,7 @@ scan_devices(fw_handle_t handle)
 	char filename[32];
 	struct fw_cdev_get_info get_info;
 	struct fw_cdev_event_bus_reset reset;
-	int fd, err, i;
+	int fd, err, i, fname_str_sz;
 	struct port *ports;
 
 	ports = handle->ports;
@@ -162,8 +162,9 @@ scan_devices(fw_handle_t handle)
 			continue;
 
 		if (i < MAX_PORTS && reset.node_id == reset.local_node_id) {
-			strncpy(ports[i].device_file, filename,
-				sizeof ports[i].device_file);
+			fname_str_sz = sizeof(ports[i].device_file) - 1;
+			strncpy(ports[i].device_file, filename, fname_str_sz);
+			ports[i].device_file[fname_str_sz] = '\0';
 			ports[i].node_count = (reset.root_node_id & 0x3f) + 1;
 			ports[i].card = get_info.card;
 			i++;
@@ -315,7 +316,7 @@ handle_inotify(raw1394handle_t handle, struct epoll_closure *ec,
 	struct fw_cdev_get_info info;
 	struct fw_cdev_event_bus_reset reset;
 	struct epoll_event ep;
-	int i, len, fd, phy_id;
+	int i, len, fd, phy_id, fname_str_sz;
 
 	event = (struct inotify_event *) fwhandle->buffer;
 	len = read(fwhandle->inotify_fd, event, BUFFER_SIZE);
@@ -365,8 +366,9 @@ handle_inotify(raw1394handle_t handle, struct epoll_closure *ec,
 	fwhandle->devices[i].node_id = reset.node_id;
 	fwhandle->devices[i].generation = reset.generation;
 	fwhandle->devices[i].fd = fd;
-	strncpy(fwhandle->devices[i].filename, filename,
-		sizeof fwhandle->devices[i].filename);
+	fname_str_sz = sizeof(fwhandle->devices[i].filename) - 1;
+	strncpy(fwhandle->devices[i].filename, filename, fname_str_sz);
+	fwhandle->devices[i].filename[fname_str_sz] = '\0';
 	fwhandle->devices[i].closure.func = handle_device_event;
 	ep.events = EPOLLIN;
 	ep.data.ptr = &fwhandle->devices[i].closure;
@@ -540,15 +542,17 @@ int fw_get_port_info(fw_handle_t handle,
 			  struct raw1394_portinfo *pinf,
 			  int maxports)
 {
-	int i;
+	int i, port_name_sz;
 
 	if (maxports >= handle->port_count)
 		maxports = handle->port_count;
 
 	for (i = 0; i < maxports; i++) {
 		pinf[i].nodes = handle->ports[i].node_count;
+		port_name_sz = sizeof(pinf[i].name) - 1;
 		strncpy(pinf[i].name, handle->ports[i].device_file,
-			sizeof pinf[i].name);
+			port_name_sz);
+		pinf[i].name[port_name_sz] = '\0';
 	}
 
 	return handle->port_count;
@@ -562,7 +566,7 @@ int fw_set_port(fw_handle_t handle, int port)
 	struct dirent *de;
 	char filename[32];
 	DIR *dir;
-	int i, fd, phy_id;
+	int i, fd, phy_id, fname_str_sz;
 
 	if (port >= handle->port_count) {
 		errno = EINVAL;
@@ -608,8 +612,9 @@ int fw_set_port(fw_handle_t handle, int port)
 		handle->devices[i].node_id = reset.node_id;
 		handle->devices[i].generation = reset.generation;
 		handle->devices[i].fd = fd;
-		strncpy(handle->devices[i].filename, filename,
-			sizeof handle->devices[i].filename);
+		fname_str_sz = sizeof(handle->devices[i].filename) -1;
+		strncpy(handle->devices[i].filename, filename, fname_str_sz);
+		handle->devices[i].filename[fname_str_sz] = '\0';
 
 		handle->devices[i].closure.func = handle_device_event;
 		memset(&ep, 0, sizeof(ep));
@@ -625,8 +630,9 @@ int fw_set_port(fw_handle_t handle, int port)
 		if (reset.node_id == reset.local_node_id) {
 			memcpy(&handle->reset, &reset, sizeof handle->reset);
 			handle->local_fd = fd;
-			strncpy(handle->local_filename, filename,
-				sizeof handle->local_filename);
+			fname_str_sz = sizeof(handle->local_filename) -1;
+			strncpy(handle->local_filename, filename, fname_str_sz);
+			handle->local_filename[fname_str_sz] = '\0';
 		}
 
 		i++;
