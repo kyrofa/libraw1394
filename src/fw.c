@@ -1310,9 +1310,10 @@ fw_bandwidth_modify (raw1394handle_t handle,
         compare = ntohl (buffer);
 	switch (mode) {
 	case RAW1394_MODIFY_ALLOC:
-		swap = compare - bandwidth;
-		if (swap < 0)
+		if (compare < bandwidth)
 			return -1;
+
+		swap = compare - bandwidth;
 		break;
 
 	case RAW1394_MODIFY_FREE:
