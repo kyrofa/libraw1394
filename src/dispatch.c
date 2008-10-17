@@ -24,36 +24,35 @@ int raw1394_errcode_to_errno(raw1394_errcode_t errcode)
 
 raw1394handle_t raw1394_new_handle(void)
 {
-	ieee1394handle_t ieee1394_handle = ieee1394_new_handle();
-	fw_handle_t fw_handle = NULL;
-	raw1394handle_t handle = NULL;
+	ieee1394handle_t ieee1394_handle;
+	fw_handle_t fw_handle;
+	raw1394handle_t handle;
+	struct raw1394_portinfo port;
 
-	if (ieee1394_handle) {
-		struct raw1394_portinfo port;
-		if (ieee1394_get_port_info(ieee1394_handle, &port, 1) < 1) {
-			ieee1394_destroy_handle(ieee1394_handle);
-			ieee1394_handle = NULL;
-			fw_handle = fw_new_handle();
-		}
+	handle = (raw1394handle_t) malloc(sizeof(struct raw1394_handle));
+	if (!handle)
+		return NULL;
+
+	ieee1394_handle = ieee1394_new_handle();
+	if (!ieee1394_handle)
+		goto try_fw;
+
+	if (ieee1394_get_port_info(ieee1394_handle, &port, 1) >= 1) {
+		handle->is_fw = 0;
+		handle->mode.ieee1394 = ieee1394_handle;
+		return handle;
 	}
-	else {
-		fw_handle = fw_new_handle();
+	ieee1394_destroy_handle(ieee1394_handle);
+try_fw:
+	fw_handle = fw_new_handle();
+	if (fw_handle) {
+		handle->is_fw = 1;
+		handle->mode.fw = fw_handle;
+		return handle;
 	}
-	if (ieee1394_handle || fw_handle) {
-		handle = (raw1394handle_t) malloc(sizeof(struct raw1394_handle));
-		if (ieee1394_handle && handle) {
-			handle->is_fw = 0;
-			handle->mode.ieee1394 = ieee1394_handle;
-		}
-		else if (handle) {
-			handle->is_fw = 1;
-			handle->mode.fw = fw_handle;
-		} else if (fw_handle)
-			fw_destroy_handle(fw_handle);
-		else if (ieee1394_handle)
-			ieee1394_destroy_handle(ieee1394_handle);
-	}
-	return handle;
+
+	free(handle);
+	return NULL;
 }
 
 void raw1394_destroy_handle(raw1394handle_t handle)
@@ -70,27 +69,30 @@ void raw1394_destroy_handle(raw1394handle_t handle)
 
 raw1394handle_t raw1394_new_handle_on_port(int port)
 {
-	ieee1394handle_t ieee1394_handle = ieee1394_new_handle_on_port(port);
+	ieee1394handle_t ieee1394_handle;
 	fw_handle_t fw_handle;
-	raw1394handle_t handle = NULL;
+	raw1394handle_t handle;
 
+	handle = (raw1394handle_t) malloc(sizeof(struct raw1394_handle));
+	if (!handle)
+		return NULL;
+
+	ieee1394_handle = ieee1394_new_handle_on_port(port);
 	if (ieee1394_handle) {
-		handle = (raw1394handle_t) malloc(sizeof(struct raw1394_handle));
-		if (handle) {
-			handle->is_fw = 0;
-			handle->mode.ieee1394 = ieee1394_handle;
-		} else
-			ieee1394_destroy_handle(ieee1394_handle);
+		handle->is_fw = 0;
+		handle->mode.ieee1394 = ieee1394_handle;
+		return handle;
 	}
-	else if ((fw_handle = fw_new_handle_on_port(port))) {
-		handle = (raw1394handle_t) malloc(sizeof(struct raw1394_handle));
-		if (handle) {
-			handle->is_fw = 1;
-			handle->mode.fw = fw_handle;
-		} else
-			fw_destroy_handle(fw_handle);
+
+	fw_handle = fw_new_handle_on_port(port);
+	if (fw_handle) {
+		handle->is_fw = 1;
+		handle->mode.fw = fw_handle;
+		return handle;
 	}
-	return handle;
+
+	free(handle);
+	return NULL;
 }
 
 int raw1394_busreset_notify (raw1394handle_t handle, int off_on_switch)
