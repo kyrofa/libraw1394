@@ -253,9 +253,7 @@ void *raw1394_get_userdata(struct raw1394_handle *handle)
 int ieee1394_get_port_info(struct ieee1394_handle *handle, 
                           struct raw1394_portinfo *pinf, int maxports)
 {
-        int num;
         struct raw1394_request req;
-        struct raw1394_khost_list *khl;
 
         CLEAR_REQ(&req);
         req.type = RAW1394_REQ_LIST_CARDS;

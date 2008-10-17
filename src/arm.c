@@ -109,7 +109,6 @@ int ieee1394_arm_set_buf (struct ieee1394_handle *handle, nodeaddr_t start,
                          size_t length, void *buf)
 {
         struct raw1394_request req;
-        int status;
 
         CLEAR_REQ(&req);
 
@@ -139,7 +138,6 @@ int ieee1394_arm_get_buf (struct ieee1394_handle *handle, nodeaddr_t start,
                          size_t length, void *buf)
 {
         struct raw1394_request req;
-        int status;
 
         CLEAR_REQ(&req);
 

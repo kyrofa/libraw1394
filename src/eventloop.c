@@ -32,7 +32,7 @@ int ieee1394_loop_iterate(struct raw1394_handle *handle)
 {
         struct raw1394_request req;
         ieee1394handle_t ihandle = handle->mode.ieee1394;
-        int retval = 0, channel;
+        int retval = 0;
 
         while (read(ihandle->fd, &req, sizeof(req)) < 0) {
                 if (errno != EINTR) return -1;

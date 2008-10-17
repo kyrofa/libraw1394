@@ -85,7 +85,8 @@ queue_xmit_packets(raw1394handle_t handle, int limit)
 	fw_handle_t fwhandle = handle->mode.fw;
 	enum raw1394_iso_disposition d;
 	unsigned char tag, sy;
-	int len, cycle = -1;
+	unsigned int len;
+	int cycle = -1;
 	unsigned int dropped = 0;
 
 	if (fwhandle->iso.xmit_handler == NULL)
@@ -258,9 +259,7 @@ int fw_iso_xmit_write(raw1394handle_t handle, unsigned char *data,
 			   unsigned char sy)
 {
 	fw_handle_t fwhandle = handle->mode.fw;
-	struct fw_cdev_queue_iso queue_iso;
 	struct fw_cdev_start_iso start_iso;
-	struct fw_cdev_iso_packet *p;
 	int retval;
 
 	if (len > fwhandle->iso.max_packet_size) {

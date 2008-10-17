@@ -71,7 +71,7 @@ void raw1394_destroy_handle(raw1394handle_t handle)
 raw1394handle_t raw1394_new_handle_on_port(int port)
 {
 	ieee1394handle_t ieee1394_handle = ieee1394_new_handle_on_port(port);
-	fw_handle_t fw_handle = NULL;
+	fw_handle_t fw_handle;
 	raw1394handle_t handle = NULL;
 
 	if (ieee1394_handle) {
@@ -82,7 +82,7 @@ raw1394handle_t raw1394_new_handle_on_port(int port)
 		} else
 			ieee1394_destroy_handle(ieee1394_handle);
 	}
-	else if (fw_handle = fw_new_handle_on_port(port)) {
+	else if ((fw_handle = fw_new_handle_on_port(port))) {
 		handle = (raw1394handle_t) malloc(sizeof(struct raw1394_handle));
 		if (handle) {
 			handle->is_fw = 1;
