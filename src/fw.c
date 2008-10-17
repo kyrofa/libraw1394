@@ -773,10 +773,12 @@ handle_arm_request(raw1394handle_t handle, struct address_closure *ac,
 	}
 	rrb->request.generation = fwhandle->reset.generation;
 	rrb->request.buffer_length = in_length;
+	rrb->request.buffer = rrb->data;
 	memcpy(rrb->request.buffer, request->data, in_length);
 
 	rrb->response.response_code = response.rcode;
 	rrb->response.buffer_length = response.length;
+	rrb->response.buffer = rrb->data + in_length;
 	memcpy(rrb->response.buffer,
 	       allocation->data + offset, response.length);
 
