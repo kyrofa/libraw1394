@@ -211,9 +211,6 @@ int fw_update_config_rom(fw_handle_t handle, const quadlet_t *new_rom,
 int fw_get_config_rom(fw_handle_t handle, quadlet_t *buffer,
 		   size_t buffersize, size_t *rom_size,
 		   unsigned char *rom_version);
-int fw_bandwidth_modify (raw1394handle_t handle,
-		   unsigned int bandwidth,
-		   enum raw1394_modify_mode mode);
 
 int fw_iso_xmit_start(raw1394handle_t handle, int start_on_cycle,
 			   int prebuffer_packets);

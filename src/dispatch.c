@@ -541,10 +541,7 @@ int raw1394_bandwidth_modify (raw1394handle_t handle, unsigned int bandwidth,
 		errno = EINVAL;
 		return -1;
 	}
-	if (handle->is_fw)
-		return fw_bandwidth_modify(handle, bandwidth, mode);
-	else
-		return ieee1394_bandwidth_modify(handle, bandwidth, mode);
+	return ieee1394_bandwidth_modify(handle, bandwidth, mode);
 }
 
 int raw1394_channel_modify (raw1394handle_t handle, unsigned int channel,
