@@ -1203,7 +1203,7 @@ raw1394_bandwidth_modify (raw1394handle_t handle, unsigned int bandwidth,
 	enum raw1394_modify_mode mode);
 
 /**
- * raw1394_bandwidth_modify - allocate or release isochronous channel
+ * raw1394_channel_modify - allocate or release isochronous channel
  * @handle: a libraw1394 handle
  * @channel: isochronous channel
  * @mode: whether to allocate or free
