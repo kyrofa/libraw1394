@@ -14,6 +14,7 @@
 #include <string.h>
 #include <sys/poll.h>
 #include <stdlib.h>
+#include <time.h>
 #include <arpa/inet.h>
 
 #include "../src/raw1394.h"
@@ -137,6 +138,27 @@ test_config_rom(raw1394handle_t handle)
 	printf("    update_config_rom returned %d\n", retval);
 }
 
+static void
+read_cycle_timer(raw1394handle_t handle)
+{
+	u_int32_t ct;
+	u_int64_t local_time;
+	time_t seconds;
+	int retval;
+
+	retval = raw1394_read_cycle_timer(handle, &ct, &local_time);
+	if (retval < 0) {
+		perror("\n  - raw1394_read_cycle_timer failed with error");
+		return;
+	}
+
+	printf("\n  - cycle timer: %d seconds, %d cycles, %d sub-cycles\n",
+	       ct >> 25, (ct >> 12) & 0x1fff, ct & 0xfff);
+	seconds = local_time / 1000000;
+	printf("    local time: %lld us = %s",
+	       (unsigned long long)local_time, ctime(&seconds));
+}
+
 int test_card(int card)
 {
 	raw1394handle_t handle;
@@ -223,6 +245,7 @@ int test_card(int card)
 	test_fcp(handle);
 	read_topology_map(handle);
 	test_config_rom(handle);
+	read_cycle_timer(handle);
 
 	printf("\n  - posting 0xdeadbeef as an echo request\n");
 	raw1394_echo_request(handle, 0xdeadbeef);
