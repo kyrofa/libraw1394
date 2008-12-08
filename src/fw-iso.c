@@ -539,7 +539,7 @@ int fw_read_cycle_timer(fw_handle_t handle,
 	int err;
 	struct fw_cdev_get_cycle_timer ctr = { 0 };
 
-	err = ioctl(handle->iso.fd, FW_CDEV_IOC_GET_CYCLE_TIMER, &ctr);
+	err = ioctl(handle->local_fd, FW_CDEV_IOC_GET_CYCLE_TIMER, &ctr);
 	if (!err) {
 		*cycle_timer = ctr.cycle_timer;
 		*local_time  = ctr.local_time;
