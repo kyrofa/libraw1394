@@ -1,6 +1,6 @@
 /*						-*- c-basic-offset: 8 -*-
  *
- * raw1394-iso.c -- Emulation of the raw1394 rawiso API on the firewire stack
+ * fw-iso.c -- Emulation of the raw1394 rawiso API on the firewire stack
  *
  * Copyright (C) 2007  Kristian Hoegsberg <krh@bitplanet.net>
  *
@@ -141,7 +141,14 @@ int fw_iso_xmit_start(raw1394handle_t handle, int start_on_cycle,
 			return retval;
 	}
 
-	return queue_xmit_packets(handle, fwhandle->iso.buf_packets);
+	retval = queue_xmit_packets(handle, fwhandle->iso.buf_packets);
+
+	if (retval)
+		return -1;
+	else
+		fwhandle->iso.state = ISO_ACTIVE;
+
+	return 0;
 }
 
 static int
@@ -224,7 +231,12 @@ int fw_iso_recv_start(fw_handle_t handle, int start_on_cycle,
 	start_iso.sync = 0;
 	start_iso.handle = 0;
 
-	return ioctl(handle->iso.fd, FW_CDEV_IOC_START_ISO, &start_iso);
+	if (ioctl(handle->iso.fd, FW_CDEV_IOC_START_ISO, &start_iso))
+		return -1;
+	else
+		handle->iso.state = ISO_ACTIVE;
+
+	return 0;
 }
 
 static int handle_iso_event(raw1394handle_t handle,
@@ -445,6 +457,7 @@ iso_init(fw_handle_t handle, int type,
 	handle->iso.head = handle->iso.buffer;
 	handle->iso.tail = handle->iso.buffer;
 	handle->iso.first_payload = handle->iso.buffer;
+	handle->iso.state = ISO_STOPPED;
 
 	return 0;
 }
@@ -521,15 +534,20 @@ void fw_iso_stop(fw_handle_t handle)
 	handle->iso.first_payload = handle->iso.buffer;
 	handle->iso.packet_phase = 0;
 	handle->iso.packet_count = 0;
+	handle->iso.packet_index = 0;
+	handle->iso.state = ISO_STOPPED;
 }
 
 void fw_iso_shutdown(fw_handle_t handle)
 {
 	munmap(handle->iso.buffer,
 	       handle->iso.buf_packets * handle->iso.max_packet_size);
+	if (handle->iso.state != ISO_STOPPED)
+		fw_iso_stop(handle);
 	close(handle->iso.fd);
 	free(handle->iso.packets);
 	handle->iso.packets = NULL;
+	handle->iso.fd = -1;
 }
 
 int fw_read_cycle_timer(fw_handle_t handle,

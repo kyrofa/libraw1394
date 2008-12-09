@@ -129,6 +129,7 @@ struct fw_handle {
 		int prebuffer;
 		int start_on_cycle;
 		enum raw1394_iso_dma_recv_mode recv_mode;
+		enum { ISO_STOPPED, ISO_ACTIVE } state;
 		raw1394_iso_xmit_handler_t xmit_handler;
 		raw1394_iso_recv_handler_t recv_handler;
 		unsigned char *buffer, *buffer_end, *head;
