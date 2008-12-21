@@ -928,7 +928,8 @@ fw_start_phy_packet_write(fw_handle_t handle,
 static int
 send_request(fw_handle_t handle, int tcode,
 	     nodeid_t node, nodeaddr_t addr,
-	     size_t length, void *in, void *out, unsigned long tag)
+	     size_t in_length, void *in, size_t out_length, void *out,
+	     unsigned long tag)
 {
 	struct fw_cdev_send_request *request;
 	struct request_closure *closure;
@@ -961,14 +962,14 @@ send_request(fw_handle_t handle, int tcode,
 	}
 
 	closure->data = out;
-	closure->length = length;
+	closure->length = out_length;
 	closure->tag = tag;
 
 	request = (struct fw_cdev_send_request *) handle->buffer;
 	request->tcode = tcode;
 	request->generation = handle->generation;
 	request->offset = addr;
-	request->length = length;
+	request->length = in_length > out_length ? in_length : out_length;
 	request->closure = ptr_to_u64(closure);
 	request->data = ptr_to_u64(in);
 
@@ -987,7 +988,7 @@ fw_start_read(fw_handle_t handle, nodeid_t node, nodeaddr_t addr,
 		tcode = TCODE_READ_BLOCK_REQUEST;
 
 	return send_request(handle, tcode,
-			    node, addr, length, NULL, buffer, tag);
+			    node, addr, 0, NULL, length, buffer, tag);
 }
 
 int
@@ -1002,7 +1003,7 @@ fw_start_write(fw_handle_t handle, nodeid_t node, nodeaddr_t addr,
 		tcode = TCODE_WRITE_BLOCK_REQUEST;
 
 	return send_request(handle, tcode,
-			    node, addr, length, data, NULL, tag);
+			    node, addr, length, data, 0, NULL, tag);
 }
 
 static int
@@ -1064,7 +1065,8 @@ fw_start_lock(fw_handle_t handle, nodeid_t node, nodeaddr_t addr,
 		return length;
 
 	return send_request(handle, 16 + extcode,
-			    node, addr, length, buffer, result, tag);
+			    node, addr, length, buffer,
+			    sizeof *result, result, tag);
 }
 
 int
@@ -1080,7 +1082,8 @@ fw_start_lock64(fw_handle_t handle, nodeid_t node, nodeaddr_t addr,
 		return length;
 
 	return send_request(handle, 16 + extcode,
-			    node, addr, length, buffer, result, tag);
+			    node, addr, length, buffer,
+			    sizeof *result, result, tag);
 }
 
 int
@@ -1123,7 +1126,7 @@ sync_callback(raw1394handle_t handle, void *data, raw1394_errcode_t err)
 static int
 send_request_sync(raw1394handle_t handle, int tcode,
 		  nodeid_t node, nodeaddr_t addr,
-		  size_t length, void *in, void *out)
+		  size_t in_length, void *in, size_t out_length, void *out)
 {
 	fw_handle_t fwhandle = handle->mode.fw;
 	struct raw1394_reqhandle reqhandle;
@@ -1134,7 +1137,8 @@ send_request_sync(raw1394handle_t handle, int tcode,
 	reqhandle.data = &sd;
 
 	err = send_request(fwhandle, tcode, node, addr,
-			   length, in, out, (unsigned long) &reqhandle);
+			   in_length, in, out_length, out,
+			   (unsigned long) &reqhandle);
 
 	while (!sd.done) {
 		if (err < 0)
@@ -1160,7 +1164,7 @@ fw_read(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 		tcode = TCODE_READ_BLOCK_REQUEST;
 
 	return send_request_sync(handle, tcode,
-				 node, addr, length, NULL, buffer);
+				 node, addr, 0, NULL, length, buffer);
 }
 
 int
@@ -1175,7 +1179,7 @@ fw_write(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 		tcode = TCODE_WRITE_BLOCK_REQUEST;
 
 	return send_request_sync(handle, tcode,
-				 node, addr, length, data, NULL);
+				 node, addr, length, data, 0, NULL);
 }
 
 int
@@ -1191,7 +1195,8 @@ fw_lock(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 		return length;
 
 	return send_request_sync(handle, 16 + extcode, node, addr,
-				 (size_t) length, buffer, result);
+				 (size_t) length, buffer,
+				 sizeof *result, result);
 }
 
 int
@@ -1207,7 +1212,8 @@ fw_lock64(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 		return length;
 
 	return send_request_sync(handle, 16 + extcode, node, addr,
-				 (size_t) length, buffer, result);
+				 (size_t) length, buffer,
+				 sizeof *result, result);
 }
 
 int
