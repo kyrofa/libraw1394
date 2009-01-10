@@ -407,7 +407,7 @@ iso_init(fw_handle_t handle, int type,
 	if (handle->iso.packets == NULL)
 		return -1;
 
-	handle->iso.fd = open(handle->local_filename, O_RDWR);
+	handle->iso.fd = open(handle->iso.filename, O_RDWR);
 	if (handle->iso.fd < 0) {
 		free(handle->iso.packets);
 		handle->iso.packets = NULL;
@@ -557,7 +557,7 @@ int fw_read_cycle_timer(fw_handle_t handle,
 	int err;
 	struct fw_cdev_get_cycle_timer ctr = { 0 };
 
-	err = ioctl(handle->local_fd, FW_CDEV_IOC_GET_CYCLE_TIMER, &ctr);
+	err = ioctl(handle->ioctl_fd, FW_CDEV_IOC_GET_CYCLE_TIMER, &ctr);
 	if (!err) {
 		*cycle_timer = ctr.cycle_timer;
 		*local_time  = ctr.local_time;

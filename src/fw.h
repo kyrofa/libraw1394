@@ -101,6 +101,7 @@ struct fw_handle {
 	__u32 fcp_allocation_handle;
 	struct allocation *allocations;
 
+	int ioctl_fd;
 	int epoll_fd;
 	int inotify_fd;
 	int inotify_watch;
@@ -110,13 +111,12 @@ struct fw_handle {
 	struct epoll_closure inotify_closure;
 
 	struct device devices[MAX_DEVICES];
+	struct device *local_device;
 	int nodes[MAX_DEVICES];
-	int local_fd;
-	char local_filename[FILENAME_SIZE];
-
 	struct fw_cdev_event_bus_reset reset;
 
 	struct {
+		char *filename;
 		struct epoll_closure closure;
 		int fd;
 		int type;

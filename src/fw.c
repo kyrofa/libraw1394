@@ -125,17 +125,19 @@ scan_devices(fw_handle_t handle)
 	char filename[32];
 	struct fw_cdev_get_info get_info;
 	struct fw_cdev_event_bus_reset reset;
-	int fd, err, i, fname_str_sz;
+	int fd, err, i, j, fname_str_sz;
 	struct port *ports;
 
 	ports = handle->ports;
 	memset(ports, 0, sizeof handle->ports);
+	for (i = 0; i < MAX_PORTS; i++)
+		ports[i].card = -1;
+
 	dir = opendir(FW_DEVICE_DIR);
 	if (dir == NULL)
 		return -1;
 
-	i = 0;
-	while (1) {
+	for (i = 0; i < MAX_PORTS; ) {
 		de = readdir(dir);
 		if (de == NULL)
 			break;
@@ -161,7 +163,10 @@ scan_devices(fw_handle_t handle)
 		if (err < 0)
 			continue;
 
-		if (i < MAX_PORTS && reset.node_id == reset.local_node_id) {
+		for (j = 0; j < i; j++)
+			if (ports[j].card == get_info.card)
+				break;
+		if (j == i) {
 			fname_str_sz = sizeof(ports[i].device_file) - 1;
 			strncpy(ports[i].device_file, filename, fname_str_sz);
 			ports[i].device_file[fname_str_sz] = '\0';
@@ -626,19 +631,26 @@ int fw_set_port(fw_handle_t handle, int port)
 			return -1;
 		}
 
-		handle->generation = reset.generation;
-		if (reset.node_id == reset.local_node_id) {
+		if (handle->iso.filename == NULL) {
 			memcpy(&handle->reset, &reset, sizeof handle->reset);
-			handle->local_fd = fd;
-			fname_str_sz = sizeof(handle->local_filename) -1;
-			strncpy(handle->local_filename, filename, fname_str_sz);
-			handle->local_filename[fname_str_sz] = '\0';
+			handle->iso.filename = handle->devices[i].filename;
+			handle->ioctl_fd = fd;
 		}
+
+		if (reset.node_id == reset.local_node_id)
+			handle->local_device = &handle->devices[i];
+
+		handle->generation = reset.generation;
 
 		i++;
 	}
 
 	closedir(dir);
+
+	if (i == 0) {
+		errno = ENODEV;
+		return -1;
+	}
 
 	return 0;
 }
@@ -656,7 +668,7 @@ int fw_reset_bus_new(fw_handle_t handle, int type)
 		break;
 	}
 
-	return ioctl(handle->local_fd,
+	return ioctl(handle->ioctl_fd,
 		     FW_CDEV_IOC_INITIATE_BUS_RESET, &initiate);
 }
 
@@ -817,7 +829,7 @@ fw_arm_register(fw_handle_t handle, nodeaddr_t start,
 	request.length = length;
 	request.closure = ptr_to_u64(&allocation->closure);
 
-	retval = ioctl(handle->local_fd, FW_CDEV_IOC_ALLOCATE, &request);
+	retval = ioctl(handle->ioctl_fd, FW_CDEV_IOC_ALLOCATE, &request);
 	if (retval < 0) {
 		free(allocation);
 		return -1;
@@ -863,7 +875,7 @@ fw_arm_unregister(fw_handle_t handle, nodeaddr_t start)
 	request.handle = allocation->handle;
 	free(allocation);
 
-	return ioctl(handle->local_fd, FW_CDEV_IOC_DEALLOCATE, &request);
+	return ioctl(handle->ioctl_fd, FW_CDEV_IOC_DEALLOCATE, &request);
 }
 
 int
@@ -1251,7 +1263,7 @@ fw_start_fcp_listen(fw_handle_t handle)
 	request.offset = CSR_REGISTER_BASE + CSR_FCP_COMMAND;
 	request.length = CSR_FCP_END - CSR_FCP_COMMAND;
 	request.closure = ptr_to_u64(closure);
-	if (ioctl(handle->local_fd, FW_CDEV_IOC_ALLOCATE, &request) < 0)
+	if (ioctl(handle->ioctl_fd, FW_CDEV_IOC_ALLOCATE, &request) < 0)
 		return -1;
 
 	handle->fcp_allocation_handle = request.handle;
@@ -1266,7 +1278,7 @@ fw_stop_fcp_listen(fw_handle_t handle)
 
 	request.handle = handle->fcp_allocation_handle;
 
-	return ioctl(handle->local_fd, FW_CDEV_IOC_DEALLOCATE, &request);
+	return ioctl(handle->ioctl_fd, FW_CDEV_IOC_DEALLOCATE, &request);
 }
 
 int
@@ -1284,13 +1296,18 @@ fw_get_config_rom(fw_handle_t handle, quadlet_t *buffer,
 	struct fw_cdev_get_info get_info;
 	int err;
 
+	if (handle->local_device == NULL) {
+		errno = EPERM;
+		return -1;
+	}
+
 	memset(&get_info, 0, sizeof(get_info));
 	get_info.version = FW_CDEV_VERSION;
 	get_info.rom = ptr_to_u64(buffer);
 	get_info.rom_length = buffersize;
 	get_info.bus_reset = 0;
 
-	err = ioctl(handle->local_fd, FW_CDEV_IOC_GET_INFO, &get_info);
+	err = ioctl(handle->local_device->fd, FW_CDEV_IOC_GET_INFO, &get_info);
 	if (err)
 		return err;
 
