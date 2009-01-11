@@ -141,12 +141,17 @@ int fw_iso_xmit_start(raw1394handle_t handle, int start_on_cycle,
 	return 0;
 }
 
+static inline int recv_header_length(fw_handle_t handle)
+{
+	return handle->abi_version >= 2 ? 8 : 4;
+}
+
 static int
 queue_recv_packets(fw_handle_t handle)
 {
 	while (handle->iso.packet_count <= handle->iso.buf_packets)
-		queue_packet(handle, handle->iso.max_packet_size, 4, 0, 0);
-
+		queue_packet(handle, handle->iso.max_packet_size,
+			     recv_header_length(handle), 0, 0);
 	return 0;
 }
  
@@ -159,9 +164,11 @@ flush_recv_packets(raw1394handle_t handle,
 	quadlet_t header, *p, *end;
 	unsigned int len, cycle, dropped;
 	unsigned char channel, tag, sy;
+	int header_has_timestamp;
 
 	p = interrupt->header;
 	end = (void *) interrupt->header + interrupt->header_length;
+	header_has_timestamp = fwhandle->abi_version >= 2;
 	cycle = interrupt->cycle;
 	dropped = 0;
 	d = RAW1394_ISO_OK;
@@ -172,6 +179,9 @@ flush_recv_packets(raw1394handle_t handle,
 		tag = (header >> 14) & 0x3;
 		channel = (header >> 8) & 0x3f;
 		sy = header & 0x0f;
+
+		if (header_has_timestamp)
+			cycle = be32_to_cpu(*p++) & 0x1fff;
 
 		d = fwhandle->iso.recv_handler(handle, fwhandle->iso.tail, len,
 					     channel, tag, sy, cycle, dropped);
@@ -420,7 +430,7 @@ iso_init(fw_handle_t handle, int type,
 	create.type = type;
 	create.channel = channel;
 	create.speed = speed;
-	create.header_size = 4;
+	create.header_size = recv_header_length(handle);
 
 	retval = ioctl(handle->iso.fd,
 		       FW_CDEV_IOC_CREATE_ISO_CONTEXT, &create);
