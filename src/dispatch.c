@@ -541,7 +541,10 @@ int raw1394_bandwidth_modify (raw1394handle_t handle, unsigned int bandwidth,
 		errno = EINVAL;
 		return -1;
 	}
-	return ieee1394_bandwidth_modify(handle, bandwidth, mode);
+	if (handle->is_fw)
+		return fw_bandwidth_modify(handle, bandwidth, mode);
+	else
+		return ieee1394_bandwidth_modify(handle, bandwidth, mode);
 }
 
 int raw1394_channel_modify (raw1394handle_t handle, unsigned int channel,
@@ -551,7 +554,10 @@ int raw1394_channel_modify (raw1394handle_t handle, unsigned int channel,
 		errno = EINVAL;
 		return -1;
 	}
-	return ieee1394_channel_modify(handle, channel, mode);
+	if (handle->is_fw)
+		return fw_channel_modify(handle, channel, mode);
+	else
+		return ieee1394_channel_modify(handle, channel, mode);
 }
 
 int raw1394_iso_xmit_init(raw1394handle_t handle,

@@ -294,6 +294,13 @@ handle_device_event(raw1394handle_t handle,
 		ac = u64_to_ptr(u->request.closure);
 		return ac->callback(handle, ac, &u->request, i);
 
+#ifdef FW_CDEV_EVENT_ISO_RESOURCE_ALLOCATED /* added in kernel 2.6.30 */
+	case FW_CDEV_EVENT_ISO_RESOURCE_ALLOCATED:
+	case FW_CDEV_EVENT_ISO_RESOURCE_DEALLOCATED:
+		memcpy(u64_to_ptr(u->iso_resource.closure), u,
+		       sizeof u->iso_resource);
+		return 0;
+#endif
 	default:
 	case FW_CDEV_EVENT_ISO_INTERRUPT:
 		/* Never happens. */
@@ -631,6 +638,7 @@ int fw_set_port(fw_handle_t handle, int port)
 			handle->local_device = &handle->devices[i];
 
 		handle->generation = reset.generation;
+		handle->abi_version = get_info.version;
 
 		i++;
 	}
@@ -1323,4 +1331,91 @@ fw_get_config_rom(fw_handle_t handle, quadlet_t *buffer,
 	*rom_version = 0;
 
 	return 0;
+}
+
+#ifdef FW_CDEV_IOC_ALLOCATE_ISO_RESOURCE_ONCE /* added in kernel 2.6.30 */
+
+static int
+iso_resource_modify(raw1394handle_t handle, unsigned int bandwidth,
+		    int channel, enum raw1394_modify_mode mode)
+{
+	fw_handle_t fwhandle = handle->mode.fw;
+	struct fw_cdev_allocate_iso_resource resource;
+	struct fw_cdev_event_iso_resource event;
+	int ioctl_nr;
+	int err;
+
+	if (channel > 63) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	event.closure = 0;
+	event.channel = -1;
+	event.bandwidth = 0;
+
+	resource.closure = ptr_to_u64(&event);
+	resource.channels = channel >= 0 ? 1ULL << channel : 0;
+	resource.bandwidth = bandwidth;
+
+	ioctl_nr = mode == RAW1394_MODIFY_ALLOC ?
+		   FW_CDEV_IOC_ALLOCATE_ISO_RESOURCE_ONCE :
+		   FW_CDEV_IOC_DEALLOCATE_ISO_RESOURCE_ONCE;
+
+	err = ioctl(fwhandle->ioctl_fd, ioctl_nr, &resource);
+
+	while (err >= 0 && event.closure != resource.closure)
+		err = fw_loop_iterate(handle);
+
+	if (err < 0)
+		return err;
+
+	if ((channel >= 0 && event.channel < 0) ||
+	    (bandwidth > 0 && event.bandwidth == 0)) {
+		errno = EIO;
+		return -1;
+	}
+
+	return 0;
+}
+
+static inline int abi_v2_available(raw1394handle_t handle)
+{
+	return handle->mode.fw->abi_version >= 2;
+}
+
+#else
+
+static inline int
+iso_resource_modify(raw1394handle_t handle, unsigned int bandwidth,
+		    int channel, enum raw1394_modify_mode mode)
+{
+	return -1;
+}
+
+static inline int abi_v2_available(raw1394handle_t handle)
+{
+	return 0;
+}
+
+#endif  /* defined(FW_CDEV_IOC_ALLOCATE_ISO_RESOURCE_ONCE) */
+
+int
+fw_bandwidth_modify(raw1394handle_t handle, unsigned int bandwidth,
+		    enum raw1394_modify_mode mode)
+{
+	if (abi_v2_available(handle))
+		return iso_resource_modify(handle, bandwidth, -1, mode);
+	else
+		return ieee1394_bandwidth_modify(handle, bandwidth, mode);
+}
+
+int
+fw_channel_modify(raw1394handle_t handle, unsigned int channel,
+		  enum raw1394_modify_mode mode)
+{
+	if (abi_v2_available(handle))
+		return iso_resource_modify(handle, 0, channel, mode);
+	else
+		return ieee1394_channel_modify(handle, channel, mode);
 }
