@@ -1105,6 +1105,7 @@ fw_start_async_stream(fw_handle_t handle, unsigned int channel,
 			   unsigned long rawtag)
 {
 	/* FIXME: implement this? */
+	errno = ENOSYS;
 	return -1;
 }
 
@@ -1116,6 +1117,7 @@ fw_start_async_send(fw_handle_t handle,
 			 quadlet_t *data, unsigned long rawtag)
 {
 	/* FIXME: implement this? */
+	errno = ENOSYS;
 	return -1;
 }
 
@@ -1234,6 +1236,7 @@ fw_async_stream(fw_handle_t handle, unsigned int channel,
 		     size_t length, quadlet_t *data)
 {
 	/* FIXME: implement this? */
+	errno = ENOSYS;
 	return -1;
 }
 
@@ -1244,6 +1247,7 @@ fw_async_send(fw_handle_t handle,
 		   quadlet_t *data)
 {
 	/* FIXME: implement this? */
+	errno = ENOSYS;
 	return -1;
 }
 
@@ -1285,6 +1289,7 @@ int
 fw_update_config_rom(fw_handle_t handle, const quadlet_t *new_rom,
 			  size_t size, unsigned char rom_version)
 {
+	errno = ENOSYS;
 	return -1;
 }
 
