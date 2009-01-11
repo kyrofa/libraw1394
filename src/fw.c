@@ -935,7 +935,17 @@ send_request(fw_handle_t handle, int tcode,
 {
 	struct fw_cdev_send_request *request;
 	struct request_closure *closure;
-	int i;
+	int ioctl_nr = FW_CDEV_IOC_SEND_REQUEST;
+	int fd, i;
+
+#ifdef FW_CDEV_IOC_SEND_BROADCAST_REQUEST /* added in kernel 2.6.30 */
+	if (node == 0xffff) {
+		ioctl_nr = FW_CDEV_IOC_SEND_BROADCAST_REQUEST;
+		fd = handle->ioctl_fd;
+	}
+#endif
+	if (ioctl_nr != FW_CDEV_IOC_SEND_REQUEST)
+		goto node_id_ok;
 
 	if (node > handle->reset.root_node_id) {
 		handle->err = -RCODE_NO_ACK;
@@ -955,6 +965,9 @@ send_request(fw_handle_t handle, int tcode,
 		errno = fw_errcode_to_errno(handle->err);
 		return -1;
 	}
+	fd = handle->devices[i].fd;
+
+node_id_ok:
 
 	closure = malloc(sizeof *closure);
 	if (closure == NULL) {
@@ -975,7 +988,7 @@ send_request(fw_handle_t handle, int tcode,
 	request->closure = ptr_to_u64(closure);
 	request->data = ptr_to_u64(in);
 
-	return ioctl(handle->devices[i].fd, FW_CDEV_IOC_SEND_REQUEST, request);
+	return ioctl(fd, ioctl_nr, request);
 }
 
 int
