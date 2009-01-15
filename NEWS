@@ -1,5 +1,9 @@
 libraw1394 Release Notes
 
+Version 2.0.1:
+- Optimized usage of /dev/fw? nodes based upon user permissions.
+- many good bugfixes
+
 Version 2.0.0:
 - added support for new firewire subsystem.
 - removed deprecated isochronous functions.
