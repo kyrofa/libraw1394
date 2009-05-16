@@ -132,7 +132,7 @@ test_config_rom(raw1394handle_t handle)
 	       retval, rom_size, rom_version);
 	printf("    here are the first 10 quadlets:\n");
 	for (i = 0; i < 10; i++)
-		printf("    0x%08x\n", i, rom[i]);
+		printf("    0x%08x\n", rom[i]);
 
 	retval = raw1394_update_config_rom(handle, rom, rom_size, rom_version);
 	printf("    update_config_rom returned %d\n", retval);
