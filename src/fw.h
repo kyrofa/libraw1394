@@ -189,7 +189,7 @@ int fw_lock(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 int fw_lock64(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 		   unsigned int extcode, octlet_t data, octlet_t arg,
 		   octlet_t *result);
-int fw_async_stream(fw_handle_t handle, unsigned int channel,
+int fw_async_stream(raw1394handle_t handle, unsigned int channel,
 		   unsigned int tag, unsigned int sy, unsigned int speed,
 		   size_t length, quadlet_t *data);
 int fw_async_send(fw_handle_t handle,

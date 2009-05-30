@@ -459,7 +459,7 @@ int raw1394_async_stream(raw1394handle_t handle, unsigned int channel,
 		return -1;
 	}
 	if (handle->is_fw)
-		return fw_async_stream(handle->mode.fw, channel, tag, sy, speed, length, data);
+		return fw_async_stream(handle, channel, tag, sy, speed, length, data);
 	else
 		return ieee1394_async_stream(handle, channel, tag, sy, speed, length, data);
 }

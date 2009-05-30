@@ -946,6 +946,18 @@ send_request(fw_handle_t handle, int tcode,
 	int ioctl_nr = FW_CDEV_IOC_SEND_REQUEST;
 	int fd, i;
 
+#ifdef FW_CDEV_IOC_SEND_STREAM_PACKET /* added in kernel 2.6.30 */
+	if (tcode == TCODE_STREAM_DATA) {
+		ioctl_nr = FW_CDEV_IOC_SEND_STREAM_PACKET;
+		fd = handle->ioctl_fd;
+	}
+#else
+	if (tcode == TCODE_STREAM_DATA) {
+		errno = ENOSYS;
+		return -1;
+	}
+#endif
+
 #ifdef FW_CDEV_IOC_SEND_BROADCAST_REQUEST /* added in kernel 2.6.30 */
 	if (node == 0xffff) {
 		ioctl_nr = FW_CDEV_IOC_SEND_BROADCAST_REQUEST;
@@ -984,17 +996,33 @@ node_id_ok:
 		return -1;
 	}
 
-	closure->data = out;
+	closure->data   = out;
 	closure->length = out_length;
-	closure->tag = tag;
+	closure->tag    = tag;
 
 	request = (struct fw_cdev_send_request *) handle->buffer;
-	request->tcode = tcode;
+	request->tcode      = tcode;
+	request->length     = in_length > out_length ? in_length : out_length;
+	request->offset     = addr;
+	request->closure    = ptr_to_u64(closure);
+	request->data       = ptr_to_u64(in);
 	request->generation = handle->generation;
-	request->offset = addr;
-	request->length = in_length > out_length ? in_length : out_length;
-	request->closure = ptr_to_u64(closure);
-	request->data = ptr_to_u64(in);
+
+#ifdef FW_CDEV_IOC_SEND_STREAM_PACKET
+	if (tcode == TCODE_STREAM_DATA) {
+		struct fw_cdev_send_stream_packet *p
+		    = (struct fw_cdev_send_stream_packet *) request;
+
+		p->length     = in_length;
+		p->tag        = (addr >> 14) & 0x3;
+		p->channel    = (addr >> 8) & 0x3f;
+		p->sy         = addr & 0xf;
+		p->closure    = ptr_to_u64(closure);
+		p->data       = ptr_to_u64(in);
+		p->generation = handle->generation;
+		p->speed      = (addr >> 4) & 0x7;
+	}
+#endif
 
 	return ioctl(fd, ioctl_nr, request);
 }
@@ -1115,9 +1143,13 @@ fw_start_async_stream(fw_handle_t handle, unsigned int channel,
 			   unsigned int speed, size_t length, quadlet_t *data,
 			   unsigned long rawtag)
 {
-	/* FIXME: implement this? */
-	errno = ENOSYS;
-	return -1;
+	nodeaddr_t addr = (tag     & 0x3)  << 14 |
+			  (channel & 0x3f) <<  8 |
+			  (speed   & 0x7)  <<  4 |
+			  (sy      & 0xf);
+
+	return send_request(handle, TCODE_STREAM_DATA,
+			    0, addr, length, data, 0, NULL, rawtag);
 }
 
 
@@ -1242,13 +1274,17 @@ fw_lock64(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 }
 
 int
-fw_async_stream(fw_handle_t handle, unsigned int channel,
+fw_async_stream(raw1394handle_t handle, unsigned int channel,
 		     unsigned int tag, unsigned int sy, unsigned int speed,
 		     size_t length, quadlet_t *data)
 {
-	/* FIXME: implement this? */
-	errno = ENOSYS;
-	return -1;
+	nodeaddr_t addr = (tag     & 0x3)  << 14 |
+			  (channel & 0x3f) <<  8 |
+			  (speed   & 0x7)  <<  4 |
+			  (sy      & 0xf);
+
+	return send_request_sync(handle, TCODE_STREAM_DATA,
+				 0, addr, length, data, 0, NULL);
 }
 
 int
