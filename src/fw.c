@@ -9,6 +9,7 @@
  * details.
  */
 
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -108,6 +109,13 @@ default_bus_reset_handler(raw1394handle_t handle, unsigned int gen)
 }
 
 static int
+is_fw_device_name(char *name)
+{
+	return strncmp(name, FW_DEVICE_PREFIX, strlen(FW_DEVICE_PREFIX)) == 0
+	       && isdigit(name[strlen(FW_DEVICE_PREFIX)]);
+}
+
+static int
 scan_devices(fw_handle_t handle)
 {
 	DIR *dir;
@@ -132,8 +140,7 @@ scan_devices(fw_handle_t handle)
 		if (de == NULL)
 			break;
 
-		if (strncmp(de->d_name,
-			    FW_DEVICE_PREFIX, strlen(FW_DEVICE_PREFIX)) != 0)
+		if (!is_fw_device_name(de->d_name))
 			continue;
 
 		snprintf(filename, sizeof filename, FW_DEVICE_DIR "/%s", de->d_name);
@@ -327,8 +334,7 @@ handle_inotify(raw1394handle_t handle, struct epoll_closure *ec,
 	len = read(fwhandle->inotify_fd, event, BUFFER_SIZE);
 	if (!(event->mask & IN_CREATE))
 		return -1;
-	if (strncmp(event->name,
-		    FW_DEVICE_PREFIX, strlen(FW_DEVICE_PREFIX)) != 0)
+	if (!is_fw_device_name(event->name))
 		return 0;
 	snprintf(filename, sizeof filename, FW_DEVICE_DIR "/%s", event->name);
 	fd = open(filename, O_RDWR);
