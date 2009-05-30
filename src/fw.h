@@ -71,7 +71,6 @@ struct request_closure {
 	void *data;
 	size_t length;
 	unsigned long tag;
-	struct raw1394_reqhandle reqhandle;
 };
 
 struct allocation;
