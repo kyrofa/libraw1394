@@ -249,6 +249,7 @@ handle_device_event(raw1394handle_t handle,
 	struct device *device = (struct device *) ec;
 	struct address_closure *ac;
 	struct request_closure *rc;
+	unsigned long tag;
 	raw1394_errcode_t errcode;
 	int len, phy_id;
 	int i;
@@ -287,8 +288,10 @@ handle_device_event(raw1394handle_t handle,
 			memcpy(rc->data, u->response.data, rc->length);
 
 		errcode = fw_to_raw1394_errcode(u->response.rcode);
+		tag = rc->tag;
+		free(rc);
 
-		return fwhandle->tag_handler(handle, rc->tag, errcode);
+		return fwhandle->tag_handler(handle, tag, errcode);
 
 	case FW_CDEV_EVENT_REQUEST:
 		ac = u64_to_ptr(u->request.closure);
@@ -944,7 +947,7 @@ send_request(fw_handle_t handle, int tcode,
 	struct fw_cdev_send_request *request;
 	struct request_closure *closure;
 	int ioctl_nr = FW_CDEV_IOC_SEND_REQUEST;
-	int fd, i;
+	int fd, i, retval;
 
 #ifdef FW_CDEV_IOC_SEND_STREAM_PACKET /* added in kernel 2.6.30 */
 	if (tcode == TCODE_STREAM_DATA) {
@@ -1024,7 +1027,11 @@ node_id_ok:
 	}
 #endif
 
-	return ioctl(fd, ioctl_nr, request);
+	retval = ioctl(fd, ioctl_nr, request);
+	if (retval < 0)
+		free(closure);
+
+	return retval;
 }
 
 int
