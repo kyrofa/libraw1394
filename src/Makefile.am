@@ -6,7 +6,11 @@ lib_LTLIBRARIES = libraw1394.la
 
 libraw1394_la_LDFLAGS = -version-info @lt_major@:@lt_revision@:@lt_age@
 
+if WITH_FW_DIR
 INCLUDES = -I$(FW_DIR)
+else
+INCLUDES =
+endif
 
 libraw1394_la_SOURCES =   \
 	main.c            \

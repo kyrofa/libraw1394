@@ -35,6 +35,7 @@ if ! test -z "$with_fw_dir" ; then
    FW_DIR="$with_fw_dir"
    AC_SUBST(FW_DIR)
 fi
+AM_CONDITIONAL([WITH_FW_DIR], [! test -z "$with_fw_dir"])
 
 AC_ARG_WITH(fw-device-prefix,
 	[  --with-fw-device-prefix=<prefix>  Prefix of firewire device file names (default "fw").],
