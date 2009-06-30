@@ -24,4 +24,4 @@ htmldoc:
 .PHONY: doc psdoc pdfdoc htmldoc
 
 dist-hook:
-	git log >$(distdir)/ChangeLog
+	cd $(distdir) && gitlog2changelog.py && cd -

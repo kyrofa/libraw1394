@@ -1,5 +1,7 @@
 2009-06-29  Dan Dennedy <dan@dennedy.org>
 
+  * ChangeLog: Update ChangeLog from git log. 
+
   * NEWS, configure.ac: Bump to v2.0.3 and update release notes. 
 
 2009-06-18  Dan Dennedy <dan@dennedy.org>

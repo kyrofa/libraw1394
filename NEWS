@@ -1,5 +1,8 @@
 libraw1394 Release Notes
 
+Version 2.0.4:
+- Fix build due to incomplete tarball. 
+
 Version 2.0.3:
 - various bug fixes, in particular for firewire stack
 
