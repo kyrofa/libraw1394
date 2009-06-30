@@ -1,14 +1,986 @@
-This project does not use a ChangeLog file.
+2009-06-29  Dan Dennedy <dan@dennedy.org>
 
-The source code of this project is managed by the Subversion revision
-control system (http://subversion.tigris.org), a very nice replacement
-for the venerable CVS.  One of the many nice features of Subversion is
-the 'log' command, which will give you the equivalent of a GNU style
-ChangeLog file.
+  * NEWS, configure.ac: Bump to v2.0.3 and update release notes. 
 
-To view the Subversion log for this project you must have a Subversion
-client installed.  Type on the command line
+2009-06-18  Dan Dennedy <dan@dennedy.org>
 
-	$ svn://svn.linux1394.org/libraw1394/trunk
+  * configure.ac, src/Makefile.am: Fix build always expecting FW_DIR.  Date:
+  Sun, 14 Jun 2009 11:51:33 +0100 From: Mike Auty <mike.auty@gmail.com>
+  Subject: [patch libraw1394-2] src/makefile.am expects FW_DIR to be set, but
+  configure only sets it if given --with-fw-dir  Here's a very small patch for
+  the configure system of libraw1394-2.0.{0,1,2}.  At the moment, if configure
+  is called without --with-fw-dir, then FW_DIR doesn't get specified.  The
+  Makefile includes the line INCLUDES=-I$(FW_DIR) and so in the compilation we
+  get a -I not followed by anything sensible.  That can cause compilation
+  issues in certain circumstances (see Gentoo bug 272540), so this patch
+  ensures that INCLUDES is only set if --with-fw-dir was specified.  Please let
+  me know if there's any problems with the patch or if I've submitted it to the
+  wrong place or in the wrong way.  Thanks...  Mike  5:)  [1]
+  http://bugs.gentoo.org/272540 
 
-to view the log.
+2009-05-31  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * src/fw.c: Match only /dev/fw[0-9]* as firewire-core device files 
+  Previously, /dev/fw* and hence files like /dev/fwmonitor were probed which
+  may have bad effects if the client runs with access privileges. 
+
+2009-05-30  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * src/fw.h: Remove an unused struct member 
+
+  * src/fw.c: Fix memory leaks with async requests on firewire-core  Each
+  request allocated a struct request_closure which was never freed. 
+
+  * src/dispatch.c, src/fw.c, src/fw.h: Use new async stream ioctl  This
+  implements asynchronous streams on juju, i.e. enables raw1394_async_stream()
+  and raw1394_start_async_stream() to work with the new firewire kernel stack. 
+
+2009-01-11  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * src/fw-iso.c: Iso reception: Use packet timestamps in juju ABI v2  In the
+  firewire-cdev ABI v1, the kernel exported only the timestamp of interrupt
+  packets.  libraw1394 estimated the cycle of all packets between interrupt
+  packets by continuously incrementing the cycle.  In v2 of the ABI, we can
+  obtain an accurate timestamp of each packet as provided by the OHCI
+  controller.  AFAIU, this is also what you got from raw1394/ ohci1394. 
+
+  * src/dispatch.c, src/fw.c, src/fw.h: Use new iso resource allocation ioctls 
+  This allows raw1394_bandwidth_modify() and raw1394_channel_modify() to work
+  on juju without write access to the IRM's character device file.  If either
+  the build-time requirement of firewire-cdev header ABI >= v.2 or the runtime
+  requirement of firewire-core ABI >= v.2 is not satisfied, the code falls back
+  to transactions to the IRM as before. 
+
+  * src/fw.c: Use new broadcast request ioctl  This implements broadcast
+  transactions on juju. (Broadcast transactions are write transactions to PHY
+  ID 63, not to be confused with isochronous or asynchronous streams.) 
+
+2009-05-16  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * tools/testlibraw.c: testlibraw: fix printing of local config ROM  Since
+  "testlibraw: test all cards instead of only the first", the actual ROM
+  content wasn't printed anymore due to a mistake in a printf format string. 
+
+2009-02-03  Dan Dennedy <dan@dennedy.org>
+
+  * NEWS, configure.ac: bump version to 2.0.2 and add release notes 
+
+  * src/fw-iso.c, src/fw.c, src/fw.h: Change the license of the "juju" fw*.[hc]
+  files to LGPL v2.1 as approved by Kristian Hogsberg in an e-mail to the
+  linux1394-devel mailing list on Feb 3, 2009. 
+
+2009-01-14  Dan Dennedy <dan@dennedy.org>
+
+  * NEWS, configure.ac: bump version and add release notes 
+
+2009-01-11  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * src/fw.c: Set errno = ENOSYS in unimplemented functions  Most of them do
+  this already, only a few missed it. 
+
+2009-01-10  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * src/fw-iso.c, src/fw.c, src/fw.h: Work without permission to access local
+  node's /dev/fw*  On 10 Jan, David Moore wrote: > On Sat, 2009-01-10 at 19:28
+  +0100, Stefan Richter wrote: >> @@ -161,14 +160,16 @@
+  scan_devices(fw_handle_t handle) ... >> +		for (j = 0; j < i; j++) >> +			if
+  (ports[j].card == get_info.card) >> +				continue; >> + > > That continue
+  statement doesn't do what you intended I think.  From: Stefan Richter
+  <stefanr@s5r6.in-berlin.de> Subject: [PATCH] Work without permission to
+  access local node's /dev/fw*  Fix for juju backend:  libraw1394 required
+  write permission to the character device file of the local node(s) in order
+  to enumerate cards and for a number of other operations.  This forced users
+  to either run applications like dvgrab and kino with elevated privileges, or
+  to configure write permission for all /dev/fw* or at least for local nodes'
+  /dev/fw*.  We now use the first accessible file which was found for each card
+  for as many tasks as possible, instead of the local node's file.  This allows
+  distributors or admins to implement stricter access rights (default off, e.g.
+  only on for AV/C and IIDC devices) without sacrificing functionality of said
+  class of applications. Access to the local node is now only required by
+  low-level tools like gscanbus. 
+
+2008-12-20  David Moore <dcm@acm.org>
+
+  * src/fw.c: Fix stack corruption during juju lock transactions  When
+  performing a lock transaction (such as with fw_lock) under Juju, 4 bytes of
+  the stack gets corrupted.  This is because the lock transaction has 8 bytes
+  of data sent and 4 bytes received.  Since the transaction "length" is
+  specified as 8, handle_device_event() copies 8 bytes into the destination
+  variable instead of the desired 4, and overflows into the stack by 4 bytes. 
+  This patch fixes the corruption by adding an extra "out_length" argument to
+  the send_request() function so that both in_length and out_length can be
+  specified separately. 
+
+2008-12-09  Jarod Wilson <jarod@redhat.com>
+
+  * src/fw-iso.c, src/fw.h: Fix iso_shutdown with juju firewire stack  Make iso
+  start/stop/start sequences on the same handle, such as those used by apps
+  such as MythTV behave as expected. I can finally watch video off my cable box
+  over FireWire using MythTV w/the juju stack now. :)  Initially, seemed a
+  one-liner might be the ticket (setting handle->iso.fd = -1 at the end of
+  fw_iso_shutdown()), but that led to memory corruption and a locked up system.
+  What ultimately worked was essentially mimicking what the old stack did to
+  track iso state, and call fw_iso_stop() from fw_iso_shutdown() as needed. 
+  Nb: Only lightly tested with iso receive via MythTV, but its all fairly
+  straight-forward, I think. 
+
+2008-12-07  Dan Dennedy <dan@dennedy.org>
+
+  * Makefile.am: Checking /dev/raw1394 and recommendation for creating it for
+  the install make target is no longer relevant because opf firewire and udev. 
+
+2008-12-07  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * tools/testlibraw.c: testlibraw: test raw1394_read_cycle_timer() 
+
+  * tools/testlibraw.c: testlibraw: test all cards instead of only the first 
+
+2008-12-07  Dan Dennedy <dan@dennedy.org>
+
+  * src/fw-iso.c: Let fw_read_cycle_timer() use the local fd instead of
+  requiring iso to be initialized 
+
+2008-12-02  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * src/dispatch.c, src/fw.c, src/fw.h: [libraw1394 patch] Unify
+  {ieee1394,fw}_bandwidth_modify()  because they do the same.  We only may want
+  a separate fw_bandwidth_modify() in the future when firewire-core gains a
+  special ioctl() for that.  (Not runtime-tested, but it looks good to me.) 
+
+  * src/dispatch.c, src/fw.c, src/fw.h, src/raw1394.h: [libraw1394 patch] Fix
+  raw1394_channel_modify() on firewire-core (juju)  Reported by Adrian Knoth: 
+  fw_channel_modify() was unable to allocate some channels which were actually
+  free. http://marc.info/?l=linux1394-devel&t=122818128900002  This can be
+  easily fixed by replacing fw_channel_modify() by ieee1394_channel_modify()
+  because this is highlevel enough to work with Juju as well.  We only may want
+  a separate fw_channel_modify() in the future when firewire-core gains a
+  special ioctl() for that.  Also fix a documentation typo: 
+  raw1394_channel_modify() did not show up in extracted API documentation due
+  to a cut'n'paste typo in raw1394.h. 
+
+2008-10-18  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * src/fw.c: Fix segfault in juju's handle_arm_request  The buffer pointers
+  were uninitialized, leading to segfault in memcpy. Bug report and initial
+  version of the fix by Adrian Knoth. 
+
+  * src/dispatch.c: Reduce nesting depth in new_handle dispatchers 
+
+  * src/arm.c, src/dispatch.c, src/eventloop.c, src/fw-iso.c, src/main.c:
+  Address some compiler warnings  7x unused variable, 1x assignment used as
+  truth value, 1x pointer signedness 
+
+2008-09-30  Erik Hovland <erik@hovland.org>
+
+  * src/fw.c: Makes extra sure strings are not overrun.  When using strncpy
+  with the exact size of the destination string the string may end up lacking
+  null termination because the source string is bigger then the destination. 
+
+  * tools/testlibraw.c: Makes sure to check any return values  The return value
+  of any function should be checked if that function uses the return value to
+  provide some sort of status information. 
+
+  * src/fw-iso.c: Makes sure a value is returned by the function.  A function
+  can compile without returning something always. 
+
+  * src/fw-iso.c, src/fw.c: Make sure that we have the right types.  When an
+  unsigned type is assigned a signed value, the negatived value is never seen. 
+
+  * src/fw.c: Compare unsigned values instead of subtracting them.  Unsigned
+  values do not return signed values when subtracted and the right operand is
+  larger then the left operand. 
+
+  * src/dispatch.c, src/fw.c: Protect against resource leaks. 
+
+  * src/fw-iso.c: Make sure variables are initialized before used. 
+
+2008-07-21  Dan Dennedy <dan@dennedy.org>
+
+  * src/dispatch.c: dispatch.c: fix a memory leak on not deleting the raw1394
+  wrapper handle.
+
+2008-07-18  Dan Dennedy <dan@dennedy.org>
+
+  * Makefile.am, configure.ac: configure.ac, Makefile.am: drop debian from
+  build and restore doc and tools to dist make target.
+
+  * Makefile.am, NEWS: NEWS: added release notes Makefile.am: use git-log to
+  generate ChangeLog on make dist.
+
+  * INSTALL, configure.ac: Reset the libtool age.
+
+2008-07-06  Dan Dennedy <dan@dennedy.org>
+
+  * src/dispatch.c, src/errors.c, src/eventloop.c, src/main.c, src/raw1394.h:
+  Change handle validation to prevent segfault and be more informative.
+
+2008-06-21  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * src/dispatch.c, src/fw-iso.c, src/fw.h, src/raw1394.h: Fix
+  raw1394_read_cycle_timer after juju integration  The ieee1394 version of
+  raw1394_read_cycle_timer() fell over the cliff in "First cut at integrating
+  juju".  This brings it back and adds a juju version of it.  Also correct a
+  typo in the inline documentation: s/get/read/
+
+2008-06-16  Philippe Troin <phil@fifi.org>
+
+  * src/fw-iso.c, src/fw.c, tools/testlibraw.c: Plug dir leak and initialize
+  data structs  While trying to track down some crashes in kino, I found the
+  following problems with libraw1394:  * There is a DIR* leak in
+  raw1394_set_port(). * Lots of data structures are not fully initialized when
+  calling IEEE1394 ioctl()s.  These cause valgrind errors (benign, as valgrind
+  does not know how to interpret all ioctls.  However these also cause kino to
+  crash in libraw1394.  I've added a bunch of memset()s to prevent this problem
+  from happening.  Forward-ported to libraw1394 git tree by Jarod Wilson.
+
+2008-04-30  Dan Dennedy <ddennedy@ddennedy.localdomain>
+
+  * Makefile.am, configure.ac, juju/Makefile.am, juju/juju.h,
+  juju/raw1394-iso.c, juju/raw1394.c, src/Makefile.am, src/dispatch.c,
+  src/fw-iso.c, src/fw.c, src/fw.h, src/raw1394_private.h: Move the source code
+  files in the juju directory into the src directory and give them 'fw' names
+  instead of 'juju.'
+
+2008-04-29  Dan Dennedy <ddennedy@kino.dennedy.org>
+
+  * INSTALL, doc/libraw1394.sgml, src/raw1394.h: libraw1394.sgml, raw1394.h:
+  remove information about deprecated isochronous API that has been removed.
+
+2008-04-29  Dan Dennedy <ddennedy@ddennedy.localdomain>
+
+  * juju/raw1394-iso.c: juju/raw1394-iso.c: bugfix size of mmap'ed isochronous
+  buffer to prevent segfault in applications.
+
+2008-04-23  Dan Dennedy <ddennedy@ddennedy.localdomain>
+
+  * Makefile.am, configure.ac, juju/Makefile.am, juju/juju.h,
+  juju/raw1394-iso.c, juju/raw1394.c, src/Makefile.am, src/arm.c,
+  src/dispatch.c, src/errors.c, src/eventloop.c, src/fcp.c, src/iso.c,
+  src/main.c, src/raw1394.h, src/raw1394_private.h, src/readwrite.c,
+  tools/Makefile.am: First cut at integrating juju This is currently working
+  with legacy ieee1394 and tools/testlibraw.
+
+2008-04-22  Dan Dennedy <ddennedy@ddennedy.localdomain>
+
+  * configure.ac: Fix configure.ac missing fi after initial merge.
+
+2008-03-27  ddennedy <ddennedy@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/eventloop.c: src/eventloop.c: redo the undo (git-svn virgin at the
+  controls)  
+
+  * src/eventloop.c: eventloop.c: apply patch from Jonas Bonn to retrty read
+  when failed with EINTR. This can occur when libraw1394 callera receives a
+  signal while in the read and the caller is not using a signal handler set
+  with signal().  
+
+  * src/eventloop.c: eventloop.c: apply patch from Jonas Bonn to retry read
+  when failed with EINTR. This can occur when libraw1394 caller receives a
+  signal while in this read and the caller is not using a signal handler set
+  with signal().  
+
+2008-03-27  Dan Dennedy <ddennedy@ddennedy.localdomain>
+
+  * src/eventloop.c: eventloop.c: apply patch from Jonas Bonn to retry read
+  when failed with EINTR. This can occur when libraw1394 caller receives a
+  signal while in this read and the caller is not using a signal handler set
+  with signal().
+
+2007-10-24  Jarod Wilson <jwilson@redhat.com>
+
+  * juju/raw1394-iso.c: Set handle->iso.packets to NULL after freeing to avoid
+  double-frees.
+
+2007-10-14  ddennedy <ddennedy@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/raw1394.h: fix documentation on raw1394_update_config_rom 
+
+  * AUTHORS: add Pieter Palmers to AUTHORS as contributor 
+
+  * NEWS: update release notes 
+
+2007-06-13  Kristian Høgsberg <krh@redhat.com>
+
+  * juju/juju.h, juju/raw1394-iso.c: Update the juju implementation to follow
+  the recent bitfield changes.
+
+2007-05-30  ddennedy <ddennedy@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * configure.ac, src/readwrite.c: Apply patch from Jon Schewe
+  <jon.schewe@honeywell.com> to make valgrind happy. Adds --with-valgrind
+  configure option. 
+
+2007-04-17  Kristian Høgsberg <krh@redhat.com>
+
+  * juju/juju.h, juju/raw1394-iso.c: Follow ioctl changes and header file move.
+
+2007-04-12  Jay Fenlason <fenlason@redhat.com>
+
+  * juju/raw1394.c: Use correct payload size for two-operand lock transactions.
+
+2007-04-12  Kristian Høgsberg <krh@redhat.com>
+
+  * juju/raw1394-iso.c: Use power-of-two max packet sizes.
+
+  * juju/raw1394-iso.c: Wrap receive tail pointer correctly.
+
+2007-04-11  Kristian Høgsberg <krh@redhat.com>
+
+  * juju/juju.h, juju/raw1394-iso.c: Refactor packet queueing and use for both
+  xmit and recv.
+
+2007-04-03  Kristian Høgsberg <krh@redhat.com>
+
+  * juju/raw1394-iso.c, juju/raw1394.c: Fix warnings.
+
+  * juju/raw1394-iso.c: Implement raw1394_iso_xmit_sync(), remove debug code.
+
+  * juju/raw1394-iso.c: Handle rawiso dispositions.
+
+  * juju/juju.h, juju/raw1394-iso.c: Fix xmit payload packing, use pointers for
+  circular buffer indices.
+
+  * juju/juju.h, juju/raw1394-iso.c: Make raw1394_iso_xmit_write work.
+
+2007-04-02  Kristian Høgsberg <krh@redhat.com>
+
+  * juju/juju.h, juju/raw1394-iso.c: More work on iso receive; handle payload
+  wrapping.
+
+2007-03-31  Kristian Høgsberg <krh@redhat.com>
+
+  * juju/raw1394-iso.c: Decode iso headers properly.
+
+2007-03-28  Kristian Høgsberg <krh@redhat.com>
+
+  * juju/juju.h, juju/raw1394-iso.c, juju/raw1394.c: Get rawiso receive a
+  little closer to working.
+
+2007-03-26  Kristian Høgsberg <krh@redhat.com>
+
+  * Makefile.am, configure.ac, juju/Makefile.am, juju/juju.h,
+  juju/raw1394-iso.c, juju/raw1394.c, tools/Makefile.am, tools/testlibraw.c:
+  Add the juju support work so far.
+
+2007-02-17  ddennedy <ddennedy@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/raw1394.h: add documentation about existence of RAW1394DEV 
+
+  * src/main.c: add support for RAW1394DEV environment variable to override
+  default /dev/raw1394, but also attempt to failover to default. 
+
+2007-02-14  ddennedy <ddennedy@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * configure.ac, src/ieee1394-ioctl.h, src/iso.c, src/kernel-raw1394.h,
+  src/main.c, src/raw1394.h: added raw1394_read_cycle_timer, contributed by
+  Pieter Palmers 
+
+2006-10-17  ddennedy <ddennedy@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/main.c: bugfix segfault in raw1394_iso_shutdown on no iso activity due
+  to not initializing raw1394_handle.iso_packet_infos to NULL in
+  raw1394_new_handle 
+
+2006-05-09  ddennedy <ddennedy@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/iso.c: apply optimization patch from Pieter Palmers that removes modulo
+  operator from high frequency isochronous code 
+
+2006-04-09  ddennedy <ddennedy@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * INSTALL, src/eventloop.c, tools/sendiso.c: cleanup some compiler warnings 
+
+  * NEWS: add release notes 
+
+  * src/iso.c: lock allocated isochronous packet tracking memory 
+
+  * src/iso.c, src/raw1394_private.h: remove memory allocations for isochronous
+  operations from the libraw1394 event loop to make them more respectful of
+  realtime applications 
+
+2006-03-04  ddennedy <ddennedy@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/iso.c, src/raw1394.h: Added a new callback response for iso_xmit
+  handlers: RAW1394_ISO_AGAIN. This would be returned when the callback doesn't
+  have enough data to create a complete packet. This can occur when the xmit
+  buffers are bigger than the buffers supplying the data. It is not
+  nescessarily an error, because there are enough packets in the xmit buffer.
+  This response could give the data supplyer more time to fill the intermediate
+  buffer without losing any packets.   
+
+2005-07-04  ddennedy <ddennedy@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/iso.c: Fix raw1394_iso_xmit_write() to work with recent kernel change
+  to raw1394 to fix bug with stalling on buffer underrun.  
+
+  * src/iso.c, src/raw1394.h: add sanity check to queuing of packets in rawiso
+  xmit 
+
+2005-07-01  ddennedy <ddennedy@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/raw1394.h: Add a comment that libraw does not allocate channels and
+  bandwidth. This is already mentioned in doc/libraw1394.sgml but an existing
+  comment about raw1394_iso_xmit_init may be misleading.   
+
+2005-06-23  ddennedy <ddennedy@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * configure.ac, src/iso.c: bugfix stalling on iso transmission underflow 
+
+2005-06-02  ddennedy <ddennedy@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * doc/libraw1394.sgml, src/raw1394.h: documentation and header comment
+  corrections from Stefan Richter 
+
+2005-02-16  ddennedy <ddennedy@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * NEWS, configure.ac, doc/libraw1394.sgml, src/main.c, src/raw1394.h,
+  src/raw1394_private.h: add functions for allocating and releasing bandwidth
+  and channels 
+
+2004-11-26  ddennedy <ddennedy@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/main.c: add comment about assumptions made in raw1394_get_port_info 
+
+2004-11-25  ddennedy <ddennedy@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/main.c: apply patch from Matthias Hanel to fix uninitialized buffer and
+  remove unncessary (and logically impossible) copy in get_port_info 
+
+  * doc/libraw1394.sgml, src/raw1394.h: improve reference documentation 
+
+2004-11-20  ddennedy <ddennedy@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * libraw1394.pc.in: pkgconfig include path should not contain libraw1394 
+
+2004-11-19  ddennedy <ddennedy@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * tools/dumpiso.c, tools/sendiso.c: bump version of isodump file 
+
+2004-11-18  ddennedy <ddennedy@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * NEWS, src/raw1394.h, tools/dumpiso.c, tools/sendiso.c: port iso examples to
+  rawiso API 
+
+2004-11-11  ddennedy <ddennedy@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * doc/libraw1394.sgml: fix version and copyright in docs 
+
+  * configure.ac, libraw1394.m4: remove m4, remove -O2 from CFLAGS 
+
+  * AUTHORS, INSTALL, NEWS, README, doc/libraw1394.sgml, src/arm.c,
+  src/errors.c, src/eventloop.c, src/fcp.c, src/iso.c, src/main.c,
+  src/raw1394.h, src/readwrite.c, src/version.c: reorganize and update
+  documentation; fix compiler warning 
+
+2004-10-31  ddennedy <ddennedy@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * NEWS, src/kernel-raw1394.h: revert kernel protocol version 
+
+  * debian/Makefile.am, doc/Makefile.am: fix make dist without doc 
+
+2004-10-30  ddennedy <ddennedy@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * doc/libraw1394.sgml: nother doc update 
+
+  * ChangeLog, Makefile.am, NEWS, README, configure.ac, doc/Makefile.am,
+  doc/libraw1394.sgml, libraw1394.spec.in, src/Makefile.am,
+  src/kernel-raw1394.h, src/version.c, tools/Makefile.am: bump versions, build
+  fixes, and doc updates 
+
+2003-12-09  bencollins <bencollins@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/raw1394.h: Patch from Jim Radford. Other half of packet_per_buffer ABI
+  cleanup.  
+
+2003-11-20  bencollins <bencollins@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/iso.c, src/kernel-raw1394.h, src/raw1394.h: Patch from Alexander
+  Neundorf to support differing ISO rx modes. Currently supported only by OHCI.
+   
+
+2003-11-09  weihs <weihs@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/arm.c, src/kernel-raw1394.h, src/raw1394.h: sync with driver (addition
+  of functions raw1394_arm_get_buf raw1394_arm_set_buf to get and set buffers
+  of mapped address ranges) 
+
+  * src/ieee1394-ioctl.h: sync with driver version of this file 
+
+2003-10-07  bencollins <bencollins@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/raw1394.h: Patch from Alexander Neundorf to add proto for
+  raw1394_iso_recv_flush()  
+
+2003-09-26  bencollins <bencollins@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * debian/changelog, debian/copyright: Update for new version, 0.10.1.  
+
+  * src/readwrite.c: Fixup async_stream to use same local req variable for
+  reentrancy.  
+
+  * debian/changelog, debian/libraw1394.postinst.in: Fix postinst so device
+  node gets created.  
+
+2003-09-11  bencollins <bencollins@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/kernel-raw1394.h, src/raw1394.h, src/readwrite.c: Async stream support
+  from Jim Radford.  
+
+2003-07-22  bencollins <bencollins@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * configure.ac: Increase so maj/age so account for new recv-flush call.  
+
+  * src/arm.c, src/eventloop.c, src/fcp.c, src/iso.c, src/main.c,
+  src/raw1394_private.h, src/readwrite.c: Patch from Stephen Tiedemann to allow
+  reentrancy in raw1394's usage of raw1394_request's.  
+
+2003-07-17  bencollins <bencollins@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/ieee1394-ioctl.h, src/iso.c: Patch from Dan Maas to add
+  raw1394_iso_recv_flush() call to API, using the RAW1394_IOC_ISO_RECV_FLUSH
+  ioctl. Updated the ieee1394-ioctl.h file aswell.  
+
+  * Makefile.am, configure.ac, libraw1394.pc.in: pkg-config support from
+  Kristian Hogsberg.  
+
+  * src/Makefile.am: Remove trailing whitespace, which automake chokes on. 
+  Patch from Manish Singh.  
+
+2003-07-13  bencollins <bencollins@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * debian/control: Fixed section for -dev package.  
+
+  * debian/rules: Re-add the pdf build 
+
+  * debian/compat, debian/libraw1394.config.in, debian/libraw1394.templates.in,
+  debian/rules: Update Debian files.  
+
+  * debian/libraw1394.postinst.in: Ok, the Debian package was way out of sync
+  with upstream 
+
+  * autogen.sh, debian/control: Ooops...libtool works a bit different than I
+  thought, but atleast it works like it is supposed to.  
+
+  * debian/control, debian/libraw1394-dev.docs, debian/rules: Generate and
+  install the pdf in the Debian package.  
+
+  * autogen.sh: Don't run configure at the end of autogen.sh. Also, remove
+  autom4te.cache.  
+
+  * debian/control: Update Debian maintainer 
+
+  * debian/changelog: Update Debian changelog.  
+
+  * ChangeLog: File doesn't really seem needed. The NEWS file gives a good
+  overview, and the svn log is more than verbose enough for info seekers.  
+
+  * src/fcp.c, src/iso.c, tools/sendiso.c, tools/testlibraw.c: Fix compiler
+  warnings.  
+
+  * AUTHORS, NEWS, debian/control, debian/copyright: Updates from 0.10.0
+  release.  
+
+2003-04-23  ddennedy <ddennedy@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * autogen.sh: add libtoolize to bootstrap 
+
+2003-04-21  ddennedy <ddennedy@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * doc/libraw1394.sgml: added Dan Maas' rawiso docs 
+
+2003-04-07  dmaas <dmaas@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/main.c: new_handle_on_port() error path fix from Jim Radford 
+
+2003-03-26  dmaas <dmaas@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/main.c, src/raw1394.h: add raw1394_new_handle_on_port() convenience
+  function 
+
+2003-02-22  bencollins <bencollins@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/ieee1394-ioctl.h, src/iso.c, src/kernel-raw1394.h: Updates for new
+  rawiso ioctl interface.  
+
+2003-01-15  dmaas <dmaas@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/iso.c, src/kernel-raw1394.h, src/main.c, src/raw1394.h,
+  src/raw1394_private.h: add iso_xmit_sync() and iso_xmit_write(); clean up iso
+  handling a bit 
+
+  * src/iso.c, src/kernel-raw1394.h, src/raw1394.h: implement tag matching for
+  rawiso reception 
+
+2003-01-05  dmaas <dmaas@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/Makefile.am, src/eventloop.c, src/iso-legacy.c, src/iso.c, src/main.c,
+  src/raw1394_private.h, src/readwrite.c: emulate legacy ISO reception API on
+  top of new rawiso API 
+
+2002-12-24  dmaas <dmaas@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/iso.c, src/kernel-raw1394.h, src/raw1394.h, src/raw1394_private.h:
+  update iso API for multi-channel reception and new packet buffer layout   
+
+2002-12-20  anonymous <anonymous@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/kernel-raw1394.h: oops, irq_interval needs to be signed 
+
+  * src/kernel-raw1394.h, src/main.c, src/raw1394.h: dmaas - renamed exported
+  arm definitions into the raw1394_ namespace; brought kernel-raw1394.h back in
+  sync with the kernel version 
+
+2002-12-16  dmaas <dmaas@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/iso.c, src/kernel-raw1394.h, src/raw1394.h: rawiso updates: - changed
+  return type of rawiso xmit/recv handlers from int to enum
+  raw1394_iso_disposition  - added an ioctl (RAW1394_ISO_QUEUE_ACTIVITY) to
+  force an ISO_ACTIVITY event into the queue. This is needed for handling
+  RAW1394_ISO_DEFER, to kick us out of the next read() instead of sleeping
+  forever.  - removed references to "8-byte" isochronous header - this is an
+  OHCI-specific implementation detail  
+
+2002-11-18  ddennedy <ddennedy@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/raw1394.h: fix cplusplus extern C block 
+
+  * src/Makefile.am, src/eventloop.c, src/iso.c, src/kernel-raw1394.h,
+  src/main.c, src/raw1394.h, src/raw1394_private.h: merged rawiso branch 
+
+2002-10-23  ddennedy <ddennedy@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/arm.c: added missing arm.c from weihs branch 
+
+  * AUTHORS, ChangeLog, NEWS, configure.ac, src/Makefile.am, src/eventloop.c,
+  src/kernel-raw1394.h, src/main.c, src/raw1394.h, src/raw1394_private.h,
+  src/readwrite.c, tools/testlibraw.c: merged weihs branch 
+
+2002-10-13  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * configure.ac, configure.in: configure.ac: - Move configure.in to
+  configure.ac (for autoconf 2.50+). - Set CFLAGS to "-Wall -O2" only if not in
+  environment already. - Set package version to 1.0.0 already.  
+
+  * src/errors.c, src/eventloop.c, src/fcp.c, src/iso.c, src/main.c,
+  src/raw1394.h, src/readwrite.c, src/version.c: Add kernel-doc style
+  documentation headers for most exported functions.  
+
+2002-10-08  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * : Set the executable flags for autogen.sh and debian/rules that were lost
+  in the CVS to SVN conversion.  
+
+2001-08-01  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * debian/changelog, debian/control, debian/libraw1394-potato.postinst.in,
+  debian/libraw1394.postinst.in, debian/rules, doc/libraw1394.sgml: Add
+  raw1394_get_local_id, _irm_id, _nodecount refentry.  
+
+2001-07-09  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * doc/libraw1394.sgml: Reworked some paragraphs. Added chapters on generation
+  numbers and error codes. Added some function reference entries.  
+
+2001-06-27  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * debian/copyright: Modify info in Debian package copyright file a bit.  
+
+  * NEWS, src/errors.c: Fix wrong error mapping in raw1394_error_to_errno() on
+  local transactions.  
+
+2001-06-17  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * configure.in, debian/changelog, debian/libraw1394-potato.postinst.in,
+  debian/libraw1394.postinst.in, doc/Makefile.am: debian: Let postinst continue
+  even if input is /dev/null. debian: 0.9.0-2 release for the above. Fix mixed
+  up sections for isodump man file in doc/Makefile.am and configure.in.  
+
+2001-06-11  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * configure.in, doc/Makefile.am, doc/dumpiso.1.in, doc/isodump.5.in,
+  doc/sendiso.1.in: Added man page describing format of the iso dump file.  
+
+2001-06-08  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * doc/dumpiso.1.in, doc/sendiso.1.in: Forgot to add dumpiso and sendiso man
+  pages to repository, fixed.  
+
+  * Makefile.am, NEWS, configure.in, doc/Makefile.am, src/Makefile.am,
+  src/testlibraw.c, tools/Makefile.am, tools/dumpiso.c, tools/sendiso.c,
+  tools/testlibraw.c: Moved testlibraw.c from src to tools directory. Added
+  sendiso and dumpiso programs in tools directory. Added man pages for sendiso
+  and dumpiso in doc directory.  
+
+2001-05-30  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * debian/rules: debian: Remove a now useless substvar.  
+
+2001-05-28  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * debian/rules: debian: Make shlibs file versioned. debian: Remove local
+  shlib dependency kludge and replace with -l option for dh_shlibdeps.  
+
+2001-05-25  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * debian/changelog, debian/libraw1394-dev.docs: Revert move of HTML directory
+  from libraw1394 to libraw1394.html  
+
+  * doc/Makefile.am: Revert move of HTML directory from libraw1394 to
+  libraw1394.html  
+
+2001-05-24  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * debian/Makefile.am, debian/changelog, debian/control,
+  debian/libraw1394-dev.docs, debian/rules, doc/Makefile.am: Move HTML
+  formatted documentation subdir from libraw1394 to libraw1394.html. Update
+  Debian control files to generate version 0.9.0-1 package.  
+
+2001-05-14  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * Makefile.am, NEWS, README, configure.in, doc/Makefile.am,
+  doc/libraw1394.sgml, src/eventloop.c, src/main.c, src/raw1394.h,
+  src/version.c: Handle generation number is not automatically advanced with
+  bus reset. Function raw1394_update_generation() added for manual update. Bus
+  reset handler get current generation number as argument. Default bus reset
+  handler calls raw1394_update_generation().  
+
+  * libraw1394.m4: Fix macros so that they actually work.  
+
+2001-05-07  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * Makefile.am, NEWS, debian/control, debian/rules: Fix Makefile.am to include
+  libraw1394.m4 in distribution. Update NEWS. Some Debian packaging updates.  
+
+2001-03-21  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/main.c: Store returned generation count after setting of port.  
+
+2001-02-28  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * Makefile.am: Install libraw1394.am. Fix wording in message when
+  /dev/raw1394 not found.  
+
+  * Makefile.am, configure.in, doc/Makefile.am, doc/testlibraw.1.in,
+  src/Makefile.am: testlibraw gets installed now. Added man page for
+  testlibraw.  
+
+2001-02-27  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/eventloop.c: Let received iso header be big endian, to be consistent.  
+
+2001-02-05  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * configure.in, libraw1394.m4, src/Makefile.am, src/raw1394.h, src/version.c:
+  Add libraw1394 autoconf macro (not yet complete). Add functions and symbols
+  to let macro determine version.  
+
+2001-01-31  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/raw1394.h: Put 'extern "C"' for C++ back in.  
+
+2001-01-27  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/testlibraw.c: Adapted testlibraw to new style error handling.  
+
+2001-01-19  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/Makefile.am, src/errors.c: Fix building errors.c.  
+
+  * configure.in, src/errors.c, src/eventloop.c, src/main.c, src/raw1394.h,
+  src/raw1394_private.h, src/readwrite.c: First implementation of new error
+  reporting API.  
+
+2001-01-04  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * configure.in, debian/changelog, debian/libraw1394.postinst.in: Fix
+  misplaced device file in Debian installation.  
+
+2000-12-12  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * configure.in, debian/Makefile.am, debian/changelog, debian/control,
+  debian/libraw1394-potato.postinst.in, debian/libraw1394.postinst.in,
+  debian/rules: Debian scripts use makedev (>=2.3.1-49) in postinst by default
+  now. Postinst script using mknod added as alternative. Revision bumped up to
+  0.8.1.  
+
+2000-11-25  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * debian/libraw1394.postinst.in, debian/rules: Fix postinst ldconfig. Fix
+  device file creation. Install NEWS and README as documentation in the dev
+  package.  
+
+  * README: Add some information about return values.  
+
+2000-11-24  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * configure.in, debian/changelog: Bump up version numbers for release.  
+
+  * debian/Makefile.am, debian/libraw1394.postinst.in, debian/rules: Added
+  libraw1394.postinst.in to list of distributed files.  
+
+2000-11-23  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * debian/libraw1394.postinst.in, debian/rules: Add ldconfig in deb postinst
+  for Debian policy conformance.  
+
+  * acconfig.h: Removed acconfig.h, which wasn't needed for some time.  
+
+2000-11-22  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * NEWS, src/Makefile.am, src/ieee1394.h: Added ieee1394.h header.  
+
+2000-09-13  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/readwrite.c: Fix raw1394_start_iso_write() which uses wrong variable.  
+
+2000-09-10  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * configure.in, src/fcp.c, src/iso.c, src/main.c, src/raw1394_private.h,
+  src/readwrite.c: Work around compiler warnings for int/ptr casts.  
+
+  * debian/Makefile.am, debian/README, debian/changelog, debian/control,
+  debian/copyright, debian/rules: Added control files for Debian packages.  
+
+2000-09-01  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/raw1394.h: Added missing prototypes for iso send functions.  
+
+2000-08-08  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * NEWS, src/eventloop.c, src/kernel-raw1394.h, src/main.c, src/raw1394.h,
+  src/raw1394_private.h, src/testlibraw.c: Added raw1394_get_irm_id().  
+
+2000-08-06  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * NEWS, src/kernel-raw1394.h, src/readwrite.c: Added support for isochronous
+  sending.  
+
+2000-07-05  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * NEWS, src/kernel-raw1394.h, src/main.c, src/raw1394.h: Added
+  raw1394_reset_bus() call.  
+
+2000-06-22  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * configure.in, src/Makefile.am, src/main.c, src/testlibraw.c: - Set library
+  version info in configure.in, use in src/Makefile.am. - Enable compiler
+  warnings.  
+
+2000-06-15  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * configure.in, src/Makefile.am: Update libtool version number.  
+
+2000-06-14  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/eventloop.c, src/fcp.c, src/iso.c, src/main.c, src/readwrite.c,
+  src/testlibraw.c: Added copyright headers.  
+
+2000-06-11  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * configure.in: Added explicit AC_PROG_INSTALL call.  
+
+2000-06-09  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/kernel-raw1394.h: Fix size of error field.  
+
+2000-06-02  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * NEWS, configure.in, src/fcp.c, src/iso.c, src/kernel-raw1394.h, src/main.c,
+  src/readwrite.c: Modified support for 32/64 bit environments, control struct
+  fields have fixed size now.  
+
+2000-05-28  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * acconfig.h, configure.in, src/eventloop.c, src/fcp.c, src/iso.c,
+  src/kernel-raw1394.h, src/main.c, src/readwrite.c: Added support for
+  environments with 64 bit kernel and 32 bit userland.  
+
+2000-04-27  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/readwrite.c: Fixed missing setting of ext code in raw1394_start_lock() 
+
+2000-04-15  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * NEWS, src/raw1394.h, src/readwrite.c: Fixed lock transaction to actually
+  return response value.  
+
+2000-04-12  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * NEWS: Add userdata functions as news.  
+
+2000-04-05  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/main.c, src/raw1394.h, src/raw1394_private.h: Add userdata functions.  
+
+2000-03-18  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * Makefile.am, configure.in, debian/Makefile.am: Bump version number to 0.6. 
+
+  * NEWS: Mention byte order change.  
+
+  * README: Mention SourceForge home.  
+
+  * autogen.sh: Add script to generate Makefiles from bare CVS checkout.  
+
+2000-03-17  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/Makefile.am: Version++ and age++ for libtool version info.  
+
+2000-03-16  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * NEWS: - Added FCP monitoring entry - Added old 0.5 news  
+
+  * src/fcp.c, src/testlibraw.c: Added FCP monitoring test.  
+
+  * src/testlibraw.c: Use correct typedef in my_tag_handler().  
+
+  * src/raw1394.h: Fix spelign of raw1394_set_fcp_handler().  
+
+  * src/Makefile.am, src/eventloop.c, src/fcp.c, src/kernel-raw1394.h,
+  src/raw1394.h, src/raw1394_private.h: Added FCP listen functionality.  
+
+  * configure.in: Removed obsolete AC_PROG_RANLIB.  
+
+2000-03-12  aeb <aeb@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * COPYING.LIB: Ensure this ends up in distributions.  
+
+  * src/raw1394.h: Renamed 'new' args to 'new_h' for C++ compatibility.  
+
+2000-02-06  abombe <abombe@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * configure.in: Version changed to 0.5  
+
+  * src/raw1394.h, src/readwrite.c: Added lock transaction.  
+
+2000-02-04  abombe <abombe@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * configure.in, src/Makefile.am, src/eventloop.c, src/main.c, src/raw1394.h,
+  src/raw1394_private.h: Changed iso rcv handling to separate handlers per
+  channel.  
+
+2000-01-02  abombe <abombe@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * Makefile.am: Added dev target to Makefile  
+
+1999-12-29  abombe <abombe@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * NEWS, configure.in, src/Makefile.am, src/iso.c, src/kernel-raw1394.h,
+  src/main.c, src/raw1394.h, src/raw1394_private.h, src/readwrite.c: Added
+  isochronous I/O support  
+
+1999-12-18  abombe <abombe@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/csr.h: - Added FCP register addresses - Added #ifdef for multiple
+  inclusion  
+
+1999-12-15  abombe <abombe@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * src/raw1394.h: Added prototypes for async write functions  
+
+1999-12-02  abombe <abombe@53a565d1-3bb7-0310-b661-cf11e63c67ab>
+
+  * AUTHORS, INSTALL, Makefile.am, README, configure.in, debian/README,
+  src/Makefile.am, src/csr.h, src/eventloop.c, src/kernel-raw1394.h,
+  src/main.c, src/raw1394.h, src/raw1394_private.h, src/readwrite.c,
+  src/testlibraw.c: Initial revision  
