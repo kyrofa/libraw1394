@@ -1,5 +1,8 @@
 libraw1394 Release Notes
 
+Version 2.0.3:
+- various bug fixes, in particular for firewire stack
+
 Version 2.0.2:
 - Fixed license headers on new files introduced in v2.0.0 to be consistent
   with LGPL v2.1.
