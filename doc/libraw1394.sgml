@@ -1,13 +1,14 @@
-<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook V3.1//EN"[]>
-
+<!--
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook V3.1//EN">
+-->
 <book>
   <bookinfo>
 
     <title>libraw1394</title>
-    <subtitle>version 1.2.0</subtitle>
+    <subtitle>version 2.0.4</subtitle>
 
     <copyright>
-      <year>2001-2004</year>
+      <year>2001-2009</year>
       <holder>Andreas Bombe, Dan Maas, Manfred Weihs, and Christian Toegel</holder>
     </copyright>
 
@@ -890,14 +891,21 @@
   <chapter id="functions">
     <title>Function Reference</title>
 
-<refentry>
+<refentry id="API-raw1394-iso-xmit-init">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-iso-xmit-init">raw1394_iso_xmit_init</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_iso_xmit_init</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_iso_xmit_init</refname>
  <refpurpose>
-   initialize isochronous transmission
+  initialize isochronous transmission
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -920,7 +928,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -928,7 +936,7 @@
    <term><parameter>handler</parameter></term>
    <listitem>
     <para>
-      handler function for queueing packets
+     handler function for queueing packets
     </para>
    </listitem>
   </varlistentry>
@@ -936,7 +944,7 @@
    <term><parameter>buf_packets</parameter></term>
    <listitem>
     <para>
-      number of isochronous packets to buffer
+     number of isochronous packets to buffer
     </para>
    </listitem>
   </varlistentry>
@@ -944,7 +952,7 @@
    <term><parameter>max_packet_size</parameter></term>
    <listitem>
     <para>
-      largest packet you need to handle, in bytes
+     largest packet you need to handle, in bytes
      (not including the isochronous header)
     </para>
    </listitem>
@@ -953,7 +961,7 @@
    <term><parameter>channel</parameter></term>
    <listitem>
     <para>
-      isochronous channel on which to transmit
+     isochronous channel on which to transmit
     </para>
    </listitem>
   </varlistentry>
@@ -961,7 +969,7 @@
    <term><parameter>speed</parameter></term>
    <listitem>
     <para>
-      speed at which to transmit
+     speed at which to transmit
     </para>
    </listitem>
   </varlistentry>
@@ -969,34 +977,42 @@
    <term><parameter>irq_interval</parameter></term>
    <listitem>
     <para>
-      maximum latency of wake-ups, in packets (-1 if you don't care)
+     maximum latency of wake-ups, in packets (-1 if you don't care)
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    Allocates all user and kernel resources necessary for isochronous transmission.
- </para>
+   Channel and bandwidth allocation at the IRM is not performed.
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-iso-recv-init">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-iso-recv-init">raw1394_iso_recv_init</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_iso_recv_init</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_iso_recv_init</refname>
  <refpurpose>
-      initialize isochronous reception
+     initialize isochronous reception
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -1019,7 +1035,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -1027,7 +1043,7 @@
    <term><parameter>handler</parameter></term>
    <listitem>
     <para>
-      handler function for receiving packets
+     handler function for receiving packets
     </para>
    </listitem>
   </varlistentry>
@@ -1035,7 +1051,7 @@
    <term><parameter>buf_packets</parameter></term>
    <listitem>
     <para>
-      number of isochronous packets to buffer
+     number of isochronous packets to buffer
     </para>
    </listitem>
   </varlistentry>
@@ -1043,7 +1059,7 @@
    <term><parameter>max_packet_size</parameter></term>
    <listitem>
     <para>
-      largest packet you need to handle, in bytes (not including
+     largest packet you need to handle, in bytes (not including
      the isochronous header)
     </para>
    </listitem>
@@ -1052,7 +1068,7 @@
    <term><parameter>channel</parameter></term>
    <listitem>
     <para>
-      isochronous channel to receive
+     isochronous channel to receive
     </para>
    </listitem>
   </varlistentry>
@@ -1060,7 +1076,7 @@
    <term><parameter>mode</parameter></term>
    <listitem>
     <para>
-      bufferfill or packet per buffer mode
+     bufferfill or packet per buffer mode
     </para>
    </listitem>
   </varlistentry>
@@ -1068,7 +1084,7 @@
    <term><parameter>irq_interval</parameter></term>
    <listitem>
     <para>
-      maximum latency of wake-ups, in packets
+     maximum latency of wake-ups, in packets
      (-1 if you don't care)
     </para>
    </listitem>
@@ -1076,27 +1092,34 @@
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    Allocates all user and kernel resources necessary for isochronous reception.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-iso-multichannel-recv-init">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-iso-multichannel-recv-init">raw1394_iso_multichannel_recv_init</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_iso_multichannel_recv_init</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_iso_multichannel_recv_init</refname>
  <refpurpose>
-      initialize multi-channel iso reception
+     initialize multi-channel iso reception
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -1117,7 +1140,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -1125,7 +1148,7 @@
    <term><parameter>handler</parameter></term>
    <listitem>
     <para>
-      handler function for receiving packets
+     handler function for receiving packets
     </para>
    </listitem>
   </varlistentry>
@@ -1133,7 +1156,7 @@
    <term><parameter>buf_packets</parameter></term>
    <listitem>
     <para>
-      number of isochronous packets to buffer
+     number of isochronous packets to buffer
     </para>
    </listitem>
   </varlistentry>
@@ -1141,7 +1164,7 @@
    <term><parameter>max_packet_size</parameter></term>
    <listitem>
     <para>
-      largest packet you need to handle, in bytes (not including
+     largest packet you need to handle, in bytes (not including
      the isochronous header)
     </para>
    </listitem>
@@ -1150,34 +1173,41 @@
    <term><parameter>irq_interval</parameter></term>
    <listitem>
     <para>
-      maximum latency of wake-ups, in packets (-1 if you don't care)
+     maximum latency of wake-ups, in packets (-1 if you don't care)
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    Allocates all user and kernel resources necessary for isochronous reception.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-iso-recv-listen-channel">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-iso-recv-listen-channel">raw1394_iso_recv_listen_channel</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_iso_recv_listen_channel</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_iso_recv_listen_channel</refname>
  <refpurpose>
-      listen to a specific channel in multi-channel mode
+     listen to a specific channel in multi-channel mode
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -1195,7 +1225,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -1203,34 +1233,41 @@
    <term><parameter>channel</parameter></term>
    <listitem>
     <para>
-      the channel to start listening
+     the channel to start listening
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    listen/unlisten on a specific channel (multi-channel mode ONLY)
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-iso-recv-unlisten-channel">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-iso-recv-unlisten-channel">raw1394_iso_recv_unlisten_channel</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_iso_recv_unlisten_channel</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_iso_recv_unlisten_channel</refname>
  <refpurpose>
-      stop listening  to a specific channel in multi-channel mode
+     stop listening  to a specific channel in multi-channel mode
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -1248,7 +1285,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -1256,28 +1293,35 @@
    <term><parameter>channel</parameter></term>
    <listitem>
     <para>
-      the channel to stop listening to
+     the channel to stop listening to
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-iso-recv-set-channel-mask">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-iso-recv-set-channel-mask">raw1394_iso_recv_set_channel_mask</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_iso_recv_set_channel_mask</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_iso_recv_set_channel_mask</refname>
  <refpurpose>
-      listen or unlisten to a whole bunch of channels at once
+     listen or unlisten to a whole bunch of channels at once
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -1295,7 +1339,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -1303,7 +1347,7 @@
    <term><parameter>mask</parameter></term>
    <listitem>
     <para>
-      64-bit mask of channels, 1 means listen, 0 means unlisten,
+     64-bit mask of channels, 1 means listen, 0 means unlisten,
      channel 0 is LSB, channel 63 is MSB
     </para>
    </listitem>
@@ -1311,27 +1355,34 @@
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    for multi-channel reception mode only
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success, -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success, -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-iso-xmit-start">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-iso-xmit-start">raw1394_iso_xmit_start</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_iso_xmit_start</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_iso_xmit_start</refname>
  <refpurpose>
-      begin isochronous transmission
+     begin isochronous transmission
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -1350,7 +1401,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -1358,7 +1409,7 @@
    <term><parameter>start_on_cycle</parameter></term>
    <listitem>
     <para>
-      isochronous cycle number on which to start 
+     isochronous cycle number on which to start 
      (-1 if you don't care)
     </para>
    </listitem>
@@ -1367,7 +1418,7 @@
    <term><parameter>prebuffer_packets</parameter></term>
    <listitem>
     <para>
-      number of packets to queue up before starting transmission
+     number of packets to queue up before starting transmission
      (-1 if you don't care)
     </para>
    </listitem>
@@ -1375,21 +1426,28 @@
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-iso-recv-start">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-iso-recv-start">raw1394_iso_recv_start</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_iso_recv_start</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_iso_recv_start</refname>
  <refpurpose>
-      begin isochronous reception
+     begin isochronous reception
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -1409,7 +1467,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -1417,7 +1475,7 @@
    <term><parameter>start_on_cycle</parameter></term>
    <listitem>
     <para>
-      isochronous cycle number on which to start 
+     isochronous cycle number on which to start 
      (-1 if you don't care)
     </para>
    </listitem>
@@ -1426,7 +1484,7 @@
    <term><parameter>tag_mask</parameter></term>
    <listitem>
     <para>
-      mask of tag fields to match (-1 to receive all packets)
+     mask of tag fields to match (-1 to receive all packets)
     </para>
    </listitem>
   </varlistentry>
@@ -1434,28 +1492,35 @@
    <term><parameter>sync</parameter></term>
    <listitem>
     <para>
-      not used, reserved for future implementation
+     not used, reserved for future implementation
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-iso-xmit-write">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-iso-xmit-write">raw1394_iso_xmit_write</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_iso_xmit_write</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_iso_xmit_write</refname>
  <refpurpose>
-      alternative blocking-write API for ISO transmission
+     alternative blocking-write API for ISO transmission
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -1476,7 +1541,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -1484,7 +1549,7 @@
    <term><parameter>data</parameter></term>
    <listitem>
     <para>
-      pointer to packet data buffer
+     pointer to packet data buffer
     </para>
    </listitem>
   </varlistentry>
@@ -1492,7 +1557,7 @@
    <term><parameter>len</parameter></term>
    <listitem>
     <para>
-      length of packet, in bytes
+     length of packet, in bytes
     </para>
    </listitem>
   </varlistentry>
@@ -1500,7 +1565,7 @@
    <term><parameter>tag</parameter></term>
    <listitem>
     <para>
-      tag field
+     tag field
     </para>
    </listitem>
   </varlistentry>
@@ -1508,37 +1573,44 @@
    <term><parameter>sy</parameter></term>
    <listitem>
     <para>
-      sync field
+     sync field
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    <function>write</function> style API - do NOT use this if you have set an xmit_handler
    if buffer is full, waits for more space UNLESS the file descriptor is
    set to non-blocking, in which case <function>xmit_write</function> will return -1 with
    errno = EAGAIN
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-iso-xmit-sync">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-iso-xmit-sync">raw1394_iso_xmit_sync</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_iso_xmit_sync</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_iso_xmit_sync</refname>
  <refpurpose>
-      wait until all queued packets have been sent
+     wait until all queued packets have been sent
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -1555,28 +1627,35 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-iso-recv-flush">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-iso-recv-flush">raw1394_iso_recv_flush</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_iso_recv_flush</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_iso_recv_flush</refname>
  <refpurpose>
-      flush all already received iso packets from kernel into user space
+     flush all already received iso packets from kernel into user space
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -1593,15 +1672,15 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    If you specified an irq_interval &gt; 1 in
    iso_recv_init, you won't be notified for every single iso packet, but
    for groups of them. Now e.g. if irq_interval is 100, and you were just
@@ -1610,24 +1689,31 @@
    that there should be more packets at this moment, you can call this
    function and all iso packets which are already received by the kernel
    will be flushed out to user space.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-iso-stop">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-iso-stop">raw1394_iso_stop</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_iso_stop</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_iso_stop</refname>
  <refpurpose>
-      halt isochronous transmission or reception
+     halt isochronous transmission or reception
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -1644,7 +1730,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -1652,14 +1738,21 @@
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-iso-shutdown">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-iso-shutdown">raw1394_iso_shutdown</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_iso_shutdown</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_iso_shutdown</refname>
  <refpurpose>
-      clean up and deallocate all resources for isochronous transmission or reception
+     clean up and deallocate all resources for isochronous transmission or reception
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -1676,7 +1769,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -1684,14 +1777,97 @@
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-read-cycle-timer">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-get-errcode">raw1394_get_errcode</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_read_cycle_timer</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_read_cycle_timer</refname>
+ <refpurpose>
+     get the current value of the cycle timer
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_read_cycle_timer </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>u_int32_t * <parameter>cycle_timer</parameter></paramdef>
+   <paramdef>u_int64_t * <parameter>local_time</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+     libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>cycle_timer</parameter></term>
+   <listitem>
+    <para>
+     buffer for Isochronous Cycle Timer
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>local_time</parameter></term>
+   <listitem>
+    <para>
+     buffer for local system time in microseconds since Epoch
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+<title>Description</title>
+<para>
+   Simultaneously reads the cycle timer register together with the system clock.
+   </para><para>
+
+   Format of <parameter>cycle_timer</parameter>, from MSB to LSB: 7 bits cycleSeconds (seconds, or
+   number of cycleCount rollovers), 13 bits cycleCount (isochronous cycles, or
+   cycleOffset rollovers), 12 bits cycleOffset (24.576 MHz clock ticks, not
+   provided on some hardware). The union of cycleSeconds and cycleCount is the
+   current cycle number. The nominal duration of a cycle is 125 microseconds.
+</para>
+</refsect1>
+<refsect1>
+<title>Returns</title>
+<para>
+   the error code of the ioctl, or 0 if successful.
+</para>
+</refsect1>
+</refentry>
+
+<refentry id="API-raw1394-get-errcode">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
+<refmeta>
+ <refentrytitle><phrase>raw1394_get_errcode</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_get_errcode</refname>
  <refpurpose>
-      return error code of async transaction
+     return error code of async transaction
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -1708,39 +1884,46 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    Some macros are available to extract information from the error code,
    <function>raw1394_errcode_to_errno</function> can be used to convert it to an errno number of
    roughly the same meaning.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    the error code of the last <function>raw1394_read</function>, <function>raw1394_write</function>,
+<title>Returns</title>
+<para>
+   the error code of the last <function>raw1394_read</function>, <function>raw1394_write</function>,
    <function>raw1394_lock</function>.  The error code is either an internal
    error (i.e. not a bus error) or a combination of acknowledge code and
    response code, as appropriate.
- </para>
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-errcode-to-errno">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-errcode-to-errno">raw1394_errcode_to_errno</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_errcode_to_errno</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_errcode_to_errno</refname>
  <refpurpose>
-      convert libraw1394 errcode to errno
+     convert libraw1394 errcode to errno
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -1757,15 +1940,15 @@
    <term><parameter>errcode</parameter></term>
    <listitem>
     <para>
-      the error code to convert
+     the error code to convert
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    The error code as retrieved by <function>raw1394_get_errcode</function> is converted into a
    roughly equivalent errno number and returned.  <constant>0xdead</constant> is returned for an
    illegal errcode.
@@ -1776,27 +1959,34 @@
    the conversion.  However the returned errnos are equivalent in source code
    meaning only, the associated text of e.g. <function>perror</function> is not necessarily
    meaningful.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    <constant>EAGAIN</constant> (retrying might succeed, also generation number
+<title>Returns</title>
+<para>
+   <constant>EAGAIN</constant> (retrying might succeed, also generation number
    mismatch), <constant>EREMOTEIO</constant> (other node had internal problems), <constant>EPERM</constant> (operation
    not allowed on this address, e.g. write on read-only location), <constant>EINVAL</constant>
    (invalid argument) and <constant>EFAULT</constant> (invalid pointer).
- </para>
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-new-handle">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-new-handle">raw1394_new_handle</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_new_handle</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_new_handle</refname>
  <refpurpose>
-      create new handle
+     create new handle
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -1820,34 +2010,47 @@
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    </para><para>
 
    Creates and returns a new handle which can (after being set up) control one
    port.  It is not allowed to use the same handle in multiple threads or forked
    processes.  It is allowed to create and use multiple handles, however.  Use
    one handle per thread which needs it in the multithreaded case.
- </para>
+   </para><para>
+
+   The default device node is /dev/raw1394, but one can override the default
+   by setting environment variable RAW1394DEV. However, if RAW1394DEV points to
+   a non-existant or invalid device node, then it also attempts to open the
+   default device node.
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    the created handle or <constant>NULL</constant> when initialization fails. In the latter
-   case errno either contains some OS specific error code or <constant>0</constant> if the error is
-   that libraw1394 and raw1394 don't support each other's protocol versions.
- </para>
+<title>Returns</title>
+<para>
+   the created handle or <constant>NULL</constant> when initialization fails. In the latter
+   case errno either contains some OS specific error code or EPROTO if
+   libraw1394 and raw1394 don't support each other's protocol versions.
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-destroy-handle">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-destroy-handle">raw1394_destroy_handle</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_destroy_handle</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_destroy_handle</refname>
  <refpurpose>
-      deallocate handle
+     deallocate handle
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -1864,30 +2067,37 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      handle to deallocate
+     handle to deallocate
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    Closes connection with raw1394 on this handle and deallocates everything
    associated with it.  It is safe to pass <constant>NULL</constant> as handle, nothing is done in
    this case.
- </para>
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-new-handle-on-port">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-new-handle-on-port">raw1394_new_handle_on_port</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_new_handle_on_port</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_new_handle_on_port</refname>
  <refpurpose>
-      create a new handle and bind it to a port
+     create a new handle and bind it to a port
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -1904,38 +2114,51 @@
    <term><parameter>port</parameter></term>
    <listitem>
     <para>
-      port to connect to (same as argument to <function>raw1394_set_port</function>)
+     port to connect to (same as argument to <function>raw1394_set_port</function>)
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    Same as <function>raw1394_new_handle</function>, but also binds the handle to the
    specified 1394 port. Equivalent to <function>raw1394_new_handle</function> followed by
    <function>raw1394_get_port_info</function> and <function>raw1394_set_port</function>. Useful for
    command-line programs that already know what port they want. If
    <function>raw1394_set_port</function> returns ESTALE, retries automatically.
- </para>
+   </para><para>
+
+   The default device node is /dev/raw1394, but one can override the default
+   by setting environment variable RAW1394DEV. However, if RAW1394DEV points to
+   a non-existant or invalid device node, then it also attempts to open the
+   default device node.
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    the new handle on success or NULL on failure
- </para>
+<title>Returns</title>
+<para>
+   the new handle on success or NULL on failure
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-busreset-notify">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-busreset-notify">raw1394_busreset_notify</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_busreset_notify</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_busreset_notify</refname>
  <refpurpose>
-      Switch off/on busreset-notification for handle
+     Switch off/on busreset-notification for handle
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -1953,7 +2176,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -1961,28 +2184,35 @@
    <term><parameter>off_on_switch</parameter></term>
    <listitem>
     <para>
-      RAW1394_NOTIFY_OFF or RAW1394_NOTIFY_ON
+     RAW1394_NOTIFY_OFF or RAW1394_NOTIFY_ON
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-get-fd">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-get-fd">raw1394_get_fd</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_get_fd</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_get_fd</refname>
  <refpurpose>
-      get the communication file descriptor
+     get the communication file descriptor
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -1999,38 +2229,46 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    This can be used for <function>select</function>/<function>poll</function> calls if you wait on other fds or can be
    integrated into another event loop (e.g. from a GUI application framework).
    It can also be used to set/remove the O_NONBLOCK flag using <function>fcntl</function> to modify
    the blocking behaviour in <function>raw1394_loop_iterate</function>.  It must not be used for
    anything else.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    the fd used for communication with the raw1394 kernel module.
- </para>
+<title>Returns</title>
+<para>
+   the fd used for communication with the raw1394 kernel module or -1
+   on failure (sets errno).
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-set-userdata">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-set-userdata">raw1394_set_userdata</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_set_userdata</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_set_userdata</refname>
  <refpurpose>
-      associate user data with a handle
+     associate user data with a handle
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -2048,7 +2286,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -2056,31 +2294,38 @@
    <term><parameter>data</parameter></term>
    <listitem>
     <para>
-      user data (pointer)
+     user data (pointer)
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    Allows to associate one void pointer with a handle.  libraw1394 does not care
    about the data, it just stores it in the handle allowing it to be retrieved
    at any time with <function>raw1394_get_userdata</function>.  This can be useful when multiple
    handles are used, so that callbacks can identify the handle.
- </para>
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-get-userdata">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-get-userdata">raw1394_get_userdata</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_get_userdata</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_get_userdata</refname>
  <refpurpose>
-      retrieve user data from handle
+     retrieve user data from handle
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -2097,29 +2342,36 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    the user data pointer associated with the handle using
+<title>Returns</title>
+<para>
+   the user data pointer associated with the handle using
    <function>raw1394_set_userdata</function>.
- </para>
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-get-local-id">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-get-local-id">raw1394_get_local_id</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_get_local_id</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_get_local_id</refname>
  <refpurpose>
-      get node ID of the current port
+     get node ID of the current port
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -2136,29 +2388,36 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    the node ID of the local node connected to which the handle is
+<title>Returns</title>
+<para>
+   the node ID of the local node connected to which the handle is
    connected.  This value can change with every bus reset.
- </para>
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-get-irm-id">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-get-irm-id">raw1394_get_irm_id</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_get_irm_id</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_get_irm_id</refname>
  <refpurpose>
-      get node ID of isochronous resource manager
+     get node ID of isochronous resource manager
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -2175,29 +2434,36 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    the node ID of the isochronous resource manager of the bus the handle
+<title>Returns</title>
+<para>
+   the node ID of the isochronous resource manager of the bus the handle
    is connected to.  This value may change with every bus reset.
- </para>
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-get-nodecount">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-get-nodecount">raw1394_get_nodecount</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_get_nodecount</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_get_nodecount</refname>
  <refpurpose>
-      get number of nodes on the bus
+     get number of nodes on the bus
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -2214,37 +2480,44 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    Since the root node always has
    the highest node ID, this number can be used to determine that ID (it's
    LOCAL_BUS|(count-1)).
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    the number of nodes on the bus to which the handle is connected.
+<title>Returns</title>
+<para>
+   the number of nodes on the bus to which the handle is connected.
    This value can change with every bus reset.
- </para>
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-get-port-info">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-get-port-info">raw1394_get_port_info</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_get_port_info</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_get_port_info</refname>
  <refpurpose>
-      get information about available ports
+     get information about available ports
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -2263,7 +2536,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -2271,7 +2544,7 @@
    <term><parameter>pinf</parameter></term>
    <listitem>
     <para>
-      pointer to an array of struct raw1394_portinfo
+     pointer to an array of struct raw1394_portinfo
     </para>
    </listitem>
   </varlistentry>
@@ -2279,15 +2552,15 @@
    <term><parameter>maxports</parameter></term>
    <listitem>
     <para>
-      number of elements in <parameter>pinf</parameter>
+     number of elements in <parameter>pinf</parameter>
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    Before you can set which port to use, you have to use this function to find
    out which ports exist.
    </para><para>
@@ -2297,25 +2570,32 @@
    non-interactive program (and probably interactive ones, too) should provide a
    command line option to choose the port. If <parameter>maxports</parameter> is <constant>0</constant>, <parameter>pinf</parameter> can be
    <constant>NULL</constant>, too.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    the number of ports and writes information about them into <parameter>pinf</parameter>, but
+<title>Returns</title>
+<para>
+   the number of ports and writes information about them into <parameter>pinf</parameter>, but
    not into more than <parameter>maxports</parameter> elements.
- </para>
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-set-port">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-set-port">raw1394_set_port</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_set_port</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_set_port</refname>
  <refpurpose>
-      choose port for handle
+     choose port for handle
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -2333,7 +2613,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -2341,41 +2621,48 @@
    <term><parameter>port</parameter></term>
    <listitem>
     <para>
-      port to connect to (corresponds to index of struct raw1394_portinfo)
+     port to connect to (corresponds to index of struct raw1394_portinfo)
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    This function connects the handle to the port given (as queried with
    <function>raw1394_get_port_info</function>).  If successful, <function>raw1394_get_port_info</function> and
    <function>raw1394_set_port</function> are not allowed to be called afterwards on this handle.
    To make up for this, all the other functions (those handling asynchronous and
    isochronous transmissions) can now be called.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    <constant>0</constant> for success or -1 for failure with errno set appropriately.  A
+<title>Returns</title>
+<para>
+   <constant>0</constant> for success or -1 for failure with errno set appropriately.  A
    possible failure mode is with errno = <constant>ESTALE</constant>, in this case the configuration
    has changed since the call to <function>raw1394_get_port_info</function> and it has to be called
    again to update your view of the available ports.
- </para>
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-reset-bus">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-reset-bus">raw1394_reset_bus</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_reset_bus</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_reset_bus</refname>
  <refpurpose>
-      initiate bus reset
+     initiate bus reset
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -2392,36 +2679,43 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    This function initiates a bus reset on the connected port.  Usually this is
    not necessary and should be avoided, this function is here for low level bus
    control and debugging.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    <constant>0</constant> for success or -1 for failure with errno set appropriately
- </para>
+<title>Returns</title>
+<para>
+   <constant>0</constant> for success or -1 for failure with errno set appropriately
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-reset-bus-new">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-reset-bus-new">raw1394_reset_bus_new</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_reset_bus_new</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_reset_bus_new</refname>
  <refpurpose>
-      Reset the connected bus (with certain type). 
+     Reset the connected bus (with certain type).
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -2439,7 +2733,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -2447,28 +2741,35 @@
    <term><parameter>type</parameter></term>
    <listitem>
     <para>
-      RAW1394_SHORT_RESET or RAW1394_LONG_RESET
+     RAW1394_SHORT_RESET or RAW1394_LONG_RESET
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    <constant>0</constant> for success or -1 for failure 
- </para>
+<title>Returns</title>
+<para>
+   <constant>0</constant> for success or -1 for failure 
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-loop-iterate">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-loop-iterate">raw1394_loop_iterate</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_loop_iterate</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_loop_iterate</refname>
  <refpurpose>
-      get and process one event message
+     get and process one event message
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -2485,38 +2786,45 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    Get one new message through handle and process it with the registered message
    handler. Note that some other library functions may call this function 
    multiple times to wait for their completion, some handler return values may 
    get lost if you use these.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    <constant>-1</constant> for an error or the return value of
+<title>Returns</title>
+<para>
+   <constant>-1</constant> for an error or the return value of
    the handler which got executed. The default handlers always return zero.
- </para>
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-set-bus-reset-handler">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-set-bus-reset-handler">raw1394_set_bus_reset_handler</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_set_bus_reset_handler</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_set_bus_reset_handler</refname>
  <refpurpose>
-      set bus reset handler
+     set bus reset handler
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -2534,7 +2842,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -2542,35 +2850,42 @@
    <term><parameter>new_h</parameter></term>
    <listitem>
     <para>
-      pointer to new handler
+     pointer to new handler
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    Sets the handler to be called on every bus reset to <parameter>new_h</parameter>.
    The default handler just calls <function>raw1394_update_generation</function>.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    the old handler
- </para>
+<title>Returns</title>
+<para>
+   the old handler or NULL on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-get-generation">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-get-generation">raw1394_get_generation</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_get_generation</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_get_generation</refname>
  <refpurpose>
-      get generation number of handle
+     get generation number of handle
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -2587,38 +2902,46 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    The generation number is incremented on every bus reset, and every transaction
    started by raw1394 is tagged with the stored generation number.  If these
    don't match, the transaction will abort with an error.
    The generation number of the handle is not automatically updated,
    <function>raw1394_update_generation</function> has to be used for this.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    the generation number associated with the handle 
- </para>
+<title>Returns</title>
+<para>
+   the generation number associated with the handle or UINT_MAX on
+   failure.
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-update-generation">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-update-generation">raw1394_update_generation</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_update_generation</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_update_generation</refname>
  <refpurpose>
-      set generation number of handle
+     set generation number of handle
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -2636,7 +2959,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -2644,15 +2967,15 @@
    <term><parameter>generation</parameter></term>
    <listitem>
     <para>
-      new generation number
+     new generation number
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    This function sets the generation number of the handle to <parameter>gen</parameter>.  All requests
    that apply to a single node ID are tagged with this number and abort with an
    error if that is different from the generation number kept in the kernel.
@@ -2661,18 +2984,25 @@
    </para><para>
 
    You should call this within your bus reset handler with an incremented value.
- </para>
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-set-tag-handler">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-set-tag-handler">raw1394_set_tag_handler</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_set_tag_handler</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_set_tag_handler</refname>
  <refpurpose>
-      set request completion handler
+     set request completion handler
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -2690,7 +3020,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -2698,42 +3028,49 @@
    <term><parameter>new_h</parameter></term>
    <listitem>
     <para>
-      pointer to new handler
+     pointer to new handler
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    Sets the handler to be called whenever a request completes to <parameter>new_h</parameter>.
    The default handler interprets the tag as a pointer
-   to a &amp;struct raw1394_reqhandle and calls the callback in there.
+   to a <structname>struct raw1394_reqhandle</structname> and calls the callback in there.
    </para><para>
 
    Care must be taken when replacing the tag handler and calling the synchronous
    versions of the transaction functions (i.e. <function>raw1394_read</function>, <function>raw1394_write</function>,
-   <function>raw1394_lock</function>) since these do pass pointers to &amp;struct
-   raw1394_reqhandle as the tag and expect the callback to be invoked.
- </para>
+   <function>raw1394_lock</function>) since these do pass pointers to <structname>struct
+   raw1394_reqhandle</structname> as the tag and expect the callback to be invoked.
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    the old handler
- </para>
+<title>Returns</title>
+<para>
+   the old handler or NULL on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-set-arm-tag-handler">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-set-arm-tag-handler">raw1394_set_arm_tag_handler</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_set_arm_tag_handler</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_set_arm_tag_handler</refname>
  <refpurpose>
-      set the async request handler
+     set the async request handler
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -2751,7 +3088,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -2759,36 +3096,43 @@
    <term><parameter>new_h</parameter></term>
    <listitem>
     <para>
-      pointer to new handler
+     pointer to new handler
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    Set the handler that will be called when an async read/write/lock arm_request
    arrived. The default action is to call the arm_callback in the 
    raw1394_arm_reqhandle pointed to by arm_tag.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    old handler
- </para>
+<title>Returns</title>
+<para>
+   old handler or NULL on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-set-fcp-handler">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-set-fcp-handler">raw1394_set_fcp_handler</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_set_fcp_handler</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_set_fcp_handler</refname>
  <refpurpose>
-      set FCP handler
+     set FCP handler
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -2806,7 +3150,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -2814,15 +3158,15 @@
    <term><parameter>new_h</parameter></term>
    <listitem>
     <para>
-      pointer to new handler
+     pointer to new handler
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    Function Control Protocol is defined in IEC 61883-1.
    </para><para>
 
@@ -2830,31 +3174,38 @@
    registers get written to <parameter>new_h</parameter>.  The default handler does nothing.
    In order to actually get FCP events, you have to enable it with
    <function>raw1394_start_fcp_listen</function> and can stop it with <function>raw1394_stop_fcp_listen</function>.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    the old handler
- </para>
+<title>Returns</title>
+<para>
+   the old handler or NULL on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-int">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-int">int</phrase></refentrytitle>
+ <refentrytitle><phrase>int</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>int</refname>
  <refpurpose>
-      This is the general request handler
+     This is the general request handler
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
  <title>Synopsis</title>
   <funcsynopsis><funcprototype>
    <funcdef>typedef <function>int </function></funcdef>
-   <paramdef>* <parameter>req_callback_t</parameter></paramdef>
+   <paramdef> * <parameter>req_callback_t</parameter></paramdef>
   </funcprototype></funcsynopsis>
 </refsynopsisdiv>
 <refsect1>
@@ -2864,37 +3215,44 @@
    <term><parameter>req_callback_t</parameter></term>
    <listitem>
     <para>
-      This is the general request handler
+     This is the general request handler
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    It is used by the default tag handler
    when a request completes, it calls the callback and passes it the data
    pointer and the error code of the request.
- </para>
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-int">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-int">int</phrase></refentrytitle>
+ <refentrytitle><phrase>int</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>int</refname>
  <refpurpose>
-      This is the general arm-request handle
+     This is the general arm-request handle
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
  <title>Synopsis</title>
   <funcsynopsis><funcprototype>
    <funcdef>typedef <function>int </function></funcdef>
-   <paramdef>* <parameter>arm_req_callback_t</parameter></paramdef>
+   <paramdef> * <parameter>arm_req_callback_t</parameter></paramdef>
   </funcprototype></funcsynopsis>
 </refsynopsisdiv>
 <refsect1>
@@ -2904,30 +3262,37 @@
    <term><parameter>arm_req_callback_t</parameter></term>
    <listitem>
     <para>
-      This is the general arm-request handle
+     This is the general arm-request handle
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    (arm = address range mapping)
    It is used by the default arm-tag handler when a request has been 
    received, it calls the arm_callback.
- </para>
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-arm-register">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-arm-register">raw1394_arm_register</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_arm_register</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_arm_register</refname>
  <refpurpose>
-      register an AddressRangeMapping
+     register an AddressRangeMapping
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -2951,7 +3316,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -2959,7 +3324,7 @@
    <term><parameter>start</parameter></term>
    <listitem>
     <para>
-                 identifies addressrange
+     identifies addressrange
     </para>
    </listitem>
   </varlistentry>
@@ -2967,7 +3332,7 @@
    <term><parameter>length</parameter></term>
    <listitem>
     <para>
-                identifies addressrange
+     identifies addressrange
     </para>
    </listitem>
   </varlistentry>
@@ -2975,7 +3340,7 @@
    <term><parameter>initial_value</parameter></term>
    <listitem>
     <para>
-         pointer to buffer containing (if necessary) initial value
+     pointer to buffer containing (if necessary) initial value
      NULL means undefined
     </para>
    </listitem>
@@ -2984,7 +3349,7 @@
    <term><parameter>arm_tag</parameter></term>
    <listitem>
     <para>
-               identifier for arm_tag_handler 
+     identifier for arm_tag_handler 
      (usually pointer to raw1394_arm_reqhandle)
     </para>
    </listitem>
@@ -2993,7 +3358,7 @@
    <term><parameter>access_rights</parameter></term>
    <listitem>
     <para>
-         access-rights for registered addressrange handled 
+     access-rights for registered addressrange handled 
      by kernel-part. Value is one or more binary or of the 
      following flags - ARM_READ, ARM_WRITE, ARM_LOCK
     </para>
@@ -3003,7 +3368,7 @@
    <term><parameter>notification_options</parameter></term>
    <listitem>
     <para>
-      identifies for which type of request you want
+     identifies for which type of request you want
      to be notified. Value is one or more binary or of the 
      following flags - ARM_READ, ARM_WRITE, ARM_LOCK
     </para>
@@ -3013,7 +3378,7 @@
    <term><parameter>client_transactions</parameter></term>
    <listitem>
     <para>
-      identifies for which type of request you want
+     identifies for which type of request you want
      to handle the request by the client application.
      for those requests no response will be generated, but
      has to be generated by the application.
@@ -3027,27 +3392,34 @@
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    ARM = Adress Range Mapping
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-arm-unregister">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-arm-unregister">raw1394_arm_unregister</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_arm_unregister</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_arm_unregister</refname>
  <refpurpose>
-      unregister an AddressRangeMapping
+     unregister an AddressRangeMapping
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -3065,7 +3437,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -3073,7 +3445,7 @@
    <term><parameter>start</parameter></term>
    <listitem>
     <para>
-                 identifies addressrange for unregistering 
+     identifies addressrange for unregistering 
      (value of start have to be the same value 
      used for registering this adressrange)
     </para>
@@ -3082,21 +3454,28 @@
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-arm-set-buf">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-arm-set-buf">raw1394_arm_set_buf</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_arm_set_buf</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_arm_set_buf</refname>
  <refpurpose>
-      set the buffer of an AdressRangeMapping
+     set the buffer of an AdressRangeMapping
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -3116,7 +3495,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -3124,7 +3503,7 @@
    <term><parameter>start</parameter></term>
    <listitem>
     <para>
-      identifies addressrange
+     identifies addressrange
     </para>
    </listitem>
   </varlistentry>
@@ -3132,7 +3511,7 @@
    <term><parameter>length</parameter></term>
    <listitem>
     <para>
-      identifies addressrange
+     identifies addressrange
     </para>
    </listitem>
   </varlistentry>
@@ -3140,36 +3519,43 @@
    <term><parameter>buf</parameter></term>
    <listitem>
     <para>
-      pointer to buffer
+     pointer to buffer
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    This function copies <parameter>length</parameter> bytes from user memory area <parameter>buf</parameter>
    to one ARM block in kernel memory area
    with start offset <parameter>start</parameter>.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-arm-get-buf">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-arm-get-buf">raw1394_arm_get_buf</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_arm_get_buf</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_arm_get_buf</refname>
  <refpurpose>
-      get the buffer of an AdressRangeMapping
+     get the buffer of an AdressRangeMapping
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -3189,7 +3575,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -3197,7 +3583,7 @@
    <term><parameter>start</parameter></term>
    <listitem>
     <para>
-      identifies addressrange
+     identifies addressrange
     </para>
    </listitem>
   </varlistentry>
@@ -3205,7 +3591,7 @@
    <term><parameter>length</parameter></term>
    <listitem>
     <para>
-      identifies addressrange
+     identifies addressrange
     </para>
    </listitem>
   </varlistentry>
@@ -3213,36 +3599,43 @@
    <term><parameter>buf</parameter></term>
    <listitem>
     <para>
-      pointer to buffer
+     pointer to buffer
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    This function copies <parameter>length</parameter> bytes from one
    ARM block in kernel memory area with start offset <parameter>start</parameter>
    to user memory area <parameter>buf</parameter>
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-echo-request">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-echo-request">raw1394_echo_request</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_echo_request</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_echo_request</refname>
  <refpurpose>
-      send an echo request to the driver
+     send an echo request to the driver
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -3260,7 +3653,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -3268,36 +3661,43 @@
    <term><parameter>data</parameter></term>
    <listitem>
     <para>
-                   arbitrary data; raw1394_loop_iterate will return it
+     arbitrary data; raw1394_loop_iterate will return it
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    the driver then send back the
    same request. raw1394_loop_iterate will return data as return value,
    when it processes the echo. 
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-wake-up">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-wake-up">raw1394_wake_up</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_wake_up</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_wake_up</refname>
  <refpurpose>
-      wake up raw1394_loop_iterate
+     wake up raw1394_loop_iterate
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -3314,35 +3714,42 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    (or a blocking read from the device
    file). actually this calls raw1394_echo_request with 0 as data. 
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-phy-packet-write">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-phy-packet-write">raw1394_phy_packet_write</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_phy_packet_write</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_phy_packet_write</refname>
  <refpurpose>
-      send physical request
+     send physical request
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -3360,7 +3767,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -3368,34 +3775,41 @@
    <term><parameter>data</parameter></term>
    <listitem>
     <para>
-      the contents of the packet
+     the contents of the packet
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    examples of physical requests are linkon, physicalconfigurationpacket, etc.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-start-phy-packet-write">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-start-phy-packet-write">raw1394_start_phy_packet_write</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_start_phy_packet_write</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_start_phy_packet_write</refname>
  <refpurpose>
-      initiate sending a physical request
+     initiate sending a physical request
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -3414,7 +3828,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -3422,7 +3836,7 @@
    <term><parameter>data</parameter></term>
    <listitem>
     <para>
-      the contents of the packet
+     the contents of the packet
     </para>
    </listitem>
   </varlistentry>
@@ -3430,34 +3844,41 @@
    <term><parameter>tag</parameter></term>
    <listitem>
     <para>
-      data to identify the request to completion handler
+     data to identify the request to completion handler
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    examples of physical requests are linkon, physicalconfigurationpacket, etc.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-start-read">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-start-read">raw1394_start_read</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_start_read</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_start_read</refname>
  <refpurpose>
-      initiate a read transaction
+     initiate a read transaction
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -3479,7 +3900,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -3487,7 +3908,7 @@
    <term><parameter>node</parameter></term>
    <listitem>
     <para>
-      target node
+     target node ID
     </para>
    </listitem>
   </varlistentry>
@@ -3495,7 +3916,7 @@
    <term><parameter>addr</parameter></term>
    <listitem>
     <para>
-      address to read from
+     address to read from
     </para>
    </listitem>
   </varlistentry>
@@ -3503,7 +3924,7 @@
    <term><parameter>length</parameter></term>
    <listitem>
     <para>
-      amount of data to read
+     amount of bytes of data to read
     </para>
    </listitem>
   </varlistentry>
@@ -3511,7 +3932,7 @@
    <term><parameter>buffer</parameter></term>
    <listitem>
     <para>
-      pointer to buffer where data will be saved
+     pointer to buffer where data will be saved
     </para>
    </listitem>
   </varlistentry>
@@ -3519,15 +3940,15 @@
    <term><parameter>tag</parameter></term>
    <listitem>
     <para>
-      data to identify the request to completion handler
+     data to identify the request to completion handler
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    This function starts the specified read request. If
    <parameter>length</parameter> is <constant>4</constant> a quadlet read is initiated and a block read otherwise.
    </para><para>
@@ -3538,24 +3959,31 @@
    error code of the transaction.  <parameter>tag</parameter> should therefore be set to something
    that uniquely identifies this transaction (e.g. a struct pointer casted to
    unsigned long).
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-start-write">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-start-write">raw1394_start_write</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_start_write</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_start_write</refname>
  <refpurpose>
-      initiate a write transaction
+     initiate a write transaction
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -3577,7 +4005,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -3585,7 +4013,7 @@
    <term><parameter>node</parameter></term>
    <listitem>
     <para>
-      target node
+     target node ID
     </para>
    </listitem>
   </varlistentry>
@@ -3593,7 +4021,7 @@
    <term><parameter>addr</parameter></term>
    <listitem>
     <para>
-      address to write to
+     address to write to
     </para>
    </listitem>
   </varlistentry>
@@ -3601,7 +4029,7 @@
    <term><parameter>length</parameter></term>
    <listitem>
     <para>
-      amount of data to write
+     amount of bytes of data to write
     </para>
    </listitem>
   </varlistentry>
@@ -3609,7 +4037,7 @@
    <term><parameter>data</parameter></term>
    <listitem>
     <para>
-      pointer to data to be sent
+     pointer to data to be sent
     </para>
    </listitem>
   </varlistentry>
@@ -3617,15 +4045,15 @@
    <term><parameter>tag</parameter></term>
    <listitem>
     <para>
-      data to identify the request to completion handler
+     data to identify the request to completion handler
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    This function starts the specified write request. If
    <parameter>length</parameter> is <constant>4</constant> a quadlet write is initiated and a block write otherwise.
    </para><para>
@@ -3636,24 +4064,31 @@
    error code of the transaction.  <parameter>tag</parameter> should therefore be set to something
    that uniquely identifies this transaction (e.g. a struct pointer casted to
    unsigned long).
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-start-lock">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-start-lock">raw1394_start_lock</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_start_lock</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_start_lock</refname>
  <refpurpose>
-      initiate a 32-bit compare-swap lock transaction
+     initiate a 32-bit compare-swap lock transaction
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -3677,7 +4112,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -3685,7 +4120,7 @@
    <term><parameter>node</parameter></term>
    <listitem>
     <para>
-      target node
+     target node ID
     </para>
    </listitem>
   </varlistentry>
@@ -3693,7 +4128,7 @@
    <term><parameter>addr</parameter></term>
    <listitem>
     <para>
-      address to read from
+     address to read from
     </para>
    </listitem>
   </varlistentry>
@@ -3701,7 +4136,7 @@
    <term><parameter>extcode</parameter></term>
    <listitem>
     <para>
-      extended transaction code determining the lock operation
+     extended transaction code determining the lock operation
     </para>
    </listitem>
   </varlistentry>
@@ -3709,7 +4144,7 @@
    <term><parameter>data</parameter></term>
    <listitem>
     <para>
-      data part of lock parameters
+     data part of lock parameters
     </para>
    </listitem>
   </varlistentry>
@@ -3717,7 +4152,7 @@
    <term><parameter>arg</parameter></term>
    <listitem>
     <para>
-      arg part of lock parameters
+     arg part of lock parameters
     </para>
    </listitem>
   </varlistentry>
@@ -3725,7 +4160,7 @@
    <term><parameter>result</parameter></term>
    <listitem>
     <para>
-      address where return value will be written
+     address where return value will be written
     </para>
    </listitem>
   </varlistentry>
@@ -3733,15 +4168,15 @@
    <term><parameter>tag</parameter></term>
    <listitem>
     <para>
-      data to identify the request to completion handler
+     data to identify the request to completion handler
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    This function starts the specified lock request.
    The transaction is only started, no success of the transaction is implied
    with a successful return of this function.  When the transaction completes, a
@@ -3749,24 +4184,31 @@
    error code of the transaction.  <parameter>tag</parameter> should therefore be set to something
    that uniquely identifies this transaction (e.g. a struct pointer casted to
    unsigned long).
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-start-lock64">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-start-lock64">raw1394_start_lock64</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_start_lock64</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_start_lock64</refname>
  <refpurpose>
-      initiate a 64-bit compare-swap lock transaction
+     initiate a 64-bit compare-swap lock transaction
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -3790,7 +4232,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -3798,7 +4240,7 @@
    <term><parameter>node</parameter></term>
    <listitem>
     <para>
-      target node
+     target node ID
     </para>
    </listitem>
   </varlistentry>
@@ -3806,7 +4248,7 @@
    <term><parameter>addr</parameter></term>
    <listitem>
     <para>
-      address to read from
+     address to read from
     </para>
    </listitem>
   </varlistentry>
@@ -3814,7 +4256,7 @@
    <term><parameter>extcode</parameter></term>
    <listitem>
     <para>
-      extended transaction code determining the lock operation
+     extended transaction code determining the lock operation
     </para>
    </listitem>
   </varlistentry>
@@ -3822,7 +4264,7 @@
    <term><parameter>data</parameter></term>
    <listitem>
     <para>
-      data part of lock parameters
+     data part of lock parameters
     </para>
    </listitem>
   </varlistentry>
@@ -3830,7 +4272,7 @@
    <term><parameter>arg</parameter></term>
    <listitem>
     <para>
-      arg part of lock parameters
+     arg part of lock parameters
     </para>
    </listitem>
   </varlistentry>
@@ -3838,7 +4280,7 @@
    <term><parameter>result</parameter></term>
    <listitem>
     <para>
-      address where return value will be written
+     address where return value will be written
     </para>
    </listitem>
   </varlistentry>
@@ -3846,15 +4288,15 @@
    <term><parameter>tag</parameter></term>
    <listitem>
     <para>
-      data to identify the request to completion handler
+     data to identify the request to completion handler
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    This function starts the specified lock request.
    The transaction is only started, no success of the transaction is implied
    with a successful return of this function.  When the transaction completes, a
@@ -3862,24 +4304,31 @@
    error code of the transaction.  <parameter>tag</parameter> should therefore be set to something
    that uniquely identifies this transaction (e.g. a struct pointer casted to
    unsigned long).
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-start-async-stream">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-start-async-stream">raw1394_start_async_stream</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_start_async_stream</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_start_async_stream</refname>
  <refpurpose>
-      initiate asynchronous stream
+     initiate asynchronous stream
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -3903,7 +4352,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -3911,7 +4360,7 @@
    <term><parameter>channel</parameter></term>
    <listitem>
     <para>
-      the isochronous channel number to send on
+     the isochronous channel number to send on
     </para>
    </listitem>
   </varlistentry>
@@ -3919,7 +4368,7 @@
    <term><parameter>tag</parameter></term>
    <listitem>
     <para>
-      data to be put into packet's tag field
+     data to be put into packet's tag field
     </para>
    </listitem>
   </varlistentry>
@@ -3927,7 +4376,7 @@
    <term><parameter>sy</parameter></term>
    <listitem>
     <para>
-      data to be put into packet's sy field
+     data to be put into packet's sy field
     </para>
    </listitem>
   </varlistentry>
@@ -3935,7 +4384,7 @@
    <term><parameter>speed</parameter></term>
    <listitem>
     <para>
-      speed at which to send
+     speed at which to send
     </para>
    </listitem>
   </varlistentry>
@@ -3943,7 +4392,7 @@
    <term><parameter>length</parameter></term>
    <listitem>
     <para>
-      amount of data to send
+     amount of data to send, in bytes
     </para>
    </listitem>
   </varlistentry>
@@ -3951,7 +4400,7 @@
    <term><parameter>data</parameter></term>
    <listitem>
     <para>
-      pointer to data to send
+     pointer to data to send
     </para>
    </listitem>
   </varlistentry>
@@ -3959,35 +4408,42 @@
    <term><parameter>rawtag</parameter></term>
    <listitem>
     <para>
-      data to identify the request to completion handler
+     data to identify the request to completion handler
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    Passes custom tag.  Use pointer to raw1394_reqhandle if you use the standard
    tag handler.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-start-async-send">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-start-async-send">raw1394_start_async_send</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_start_async_send</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_start_async_send</refname>
  <refpurpose>
-      send an asynchronous packet
+     send an asynchronous packet
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -4009,7 +4465,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -4017,7 +4473,7 @@
    <term><parameter>length</parameter></term>
    <listitem>
     <para>
-      the amount of quadlets of data to send
+     the amount of bytes of data to send
     </para>
    </listitem>
   </varlistentry>
@@ -4025,7 +4481,7 @@
    <term><parameter>header_length</parameter></term>
    <listitem>
     <para>
-      the number of quadlets in the header
+     the number of bytes in the header
     </para>
    </listitem>
   </varlistentry>
@@ -4033,7 +4489,7 @@
    <term><parameter>expect_response</parameter></term>
    <listitem>
     <para>
-      indicate with a 0 or 1 whether to receive a completion event
+     indicate with a 0 or 1 whether to receive a completion event
     </para>
    </listitem>
   </varlistentry>
@@ -4041,7 +4497,7 @@
    <term><parameter>data</parameter></term>
    <listitem>
     <para>
-      pointer to data to send
+     pointer to data to send
     </para>
    </listitem>
   </varlistentry>
@@ -4049,15 +4505,15 @@
    <term><parameter>rawtag</parameter></term>
    <listitem>
     <para>
-      data to identify the request to completion handler
+     data to identify the request to completion handler
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    This starts sending an arbitrary async packet. It gets an array of quadlets 
    consisting of header and data (without CRC in between). Header information 
    is always in machine byte order, data (data block as well as quadlet data 
@@ -4069,24 +4525,31 @@
    transactions, that are handled by the application.
    Do not use that function, unless you really know, what you do! Sending 
    corrupt packet may lead to weird results.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-read">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-read">raw1394_read</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_read</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_read</refname>
  <refpurpose>
-      send async read request to a node and wait for response.
+     send async read request to a node and wait for response.
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -4107,7 +4570,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -4115,7 +4578,7 @@
    <term><parameter>node</parameter></term>
    <listitem>
     <para>
-      target node
+     target node ID
     </para>
    </listitem>
   </varlistentry>
@@ -4123,7 +4586,7 @@
    <term><parameter>addr</parameter></term>
    <listitem>
     <para>
-      address to read from
+     address to read from
     </para>
    </listitem>
   </varlistentry>
@@ -4131,7 +4594,7 @@
    <term><parameter>length</parameter></term>
    <listitem>
     <para>
-      amount of data to read in quadlets
+     amount of bytes of data to read
     </para>
    </listitem>
   </varlistentry>
@@ -4139,36 +4602,46 @@
    <term><parameter>buffer</parameter></term>
    <listitem>
     <para>
-      pointer to buffer where data will be saved
+     pointer to buffer where data will be saved
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
+   If <parameter>length</parameter> is <constant>4</constant>, a quadlet read request is used.
+   </para><para>
+
    This does the complete transaction and will return when it's finished.  It
    will call <function>raw1394_loop_iterate</function> as often as necessary, return values of
    handlers called will be therefore lost.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-write">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-write">raw1394_write</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_write</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_write</refname>
  <refpurpose>
-      send async write request to a node and wait for response.
+     send async write request to a node and wait for response.
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -4189,7 +4662,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -4197,7 +4670,7 @@
    <term><parameter>node</parameter></term>
    <listitem>
     <para>
-      target node
+     target node ID
     </para>
    </listitem>
   </varlistentry>
@@ -4205,7 +4678,7 @@
    <term><parameter>addr</parameter></term>
    <listitem>
     <para>
-      address to write to
+     address to write to
     </para>
    </listitem>
   </varlistentry>
@@ -4213,7 +4686,7 @@
    <term><parameter>length</parameter></term>
    <listitem>
     <para>
-      amount of data to write in quadlets
+     amount of bytes of data to write
     </para>
    </listitem>
   </varlistentry>
@@ -4221,36 +4694,46 @@
    <term><parameter>data</parameter></term>
    <listitem>
     <para>
-      pointer to data to be sent
+     pointer to data to be sent
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
+   If <parameter>length</parameter> is <constant>4</constant>, a quadlet write request is used.
+   </para><para>
+
    This does the complete transaction and will return when it's finished.  It
    will call <function>raw1394_loop_iterate</function> as often as necessary, return values of
    handlers called will be therefore lost.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-lock">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-lock">raw1394_lock</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_lock</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_lock</refname>
  <refpurpose>
-      send 32-bit compare-swap lock request and wait for response.
+     send 32-bit compare-swap lock request and wait for response.
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -4273,7 +4756,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -4281,7 +4764,7 @@
    <term><parameter>node</parameter></term>
    <listitem>
     <para>
-      target node
+     target node ID
     </para>
    </listitem>
   </varlistentry>
@@ -4289,7 +4772,7 @@
    <term><parameter>addr</parameter></term>
    <listitem>
     <para>
-      address to read from
+     address to read from
     </para>
    </listitem>
   </varlistentry>
@@ -4297,7 +4780,7 @@
    <term><parameter>extcode</parameter></term>
    <listitem>
     <para>
-      extended transaction code determining the lock operation
+     extended transaction code determining the lock operation
     </para>
    </listitem>
   </varlistentry>
@@ -4305,7 +4788,7 @@
    <term><parameter>data</parameter></term>
    <listitem>
     <para>
-      data part of lock parameters
+     data part of lock parameters
     </para>
    </listitem>
   </varlistentry>
@@ -4313,7 +4796,7 @@
    <term><parameter>arg</parameter></term>
    <listitem>
     <para>
-      arg part of lock parameters
+     arg part of lock parameters
     </para>
    </listitem>
   </varlistentry>
@@ -4321,36 +4804,43 @@
    <term><parameter>result</parameter></term>
    <listitem>
     <para>
-      address where return value will be written
+     address where return value will be written
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    This does the complete transaction and will return when it's finished.  It
    will call <function>raw1394_loop_iterate</function> as often as necessary, return values of
    handlers called will be therefore lost.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-lock64">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-lock64">raw1394_lock64</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_lock64</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_lock64</refname>
  <refpurpose>
-      send 64-bit compare-swap lock request and wait for response.
+     send 64-bit compare-swap lock request and wait for response.
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -4373,7 +4863,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -4381,7 +4871,7 @@
    <term><parameter>node</parameter></term>
    <listitem>
     <para>
-      target node
+     target node ID
     </para>
    </listitem>
   </varlistentry>
@@ -4389,7 +4879,7 @@
    <term><parameter>addr</parameter></term>
    <listitem>
     <para>
-      address to read from
+     address to read from
     </para>
    </listitem>
   </varlistentry>
@@ -4397,7 +4887,7 @@
    <term><parameter>extcode</parameter></term>
    <listitem>
     <para>
-      extended transaction code determining the lock operation
+     extended transaction code determining the lock operation
     </para>
    </listitem>
   </varlistentry>
@@ -4405,7 +4895,7 @@
    <term><parameter>data</parameter></term>
    <listitem>
     <para>
-      data part of lock parameters
+     data part of lock parameters
     </para>
    </listitem>
   </varlistentry>
@@ -4413,7 +4903,7 @@
    <term><parameter>arg</parameter></term>
    <listitem>
     <para>
-      arg part of lock parameters
+     arg part of lock parameters
     </para>
    </listitem>
   </varlistentry>
@@ -4421,31 +4911,38 @@
    <term><parameter>result</parameter></term>
    <listitem>
     <para>
-      address where return value will be written
+     address where return value will be written
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    This does the complete transaction and will return when it's finished.  It
    will call <function>raw1394_loop_iterate</function> as often as necessary, return values of
    handlers called will be therefore lost.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-async-stream">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-async-stream">raw1394_async_stream</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_async_stream</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_async_stream</refname>
@@ -4472,7 +4969,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -4480,7 +4977,7 @@
    <term><parameter>channel</parameter></term>
    <listitem>
     <para>
-      the isochronous channel number to send on
+     the isochronous channel number to send on
     </para>
    </listitem>
   </varlistentry>
@@ -4488,7 +4985,7 @@
    <term><parameter>tag</parameter></term>
    <listitem>
     <para>
-      data to be put into packet's tag field
+     data to be put into packet's tag field
     </para>
    </listitem>
   </varlistentry>
@@ -4496,7 +4993,7 @@
    <term><parameter>sy</parameter></term>
    <listitem>
     <para>
-      data to be put into packet's sy field
+     data to be put into packet's sy field
     </para>
    </listitem>
   </varlistentry>
@@ -4504,7 +5001,7 @@
    <term><parameter>speed</parameter></term>
    <listitem>
     <para>
-      speed at which to send
+     speed at which to send
     </para>
    </listitem>
   </varlistentry>
@@ -4512,7 +5009,7 @@
    <term><parameter>length</parameter></term>
    <listitem>
     <para>
-      amount of data to send
+     amount of bytes of data to send
     </para>
    </listitem>
   </varlistentry>
@@ -4520,23 +5017,30 @@
    <term><parameter>data</parameter></term>
    <listitem>
     <para>
-      pointer to data to send
+     pointer to data to send
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-async-send">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-async-send">raw1394_async_send</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_async_send</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_async_send</refname>
@@ -4561,7 +5065,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -4569,7 +5073,7 @@
    <term><parameter>length</parameter></term>
    <listitem>
     <para>
-      the amount of quadlets of data to send
+     the amount of bytes of data to send
     </para>
    </listitem>
   </varlistentry>
@@ -4577,7 +5081,7 @@
    <term><parameter>header_length</parameter></term>
    <listitem>
     <para>
-      the number of quadlets in the header
+     the number of bytes in the header
     </para>
    </listitem>
   </varlistentry>
@@ -4585,7 +5089,7 @@
    <term><parameter>expect_response</parameter></term>
    <listitem>
     <para>
-      indicate with a 0 or 1 whether to receive a completion event
+     indicate with a 0 or 1 whether to receive a completion event
     </para>
    </listitem>
   </varlistentry>
@@ -4593,28 +5097,35 @@
    <term><parameter>data</parameter></term>
    <listitem>
     <para>
-      pointer to data to send
+     pointer to data to send
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-start-fcp-listen">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-start-fcp-listen">raw1394_start_fcp_listen</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_start_fcp_listen</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_start_fcp_listen</refname>
  <refpurpose>
-      enable reception of FCP events
+     enable reception of FCP events
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -4631,37 +5142,44 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    FCP = Function Control Protocol (see IEC 61883-1)
    Enables the reception of FCP events (writes to the FCP_COMMAND or
    FCP_RESPONSE address ranges) on <parameter>handle</parameter>.  FCP requests are then passed to the
    callback specified with <function>raw1394_set_fcp_handler</function>.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-stop-fcp-listen">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-stop-fcp-listen">raw1394_stop_fcp_listen</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_stop_fcp_listen</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_stop_fcp_listen</refname>
  <refpurpose>
-      disable reception of FCP events
+     disable reception of FCP events
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -4678,35 +5196,42 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    Stops the reception of FCP events (writes to the FCP_COMMAND or
    FCP_RESPONSE address ranges) on <parameter>handle</parameter>.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    0 on success or -1 on failure (sets errno)
- </para>
+<title>Returns</title>
+<para>
+   0 on success or -1 on failure (sets errno)
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-get-libversion">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-get-libversion">raw1394_get_libversion</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_get_libversion</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_get_libversion</refname>
  <refpurpose>
-      Returns the version string
+     Returns the version string
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -4730,30 +5255,37 @@
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    </para><para>
 
    Instead, typically, one uses 'pkg-config --mod-version libraw1394'
    Might be useful for an application.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    a pointer to a string containing the version number
- </para>
+<title>Returns</title>
+<para>
+   a pointer to a string containing the version number
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-update-config-rom">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-update-config-rom">raw1394_update_config_rom</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_update_config_rom</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_update_config_rom</refname>
  <refpurpose>
-      updates the configuration ROM of a host
+     updates the configuration ROM of a host
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -4761,7 +5293,7 @@
   <funcsynopsis><funcprototype>
    <funcdef>int <function>raw1394_update_config_rom </function></funcdef>
    <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
-   <paramdef>const quadlet_t         * <parameter>new_rom</parameter></paramdef>
+   <paramdef>const quadlet_t * <parameter>new_rom</parameter></paramdef>
    <paramdef>size_t <parameter>size</parameter></paramdef>
    <paramdef>unsigned char <parameter>rom_version</parameter></paramdef>
   </funcprototype></funcsynopsis>
@@ -4773,7 +5305,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -4781,7 +5313,7 @@
    <term><parameter>new_rom</parameter></term>
    <listitem>
     <para>
-      a pointer to the new ROM image
+     a pointer to the new ROM image
     </para>
    </listitem>
   </varlistentry>
@@ -4789,7 +5321,7 @@
    <term><parameter>size</parameter></term>
    <listitem>
     <para>
-      the size of the new ROM image in quadlets
+     the size of the new ROM image in bytes
     </para>
    </listitem>
   </varlistentry>
@@ -4797,37 +5329,44 @@
    <term><parameter>rom_version</parameter></term>
    <listitem>
     <para>
-      the version numer of the current version, not the new
+     the version numer of the current version, not the new
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    <parameter>rom_version</parameter> must be the current
    version, otherwise it will fail with return value -1. 
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Returns</title>
- <para>
-    -1 (failure) if the version is incorrect, 
+<title>Returns</title>
+<para>
+   -1 (failure) if the version is incorrect, 
    -2 (failure) if the new rom version is too big, or
    0 for success
- </para>
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-get-config-rom">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-get-config-rom">raw1394_get_config_rom</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_get_config_rom</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_get_config_rom</refname>
  <refpurpose>
-      reads the current version of the configuration ROM of a host
+     reads the current version of the configuration ROM of a host
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -4848,7 +5387,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      libraw1394 handle
+     libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -4856,7 +5395,7 @@
    <term><parameter>buffer</parameter></term>
    <listitem>
     <para>
-      the memory address at which to store the copy of the ROM
+     the memory address at which to store the copy of the ROM
     </para>
    </listitem>
   </varlistentry>
@@ -4864,7 +5403,7 @@
    <term><parameter>buffersize</parameter></term>
    <listitem>
     <para>
-      is the size of the buffer, <parameter>rom_size</parameter>
+     is the size of the buffer, <parameter>rom_size</parameter>
     </para>
    </listitem>
   </varlistentry>
@@ -4872,7 +5411,7 @@
    <term><parameter>rom_size</parameter></term>
    <listitem>
     <para>
-      upon successful return, contains the size of the ROM
+     upon successful return, contains the size of the ROM
     </para>
    </listitem>
   </varlistentry>
@@ -4880,35 +5419,42 @@
    <term><parameter>rom_version</parameter></term>
    <listitem>
     <para>
-      upon successful return, contains the version of the rom
+     upon successful return, contains the version of the rom
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    returns the size of the current rom image. <parameter>rom_version</parameter> is the
    version number of the fetched rom.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Return</title>
- <para>
-    -1 (failure) if the buffer was too small or 0 for success
- </para>
+<title>Return</title>
+<para>
+   -1 (failure) if the buffer was too small or 0 for success
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-bandwidth-modify">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-bandwidth-modify">raw1394_bandwidth_modify</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_bandwidth_modify</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_bandwidth_modify</refname>
  <refpurpose>
-      allocate or release bandwidth
+     allocate or release bandwidth
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -4927,7 +5473,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      a libraw1394 handle
+     a libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -4935,7 +5481,7 @@
    <term><parameter>bandwidth</parameter></term>
    <listitem>
     <para>
-      IEEE 1394 Bandwidth Alloction Units
+     IEEE 1394 Bandwidth Alloction Units
     </para>
    </listitem>
   </varlistentry>
@@ -4943,34 +5489,41 @@
    <term><parameter>mode</parameter></term>
    <listitem>
     <para>
-      whether to allocate or free
+     whether to allocate or free
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    Communicates with the isochronous resource manager.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Return</title>
- <para>
+<title>Return</title>
+<para>
    -1 for failure, 0 for success
- </para>
+</para>
 </refsect1>
 </refentry>
 
-<refentry>
+<refentry id="API-raw1394-channel-modify">
+<refentryinfo>
+ <title>LINUX</title>
+ <productname>Kernel Hackers Manual</productname>
+ <date>August 2009</date>
+</refentryinfo>
 <refmeta>
-<refentrytitle><phrase id="API-raw1394-channel-modify">raw1394_channel_modify</phrase></refentrytitle>
+ <refentrytitle><phrase>raw1394_channel_modify</phrase></refentrytitle>
+ <manvolnum>9</manvolnum>
+ <refmiscinfo class="version">unknown kernel version</refmiscinfo>
 </refmeta>
 <refnamediv>
  <refname>raw1394_channel_modify</refname>
  <refpurpose>
-      allocate or release isochronous channel
+     allocate or release isochronous channel
  </refpurpose>
 </refnamediv>
 <refsynopsisdiv>
@@ -4989,7 +5542,7 @@
    <term><parameter>handle</parameter></term>
    <listitem>
     <para>
-      a libraw1394 handle
+     a libraw1394 handle
     </para>
    </listitem>
   </varlistentry>
@@ -4997,7 +5550,7 @@
    <term><parameter>channel</parameter></term>
    <listitem>
     <para>
-      isochronous channel
+     isochronous channel
     </para>
    </listitem>
   </varlistentry>
@@ -5005,23 +5558,23 @@
    <term><parameter>mode</parameter></term>
    <listitem>
     <para>
-      whether to allocate or free
+     whether to allocate or free
     </para>
    </listitem>
   </varlistentry>
  </variablelist>
 </refsect1>
 <refsect1>
- <title>Description</title>
- <para>
+<title>Description</title>
+<para>
    Communicates with the isochronous resource manager.
- </para>
+</para>
 </refsect1>
 <refsect1>
- <title>Return</title>
- <para>
+<title>Return</title>
+<para>
    -1 for failure, 0 for success
- </para>
+</para>
 </refsect1>
 </refentry>
 
