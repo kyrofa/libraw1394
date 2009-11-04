@@ -391,11 +391,14 @@ iso_init(fw_handle_t handle, int type,
 		return -1;
 	}
 
-	handle->iso.type = type;
+	/* set irq_interval from < 1 to default values like ieee1394 rawiso */
 	if (irq_interval < 0)
-		handle->iso.irq_interval = 256;
-	else
-		handle->iso.irq_interval = irq_interval;
+		irq_interval = buf_packets / 4;
+	if (irq_interval == 0)
+		irq_interval = 1;
+
+	handle->iso.type = type;
+	handle->iso.irq_interval = irq_interval;
 	handle->iso.xmit_handler = xmit_handler;
 	handle->iso.recv_handler = recv_handler;
 	handle->iso.buf_packets = buf_packets;
