@@ -70,13 +70,12 @@ queue_packet(fw_handle_t handle,
 }
 
 static int
-queue_xmit_packets(raw1394handle_t handle, int limit)
+queue_xmit_packets(raw1394handle_t handle, int limit, int cycle)
 {
 	fw_handle_t fwhandle = handle->mode.fw;
 	enum raw1394_iso_disposition d;
 	unsigned char tag, sy;
 	unsigned int len;
-	int cycle = -1;
 	unsigned int dropped = 0;
 
 	if (fwhandle->iso.xmit_handler == NULL)
@@ -90,6 +89,11 @@ queue_xmit_packets(raw1394handle_t handle, int limit)
 		switch (d) {
 		case RAW1394_ISO_OK:
 			queue_packet(fwhandle, len, 0, tag, sy);
+			if (cycle >= 0) {
+				cycle++;
+				if (cycle >= 8000)
+					cycle %= 8000;
+			}
 			break;
 		case RAW1394_ISO_DEFER:
 		case RAW1394_ISO_AGAIN:
@@ -119,7 +123,21 @@ int fw_iso_xmit_start(raw1394handle_t handle, int start_on_cycle,
 	fwhandle->iso.prebuffer = prebuffer_packets;
 	fwhandle->iso.start_on_cycle = start_on_cycle;
 
-	queue_xmit_packets(handle, prebuffer_packets);
+	retval = queue_xmit_packets(handle, prebuffer_packets, start_on_cycle);
+	if (retval)
+		return -1;
+
+	if (start_on_cycle >= 0) {
+		int tmp;
+
+		tmp = start_on_cycle + prebuffer_packets;
+		tmp %= 8000;
+		retval = queue_xmit_packets(handle, fwhandle->iso.buf_packets, tmp);
+	} else {
+		retval = queue_xmit_packets(handle, fwhandle->iso.buf_packets, -1);
+	}
+	if (retval)
+		return -1;
 
 	if (fwhandle->iso.prebuffer <= fwhandle->iso.packet_count) {
 		start_iso.cycle  = start_on_cycle;
@@ -131,12 +149,7 @@ int fw_iso_xmit_start(raw1394handle_t handle, int start_on_cycle,
 			return retval;
 	}
 
-	retval = queue_xmit_packets(handle, fwhandle->iso.buf_packets);
-
-	if (retval)
-		return -1;
-	else
-		fwhandle->iso.state = ISO_ACTIVE;
+	fwhandle->iso.state = ISO_ACTIVE;
 
 	return 0;
 }
@@ -256,8 +269,31 @@ static int handle_iso_event(raw1394handle_t handle,
 
 	switch (fwhandle->iso.type) {
 	case FW_CDEV_ISO_CONTEXT_TRANSMIT:
+	{
+		int cycle;
+
 		fwhandle->iso.packet_count -= fwhandle->iso.irq_interval;
-		return queue_xmit_packets(handle, fwhandle->iso.buf_packets);
+		if (interrupt->header_length) {
+			/*
+			 * Take the cycle of the last packet transmitted, add
+			 * the number of packets currently queued, plus one, and
+			 * that's the cycle number of the next packet to ask
+			 * for.
+			 */
+			cycle = be32_to_cpu(interrupt->header[interrupt->header_length/4 - 1]);
+			cycle &= 0x1fff;
+		} else {
+			/*
+			 * Bogusly faking it again.  Assume that the last packet
+			 * transmitted was transmitted on interrupt->cycle.
+			 */
+			cycle = interrupt->cycle;
+		}
+		cycle += fwhandle->iso.packet_count;
+		cycle++;
+		cycle %= 8000;
+		return queue_xmit_packets(handle, fwhandle->iso.buf_packets, cycle);
+	}
 	case FW_CDEV_ISO_CONTEXT_RECEIVE:
 		return flush_recv_packets(handle, interrupt);
 	default:
