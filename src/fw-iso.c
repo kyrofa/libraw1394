@@ -182,7 +182,21 @@ flush_recv_packets(raw1394handle_t handle,
 	p = interrupt->header;
 	end = (void *) interrupt->header + interrupt->header_length;
 	header_has_timestamp = fwhandle->abi_version >= 2;
-	cycle = interrupt->cycle;
+	/*
+	 * This is bogus, but it's the best we can do without accurate
+	 * timestamps.  Assume that the first packet was received
+	 * {number of packets} before the cycle recorded in the interrupt
+	 * event, and that each subsequent packet was received one cycle
+	 * later.  This also assumes that the interrupt event happened
+	 * immediately after the last packet was received.
+	 */
+	if (!header_has_timestamp) {
+		cycle = interrupt->cycle;
+		cycle &= 0x1fff;
+		cycle += 8000;
+		cycle -= end - p;
+	}
+
 	dropped = 0;
 	d = RAW1394_ISO_OK;
 
@@ -195,6 +209,8 @@ flush_recv_packets(raw1394handle_t handle,
 
 		if (header_has_timestamp)
 			cycle = be32_to_cpu(*p++) & 0x1fff;
+		else
+			cycle++;
 
 		d = fwhandle->iso.recv_handler(handle, fwhandle->iso.tail, len,
 					     channel, tag, sy, cycle, dropped);
@@ -202,7 +218,6 @@ flush_recv_packets(raw1394handle_t handle,
 			/* FIXME: we need to save the headers so we
 			 * can restart this loop. */
 			break;
-		cycle++;
 
 		fwhandle->iso.tail += fwhandle->iso.max_packet_size;
 		fwhandle->iso.packet_count--;
