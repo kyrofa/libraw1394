@@ -1406,6 +1406,7 @@ iso_resource_modify(raw1394handle_t handle, unsigned int bandwidth,
 	resource.closure = ptr_to_u64(&event);
 	resource.channels = channel >= 0 ? 1ULL << channel : 0;
 	resource.bandwidth = bandwidth;
+	resource.handle = 0; /* unused */
 
 	ioctl_nr = mode == RAW1394_MODIFY_ALLOC ?
 		   FW_CDEV_IOC_ALLOCATE_ISO_RESOURCE_ONCE :

@@ -140,6 +140,8 @@ int fw_iso_xmit_start(raw1394handle_t handle, int start_on_cycle,
 		return -1;
 
 	if (fwhandle->iso.prebuffer <= fwhandle->iso.packet_count) {
+		start_iso.sync   = 0; /* unused */
+		start_iso.tags   = 0; /* unused */
 		start_iso.cycle  = start_on_cycle;
 		start_iso.handle = 0;
 
