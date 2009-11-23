@@ -196,7 +196,7 @@ flush_recv_packets(raw1394handle_t handle,
 		cycle = interrupt->cycle;
 		cycle &= 0x1fff;
 		cycle += 8000;
-		cycle -= end - p;
+		cycle -= interrupt->header_length / 4;
 	}
 
 	dropped = 0;
@@ -211,8 +211,11 @@ flush_recv_packets(raw1394handle_t handle,
 
 		if (header_has_timestamp)
 			cycle = be32_to_cpu(*p++) & 0x1fff;
-		else
+		else {
 			cycle++;
+			if (cycle >= 8000)
+				cycle -= 8000;
+		}
 
 		d = fwhandle->iso.recv_handler(handle, fwhandle->iso.tail, len,
 					     channel, tag, sy, cycle, dropped);
