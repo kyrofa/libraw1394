@@ -1,3 +1,39 @@
+2009-12-26  Dan Dennedy <dan@dennedy.org>
+
+  * NEWS: Update release notes. 
+
+2009-11-23  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * src/fw-iso.c: Addendum to 'Calculate iso receive cycles on firewire-core' 
+  The number of packets is a 4th of the number of header bytes (in case of ABI
+  version 1).  Also, wrap after an increment over 8000. 
+
+2009-11-19  Jay Fenlason <fenlason@redhat.com>
+
+  * src/fw-iso.c, src/fw.c: Initialize unused fields in ioctl arguments  This
+  change is essentially cosmetic:  Set fields of structs passed to the kernel
+  via ioctl so that valgrind will not complain about them. 
+
+  * src/fw-iso.c: Calculate iso receive cycles on firewire-core at ABI version
+  1  More accurately report the cycle on which isochronous packets were
+  received.  Only affects libraw1394 when used with kernel 2.6.29 or older. 
+
+2009-11-04  Jay Fenlason <fenlason@redhat.com>
+
+  * src/fw-iso.c: Fix default isochronous IRQ interval on firewire-core 
+  libraw1394 takes a negative IRQ interval to mean "every 256 packets" with the
+  juju backend, which doesn't work well if you don't queue that many.  Use
+  buf_packets / 4 like the ieee1394 version. 
+
+2009-08-30  Dan Dennedy <dan@dennedy.org>
+
+  * doc/libraw1394.sgml: Update reference docs using kernel-doc. 
+
+2009-06-30  Dan Dennedy <dan@dennedy.org>
+
+  * ChangeLog, Makefile.am, NEWS, configure.ac: Fix build due to incomplete
+  tarball. 
+
 2009-06-29  Dan Dennedy <dan@dennedy.org>
 
   * ChangeLog: Update ChangeLog from git log. 
