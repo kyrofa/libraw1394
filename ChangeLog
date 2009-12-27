@@ -1,5 +1,9 @@
 2009-12-26  Dan Dennedy <dan@dennedy.org>
 
+  * NEWS, configure.ac: Set to version 2.0.5. 
+
+  * ChangeLog: Update ChangeLog for release. 
+
   * NEWS: Update release notes. 
 
 2009-11-23  Stefan Richter <stefanr@s5r6.in-berlin.de>
