@@ -1,6 +1,6 @@
-<!--
-<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook V3.1//EN">
--->
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+	"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" []>
 <book>
   <bookinfo>
 
@@ -3184,7 +3184,7 @@
 </refsect1>
 </refentry>
 
-<refentry id="API-int">
+<refentry id="API-req_callback_t">
 <refentryinfo>
  <title>LINUX</title>
  <productname>Kernel Hackers Manual</productname>
@@ -3231,7 +3231,7 @@
 </refsect1>
 </refentry>
 
-<refentry id="API-int">
+<refentry id="API-arm_req_callback_t">
 <refentryinfo>
  <title>LINUX</title>
  <productname>Kernel Hackers Manual</productname>

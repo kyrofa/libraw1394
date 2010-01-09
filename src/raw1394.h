@@ -699,12 +699,11 @@ typedef int (*fcp_handler_t)(raw1394handle_t, nodeid_t nodeid, int response,
 fcp_handler_t raw1394_set_fcp_handler(raw1394handle_t handle, fcp_handler_t new_h);
 
 /**
- * req_callback_t - This is the general request handler
- * @req_callback_t: This is the general request handler
+ * typedef req_callback_t - This is the general request handler
  *
- * It is used by the default tag handler
- * when a request completes, it calls the callback and passes it the data
- * pointer and the error code of the request.
+ * Used by the default tag handler.  When a request completes, it calls
+ * the callback and passes it the libraw1394 handle, the data pointer,
+ * and the error code of the request.
  **/
 typedef int (*req_callback_t)(raw1394handle_t, void *data,
                               raw1394_errcode_t err);
@@ -715,13 +714,10 @@ struct raw1394_reqhandle {
 };
 
 /**
- * arm_req_callback_t - This is the general arm-request handle
- * @arm_req_callback_t: This is the general arm-request handle
- * @handle: libraw1394 handle
+ * typedef arm_req_callback_t - This is the general arm-request handle
  *
- * (arm = address range mapping)
- * It is used by the default arm-tag handler when a request has been 
- * received, it calls the arm_callback.
+ * Used by the default arm-tag handler (arm = address range mapping).
+ * Called when a request has been received.
  **/
 typedef int (*arm_req_callback_t) (raw1394handle_t,
                                    struct raw1394_arm_request_response *arm_req_resp,
