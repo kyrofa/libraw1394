@@ -7,7 +7,7 @@ man_MANS = testlibraw.1 sendiso.1 dumpiso.1 isodump.5
 # libraw1394 docbook documentation
 
 CLEANFILES = libraw1394.aux libraw1394.dvi libraw1394.log libraw1394.out \
-	libraw1394.tex libraw1394.pdf
+	libraw1394.tex libraw1394.pdf *.html
 
 MAINTAINERCLEANFILES = Makefile.in libraw1394.ps
 
