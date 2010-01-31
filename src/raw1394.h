@@ -849,7 +849,7 @@ int raw1394_phy_packet_write (raw1394handle_t handle, quadlet_t data);
  *
  * examples of physical requests are linkon, physicalconfigurationpacket, etc.
  *
- * Returns: 0 on success or -1 on failure (sets errno)
+ * Returns: >= 0 on success or -1 on failure (sets errno)
  **/
 int raw1394_start_phy_packet_write(raw1394handle_t handle, 
         quadlet_t data, unsigned long tag);
@@ -873,7 +873,7 @@ int raw1394_start_phy_packet_write(raw1394handle_t handle,
  * that uniquely identifies this transaction (e.g. a struct pointer casted to
  * unsigned long).
  *
- * Returns: 0 on success or -1 on failure (sets errno)
+ * Returns: >= 0 on success or -1 on failure (sets errno)
  **/
 int raw1394_start_read(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
                        size_t length, quadlet_t *buffer, unsigned long tag);
@@ -897,7 +897,7 @@ int raw1394_start_read(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
  * that uniquely identifies this transaction (e.g. a struct pointer casted to
  * unsigned long).
  *
- * Returns: 0 on success or -1 on failure (sets errno)
+ * Returns: >= 0 on success or -1 on failure (sets errno)
  **/
 int raw1394_start_write(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
                         size_t length, quadlet_t *data, unsigned long tag);
@@ -921,7 +921,7 @@ int raw1394_start_write(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
  * that uniquely identifies this transaction (e.g. a struct pointer casted to
  * unsigned long).
  *
- * Returns: 0 on success or -1 on failure (sets errno)
+ * Returns: >= 0 on success or -1 on failure (sets errno)
  **/
 int raw1394_start_lock(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
                        unsigned int extcode, quadlet_t data, quadlet_t arg,
@@ -946,7 +946,7 @@ int raw1394_start_lock(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
  * that uniquely identifies this transaction (e.g. a struct pointer casted to
  * unsigned long).
  *
- * Returns: 0 on success or -1 on failure (sets errno)
+ * Returns: >= 0 on success or -1 on failure (sets errno)
  **/
 int raw1394_start_lock64(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
                        unsigned int extcode, octlet_t data, octlet_t arg,
@@ -966,7 +966,7 @@ int raw1394_start_lock64(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
  * Passes custom tag.  Use pointer to raw1394_reqhandle if you use the standard
  * tag handler.
  *
- * Returns: 0 on success or -1 on failure (sets errno)
+ * Returns: >= 0 on success or -1 on failure (sets errno)
  **/
 int raw1394_start_async_stream(raw1394handle_t handle, unsigned int channel,
                                unsigned int tag, unsigned int sy,
@@ -995,7 +995,7 @@ int raw1394_start_async_stream(raw1394handle_t handle, unsigned int channel,
  * Do not use that function, unless you really know, what you do! Sending 
  * corrupt packet may lead to weird results.
  *
- * Returns: 0 on success or -1 on failure (sets errno)
+ * Returns: >= 0 on success or -1 on failure (sets errno)
  **/
 int raw1394_start_async_send(raw1394handle_t handle,
                              size_t length, size_t header_length, 
