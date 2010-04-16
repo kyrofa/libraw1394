@@ -262,7 +262,7 @@ handle_device_event(raw1394handle_t handle,
 	int i;
 
 	i = device - fwhandle->devices;
-	if (events == EPOLLHUP)
+	if (events & EPOLLHUP)
 		return handle_lost_device(fwhandle, i);
 
 	len = read(fwhandle->devices[i].fd,
