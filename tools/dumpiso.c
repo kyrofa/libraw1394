@@ -163,13 +163,12 @@ void open_dumpfile()
                 return;
         }
 
-        file = open(filename, O_CREAT | O_WRONLY, 0666);
+        file = creat(filename, 0666);
         if (file < 0) {
                 perror("dumpfile open");
                 exit(1);
         }
-        
-        ftruncate(file, 0);
+
         write_header();
 }
 
@@ -180,18 +179,21 @@ iso_handler(raw1394handle_t handle, unsigned char *data,
         unsigned int dropped)
 {
         int ret;
+        unsigned char pad = 0;
         static unsigned int counter = 0;
 
         if (++counter % 1000 == 0)
                 fprintf(stderr, "\r%uK packets", counter/1000);
 
         /* write header */
-        write(file, &length, sizeof(length));
-        write(file, &channel, sizeof(channel));
-        write(file, &tag, sizeof(tag));
-        write(file, &sy, sizeof(sy));
-        sy = 0;
-        write(file, &sy, sizeof(sy));
+        if (write(file, &length,  sizeof(length))  != sizeof(length)  ||
+            write(file, &channel, sizeof(channel)) != sizeof(channel) ||
+            write(file, &tag,     sizeof(tag))     != sizeof(tag)     ||
+            write(file, &sy,      sizeof(sy))      != sizeof(sy)      ||
+            write(file, &pad,     sizeof(pad))     != sizeof(pad)) {
+                perror("data write");
+                return RAW1394_ISO_ERROR;
+        }
 
         while (length) {
                 ret = write(file, data, length);
@@ -215,7 +217,7 @@ int main(int argc, char **argv)
         parse_args(argc, argv);
 
         fprintf(stderr, "port: %ld\nchannels: %#016llx\nfile: %s\n", which_port,
-                listen_channels, filename);
+                (long long unsigned)listen_channels, filename);
 
         handle = raw1394_new_handle();
         if (!handle) {
