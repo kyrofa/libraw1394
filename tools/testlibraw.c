@@ -55,7 +55,7 @@ int my_fcp_handler(raw1394handle_t handle, nodeid_t nodeid, int response,
                    size_t length, unsigned char *data)
 {
 	printf("    got fcp %s from node %d of %d bytes:",
-	       (response ? "response" : "command"), nodeid & 0x3f, length);
+	       (response ? "response" : "command"), nodeid & 0x3f, (int)length);
 
 	if (memcmp(fcp_data, data, sizeof fcp_data) != 0)
 		printf("ERROR: fcp payload not correct\n");
@@ -129,7 +129,7 @@ test_config_rom(raw1394handle_t handle)
 	retval = raw1394_get_config_rom(handle, rom, 0x100,
 					&rom_size, &rom_version);
 	printf("    get_config_rom returned %d, romsize %d, rom_version %d\n",
-	       retval, rom_size, rom_version);
+	       retval, (int)rom_size, rom_version);
 	printf("    here are the first 10 quadlets:\n");
 	for (i = 0; i < 10; i++)
 		printf("    0x%08x\n", rom[i]);
