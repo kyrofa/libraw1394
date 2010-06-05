@@ -58,7 +58,7 @@ queue_packet(fw_handle_t handle,
 		queue_iso.packets = ptr_to_u64(handle->iso.packets);
 		queue_iso.size    = handle->iso.packet_index * sizeof handle->iso.packets[0];
 		queue_iso.data    = ptr_to_u64(handle->iso.first_payload);
-		queue_iso.handle  = 0;
+		queue_iso.handle  = handle->iso.kernel_handle;
 		handle->iso.packet_index = 0;
 		handle->iso.first_payload = handle->iso.head;
 
@@ -143,7 +143,7 @@ int fw_iso_xmit_start(raw1394handle_t handle, int start_on_cycle,
 		start_iso.sync   = 0; /* unused */
 		start_iso.tags   = 0; /* unused */
 		start_iso.cycle  = start_on_cycle;
-		start_iso.handle = 0;
+		start_iso.handle = fwhandle->iso.kernel_handle;
 
 		retval = ioctl(fwhandle->iso.fd,
 			       FW_CDEV_IOC_START_ISO, &start_iso);
@@ -262,7 +262,7 @@ int fw_iso_recv_start(fw_handle_t handle, int start_on_cycle,
 		tag_mask == -1 ? FW_CDEV_ISO_CONTEXT_MATCH_ALL_TAGS : tag_mask;
 	/* sync is documented as 'not used' */
 	start_iso.sync = 0;
-	start_iso.handle = 0;
+	start_iso.handle = handle->iso.kernel_handle;
 
 	if (ioctl(handle->iso.fd, FW_CDEV_IOC_START_ISO, &start_iso))
 		return -1;
@@ -351,7 +351,7 @@ int fw_iso_xmit_write(raw1394handle_t handle, unsigned char *data,
 		/* Set this to 0 to indicate that we're running. */
 		fwhandle->iso.prebuffer = 0;
 		start_iso.cycle  = fwhandle->iso.start_on_cycle;
-		start_iso.handle = 0;
+		start_iso.handle = fwhandle->iso.kernel_handle;
 
 		retval = ioctl(fwhandle->iso.fd,
 			       FW_CDEV_IOC_START_ISO, &start_iso);
@@ -373,7 +373,7 @@ int fw_iso_xmit_sync(raw1394handle_t handle)
 	queue_iso.packets = ptr_to_u64(&skip);
 	queue_iso.size    = sizeof skip;
 	queue_iso.data    = 0;
-	queue_iso.handle  = 0;
+	queue_iso.handle  = fwhandle->iso.kernel_handle;
 
 	len = ioctl(fwhandle->iso.fd, FW_CDEV_IOC_QUEUE_ISO, &queue_iso);
 	if (len < 0)
@@ -501,6 +501,7 @@ iso_init(fw_handle_t handle, int type,
 		handle->iso.packets = NULL;
 		return retval;
 	}
+	handle->iso.kernel_handle = create.handle;
 
 	handle->iso.buffer =
 		mmap(NULL, buf_packets * handle->iso.max_packet_size,
@@ -587,7 +588,7 @@ void fw_iso_stop(fw_handle_t handle)
 {
 	struct fw_cdev_stop_iso stop_iso;
 
-	stop_iso.handle = 0;
+	stop_iso.handle = handle->iso.kernel_handle;
 	ioctl(handle->iso.fd, FW_CDEV_IOC_STOP_ISO, &stop_iso);
 
 	handle->iso.head = handle->iso.buffer;

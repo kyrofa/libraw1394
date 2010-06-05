@@ -109,6 +109,7 @@ struct fw_handle {
 		char *filename;
 		struct epoll_closure closure;
 		int fd;
+		unsigned kernel_handle;
 		int type;
 		int irq_interval;
 		int packet_phase;
