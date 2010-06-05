@@ -602,6 +602,9 @@ void fw_iso_stop(fw_handle_t handle)
 
 void fw_iso_shutdown(fw_handle_t handle)
 {
+	if (handle->iso.packets == NULL)
+		return;
+
 	munmap(handle->iso.buffer,
 	       handle->iso.buf_packets * handle->iso.max_packet_size);
 	if (handle->iso.state != ISO_STOPPED)

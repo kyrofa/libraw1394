@@ -502,9 +502,8 @@ void fw_destroy_handle(fw_handle_t handle)
 
 		close(handle->devices[i].fd);
 	}
-
+	fw_iso_shutdown(handle);
 	close(handle->epoll_fd);
-
 	free(handle);
 
 	return;
