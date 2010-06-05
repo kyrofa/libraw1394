@@ -463,8 +463,10 @@ iso_init(fw_handle_t handle, int type,
 	handle->iso.packet_count = 0;
 	handle->iso.packets =
 		malloc(handle->iso.irq_interval * sizeof handle->iso.packets[0]);
-	if (handle->iso.packets == NULL)
+	if (handle->iso.packets == NULL) {
+		errno = ENOMEM;
 		return -1;
+	}
 
 	handle->iso.fd = open(handle->iso.filename, O_RDWR);
 	if (handle->iso.fd < 0) {

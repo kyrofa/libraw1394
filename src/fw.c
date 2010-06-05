@@ -419,9 +419,13 @@ fw_handle_t fw_new_handle(void)
 	struct epoll_event ep;
 	int i;
 
-	memset(&ep, 0, sizeof(ep));
-
 	handle = malloc(sizeof *handle);
+	if (handle == NULL) {
+		errno = ENOMEM;
+		return NULL;
+	}
+
+	memset(&ep, 0, sizeof(ep));
 	memset(handle, 0, sizeof(*handle));
 
 	handle->tag_handler = default_tag_handler;
@@ -775,6 +779,10 @@ handle_arm_request(raw1394handle_t handle, struct address_closure *ac,
 		return 0;
 
 	rrb = malloc(sizeof *rrb + in_length + response.length);
+	if (rrb == NULL) {
+		errno == ENOMEM;
+		return -1;
+	}
 
 	rrb->request_response.request = &rrb->request;
 	rrb->request_response.response = &rrb->response;
@@ -818,8 +826,10 @@ fw_arm_register(fw_handle_t handle, nodeaddr_t start,
 	int retval;
 
 	allocation = malloc(sizeof *allocation + length);
-	if (allocation == NULL)
+	if (allocation == NULL) {
+		errno = ENOMEM;
 		return -1;
+	}
 
 	allocation->closure.callback = handle_arm_request;
 	allocation->buffer = initial_value;
@@ -1318,8 +1328,10 @@ fw_start_fcp_listen(fw_handle_t handle)
 	struct address_closure *closure;
 
 	closure = malloc(sizeof *closure);
-	if (closure == NULL)
+	if (closure == NULL) {
+		errno = ENOMEM;
 		return -1;
+	}
 
 	closure->callback = handle_fcp_request;
 
