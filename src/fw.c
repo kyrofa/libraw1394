@@ -220,14 +220,14 @@ handle_lost_device(fw_handle_t handle, int i)
 struct address_closure {
 	int (*callback)(raw1394handle_t handle, struct address_closure *ac,
 			int tcode, unsigned long long offset,
-			int source_node_id, unsigned kernel_handle,
+			int source_node_id, int card, unsigned kernel_handle,
 			size_t length, void *data);
 };
 
 static int
 handle_fcp_request(raw1394handle_t handle, struct address_closure *ac,
 		   int tcode, unsigned long long offset, int source_node_id,
-		   unsigned kernel_handle, size_t length, void *data)
+		   int card, unsigned kernel_handle, size_t length, void *data)
 {
 	struct fw_cdev_send_response response;
 	int is_response;
@@ -246,6 +246,9 @@ handle_fcp_request(raw1394handle_t handle, struct address_closure *ac,
 	if (ioctl(handle->mode.fw->ioctl_fd,
 		  FW_CDEV_IOC_SEND_RESPONSE, &response) < 0)
 		return -1;
+
+	if (card != handle->mode.fw->card)
+		return 0;
 
 	if (response.rcode != RCODE_COMPLETE)
 		return 0;
@@ -315,6 +318,7 @@ handle_device_event(raw1394handle_t handle,
 				    u->request.offset,
 				    /* wild guess, but can't do better */
 				    fwhandle->devices[i].node_id,
+				    fwhandle->card,
 				    u->request.handle,
 				    u->request.length, u->request.data);
 
@@ -324,6 +328,7 @@ handle_device_event(raw1394handle_t handle,
 		return ac->callback(handle, ac, u->request2.tcode,
 				    u->request2.offset,
 				    u->request2.source_node_id,
+				    u->request2.card,
 				    u->request2.handle,
 				    u->request2.length, u->request2.data);
 #endif
@@ -673,6 +678,7 @@ int fw_set_port(fw_handle_t handle, int port)
 		if (reset.node_id == reset.local_node_id)
 			handle->local_device = &handle->devices[i];
 
+		handle->card = get_info.card;
 		handle->generation = reset.generation;
 		handle->abi_version = get_info.version;
 
@@ -730,7 +736,7 @@ struct allocation {
 static int
 handle_arm_request(raw1394handle_t handle, struct address_closure *ac,
 		   int tcode, unsigned long long offset, int source_node_id,
-		   unsigned kernel_handle, size_t length, void *data)
+		   int card, unsigned kernel_handle, size_t length, void *data)
 {
 	fw_handle_t fwhandle = handle->mode.fw;
 	struct allocation *allocation = (struct allocation *) ac;
@@ -808,6 +814,13 @@ handle_arm_request(raw1394handle_t handle, struct address_closure *ac,
 			  FW_CDEV_IOC_SEND_RESPONSE, &response) < 0)
 			return -1;
 	}
+
+	/*
+	 * libraw1394 clients do not expect requests from nodes on
+	 * a card other than the one set by raw1394_set_port().
+	 */
+	if (card != fwhandle->card)
+		return 0;
 
 	if (!(allocation->notification_options & type))
 		return 0;

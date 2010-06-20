@@ -79,6 +79,7 @@ struct fw_handle {
 	struct port ports[MAX_PORTS];
 	int port_count;
 	int err;
+	int card;
 	int generation;
 	int abi_version;
 	void *userdata;
