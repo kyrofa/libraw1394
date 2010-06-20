@@ -25,6 +25,11 @@
 #include "fw.h"
 #include "raw1394_private.h"
 
+/*
+ * ABI version history is documented in linux/firewire-cdev.h.
+ */
+#define IMPLEMENTED_CDEV_ABI_VERSION	2
+
 int
 fw_errcode_to_errno(raw1394_errcode_t errcode)
 {
@@ -150,7 +155,7 @@ scan_devices(fw_handle_t handle)
 			continue;
 		memset(&get_info, 0, sizeof(get_info));
 		memset(&reset, 0, sizeof(reset));
-		get_info.version = FW_CDEV_VERSION;
+		get_info.version = IMPLEMENTED_CDEV_ABI_VERSION;
 		get_info.rom = 0;
 		get_info.rom_length = 0;
 		get_info.bus_reset = ptr_to_u64(&reset);
@@ -355,7 +360,7 @@ handle_inotify(raw1394handle_t handle, struct epoll_closure *ec,
 		}
 	}
 
-	info.version = FW_CDEV_VERSION;
+	info.version = IMPLEMENTED_CDEV_ABI_VERSION;
 	info.rom = 0;
 	info.rom_length = 0;
 	info.bus_reset = ptr_to_u64(&reset);
@@ -607,7 +612,7 @@ int fw_set_port(fw_handle_t handle, int port)
 
 		memset(&get_info, 0, sizeof(get_info));
 		memset(&reset, 0, sizeof(reset));
-		get_info.version = FW_CDEV_VERSION;
+		get_info.version = IMPLEMENTED_CDEV_ABI_VERSION;
 		get_info.rom = 0;
 		get_info.rom_length = 0;
 		get_info.bus_reset = ptr_to_u64(&reset);
@@ -1378,7 +1383,7 @@ fw_get_config_rom(fw_handle_t handle, quadlet_t *buffer,
 	}
 
 	memset(&get_info, 0, sizeof(get_info));
-	get_info.version = FW_CDEV_VERSION;
+	get_info.version = IMPLEMENTED_CDEV_ABI_VERSION;
 	get_info.rom = ptr_to_u64(buffer);
 	get_info.rom_length = buffersize;
 	get_info.bus_reset = 0;
