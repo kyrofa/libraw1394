@@ -1445,7 +1445,7 @@ iso_resource_modify(raw1394handle_t handle, unsigned int bandwidth,
 	return 0;
 }
 
-static inline int abi_v2_available(raw1394handle_t handle)
+static inline int abi_has_iso_resource_management(raw1394handle_t handle)
 {
 	return handle->mode.fw->abi_version >= 2;
 }
@@ -1459,7 +1459,7 @@ iso_resource_modify(raw1394handle_t handle, unsigned int bandwidth,
 	return -1;
 }
 
-static inline int abi_v2_available(raw1394handle_t handle)
+static inline int abi_has_iso_resource_management(raw1394handle_t handle)
 {
 	return 0;
 }
@@ -1470,7 +1470,7 @@ int
 fw_bandwidth_modify(raw1394handle_t handle, unsigned int bandwidth,
 		    enum raw1394_modify_mode mode)
 {
-	if (abi_v2_available(handle))
+	if (abi_has_iso_resource_management(handle))
 		return iso_resource_modify(handle, bandwidth, -1, mode);
 	else
 		return ieee1394_bandwidth_modify(handle, bandwidth, mode);
@@ -1480,7 +1480,7 @@ int
 fw_channel_modify(raw1394handle_t handle, unsigned int channel,
 		  enum raw1394_modify_mode mode)
 {
-	if (abi_v2_available(handle))
+	if (abi_has_iso_resource_management(handle))
 		return iso_resource_modify(handle, 0, channel, mode);
 	else
 		return ieee1394_channel_modify(handle, channel, mode);

@@ -156,9 +156,14 @@ int fw_iso_xmit_start(raw1394handle_t handle, int start_on_cycle,
 	return 0;
 }
 
+static inline int abi_has_iso_rx_timestamps(fw_handle_t handle)
+{
+	return handle->abi_version >= 2;
+}
+
 static inline int recv_header_length(fw_handle_t handle)
 {
-	return handle->abi_version >= 2 ? 8 : 4;
+	return abi_has_iso_rx_timestamps(handle) ? 8 : 4;
 }
 
 static int
@@ -179,11 +184,9 @@ flush_recv_packets(raw1394handle_t handle,
 	quadlet_t header, *p, *end;
 	unsigned int len, cycle, dropped;
 	unsigned char channel, tag, sy;
-	int header_has_timestamp;
 
 	p = interrupt->header;
 	end = (void *) interrupt->header + interrupt->header_length;
-	header_has_timestamp = fwhandle->abi_version >= 2;
 	/*
 	 * This is bogus, but it's the best we can do without accurate
 	 * timestamps.  Assume that the first packet was received
@@ -192,7 +195,7 @@ flush_recv_packets(raw1394handle_t handle,
 	 * later.  This also assumes that the interrupt event happened
 	 * immediately after the last packet was received.
 	 */
-	if (!header_has_timestamp) {
+	if (!abi_has_iso_rx_timestamps(fwhandle)) {
 		cycle = interrupt->cycle;
 		cycle &= 0x1fff;
 		cycle += 8000;
@@ -209,7 +212,7 @@ flush_recv_packets(raw1394handle_t handle,
 		channel = (header >> 8) & 0x3f;
 		sy = header & 0x0f;
 
-		if (header_has_timestamp)
+		if (abi_has_iso_rx_timestamps(fwhandle))
 			cycle = be32_to_cpu(*p++) & 0x1fff;
 		else {
 			cycle++;
@@ -293,6 +296,8 @@ static int handle_iso_event(raw1394handle_t handle,
 		int cycle;
 
 		fwhandle->iso.packet_count -= fwhandle->iso.irq_interval;
+
+		/* Check whether the ABI version provides iso tx timestamps. */
 		if (interrupt->header_length) {
 			/*
 			 * Take the cycle of the last packet transmitted, add
