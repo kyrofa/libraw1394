@@ -292,7 +292,7 @@ int raw1394_phy_packet_write (raw1394handle_t handle, quadlet_t data)
 		return -1;
 	}
 	if (handle->is_fw)
-		return fw_phy_packet_write(handle->mode.fw, data);
+		return fw_phy_packet_write(handle, data);
 	else
 		return ieee1394_phy_packet_write(handle, data);
 }

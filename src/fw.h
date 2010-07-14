@@ -159,9 +159,6 @@ int fw_arm_get_buf(fw_handle_t handle, nodeaddr_t start,
 		   size_t length, void *buf);
 int fw_echo_request(fw_handle_t handle, quadlet_t data);
 int fw_wake_up(fw_handle_t handle);
-int fw_phy_packet_write (fw_handle_t handle, quadlet_t data);
-int fw_start_phy_packet_write(fw_handle_t handle,
-		   quadlet_t data, unsigned long tag);
 int fw_start_read(fw_handle_t handle, nodeid_t node, nodeaddr_t addr,
 		   size_t length, quadlet_t *buffer, unsigned long tag);
 int fw_start_write(fw_handle_t handle, nodeid_t node, nodeaddr_t addr,
@@ -176,6 +173,8 @@ int fw_start_async_stream(fw_handle_t handle, unsigned int channel,
 		   unsigned int tag, unsigned int sy,
 		   unsigned int speed, size_t length, quadlet_t *data,
 		   unsigned long rawtag);
+int fw_start_phy_packet_write(fw_handle_t handle,
+		   quadlet_t data, unsigned long tag);
 int fw_start_async_send(fw_handle_t handle,
 		   size_t length, size_t header_length,
 		   unsigned int expect_response,
@@ -193,6 +192,7 @@ int fw_lock64(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 int fw_async_stream(raw1394handle_t handle, unsigned int channel,
 		   unsigned int tag, unsigned int sy, unsigned int speed,
 		   size_t length, quadlet_t *data);
+int fw_phy_packet_write(raw1394handle_t handle, quadlet_t data);
 int fw_async_send(fw_handle_t handle,
 		   size_t length, size_t header_length,
 		   unsigned int expect_response,

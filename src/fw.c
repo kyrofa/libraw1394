@@ -340,6 +340,16 @@ handle_device_event(raw1394handle_t handle,
 		       sizeof u->iso_resource);
 		return 0;
 #endif
+
+#ifdef FW_CDEV_EVENT_PHY_PACKET_SENT /* added in kernel 2.6.36 */
+	case FW_CDEV_EVENT_PHY_PACKET_SENT:
+		rc = u64_to_ptr(u->phy_packet.closure);
+		errcode = fw_to_raw1394_errcode(u->phy_packet.rcode);
+		tag = rc->tag;
+		free(rc);
+
+		return fwhandle->tag_handler(handle, tag, errcode);
+#endif
 	default:
 	case FW_CDEV_EVENT_ISO_INTERRUPT:
 		/* Never happens. */
@@ -987,20 +997,6 @@ int fw_wake_up(fw_handle_t handle)
 	return fw_echo_request(handle, 0);
 }
 
-int fw_phy_packet_write (fw_handle_t handle, quadlet_t data)
-{
-	errno = ENOSYS;
-	return -1;
-}
-
-int
-fw_start_phy_packet_write(fw_handle_t handle,
-			       quadlet_t data, unsigned long tag)
-{
-	errno = ENOSYS;
-	return -1;
-}
-
 static int
 send_request(fw_handle_t handle, int tcode,
 	     nodeid_t node, nodeaddr_t addr,
@@ -1222,6 +1218,47 @@ fw_start_async_stream(fw_handle_t handle, unsigned int channel,
 			    0, addr, length, data, 0, NULL, rawtag);
 }
 
+int
+fw_start_phy_packet_write(fw_handle_t handle, quadlet_t data, unsigned long tag)
+{
+#ifdef FW_CDEV_IOC_SEND_PHY_PACKET /* added in kernel 2.6.36 */
+	struct fw_cdev_send_phy_packet send_phy_packet;
+	struct request_closure *closure;
+	int retval;
+
+	if (handle->local_device == NULL) {
+		handle->err = -EPERM;
+		errno = EPERM;
+		return -1;
+	}
+
+	closure = malloc(sizeof *closure);
+	if (closure == NULL) {
+		handle->err = -RCODE_SEND_ERROR;
+		errno = fw_errcode_to_errno(handle->err);
+		return -1;
+	}
+
+	closure->data   = NULL;
+	closure->length = 0;
+	closure->tag    = tag;
+
+	send_phy_packet.closure    = ptr_to_u64(closure);
+	send_phy_packet.data[0]    =  be32_to_cpu(data);
+	send_phy_packet.data[1]    = ~be32_to_cpu(data);
+	send_phy_packet.generation = handle->local_device->generation;
+	retval = ioctl(handle->local_device->fd, FW_CDEV_IOC_SEND_PHY_PACKET,
+		       &send_phy_packet);
+	if (retval < 0)
+		free(closure);
+
+	return retval;
+#else
+	errno = ENOSYS;
+	handle->err = -errno;
+	return -1;
+#endif
+}
 
 int
 fw_start_async_send(fw_handle_t handle,
@@ -1355,6 +1392,32 @@ fw_async_stream(raw1394handle_t handle, unsigned int channel,
 
 	return send_request_sync(handle, TCODE_STREAM_DATA,
 				 0, addr, length, data, 0, NULL);
+}
+
+int
+fw_phy_packet_write(raw1394handle_t handle, quadlet_t data)
+{
+	fw_handle_t fwhandle = handle->mode.fw;
+	struct raw1394_reqhandle reqhandle;
+	struct sync_data sd = { 0, 0 };
+	int err;
+
+	reqhandle.callback = sync_callback;
+	reqhandle.data = &sd;
+
+	err = fw_start_phy_packet_write(fwhandle, data,
+					(unsigned long) &reqhandle);
+
+	while (!sd.done) {
+		if (err < 0)
+			return err;
+		err = fw_loop_iterate(handle);
+	}
+
+	fwhandle->err = sd.err;
+	errno = fw_errcode_to_errno(sd.err);
+
+	return (errno ? -1 : 0);
 }
 
 int
