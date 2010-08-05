@@ -588,7 +588,7 @@ void fw_iso_stop(fw_handle_t handle)
 	struct fw_cdev_stop_iso stop_iso;
 
 	stop_iso.handle = 0;
-	ioctl(handle->iso.fd, FW_CDEV_IOC_STOP_ISO);
+	ioctl(handle->iso.fd, FW_CDEV_IOC_STOP_ISO, &stop_iso);
 
 	handle->iso.head = handle->iso.buffer;
 	handle->iso.tail = handle->iso.buffer;
