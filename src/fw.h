@@ -69,7 +69,6 @@ struct device {
 
 struct request_closure {
 	void *data;
-	size_t length;
 	unsigned long tag;
 };
 

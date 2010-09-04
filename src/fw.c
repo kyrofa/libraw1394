@@ -303,8 +303,9 @@ handle_device_event(raw1394handle_t handle,
 	case FW_CDEV_EVENT_RESPONSE:
 		rc = u64_to_ptr(u->response.closure);
 
-		if (rc->data != NULL)
-			memcpy(rc->data, u->response.data, rc->length);
+		/* Kernel ensures that u->response.length does not overflow. */
+		if (rc->data != NULL && u->response.rcode == RCODE_COMPLETE)
+			memcpy(rc->data, u->response.data, u->response.length);
 
 		errcode = fw_to_raw1394_errcode(u->response.rcode);
 		tag = rc->tag;
@@ -1058,9 +1059,8 @@ node_id_ok:
 		return -1;
 	}
 
-	closure->data   = out;
-	closure->length = out_length;
-	closure->tag    = tag;
+	closure->data = out;
+	closure->tag  = tag;
 
 	request = (struct fw_cdev_send_request *) handle->buffer;
 	request->tcode      = tcode;
@@ -1239,9 +1239,8 @@ fw_start_phy_packet_write(fw_handle_t handle, quadlet_t data, unsigned long tag)
 		return -1;
 	}
 
-	closure->data   = NULL;
-	closure->length = 0;
-	closure->tag    = tag;
+	closure->data = NULL;
+	closure->tag  = tag;
 
 	send_phy_packet.closure    = ptr_to_u64(closure);
 	send_phy_packet.data[0]    =  be32_to_cpu(data);
