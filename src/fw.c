@@ -763,9 +763,6 @@ handle_arm_request(raw1394handle_t handle, struct address_closure *ac,
 	switch (tcode) {
 	case TCODE_WRITE_QUADLET_REQUEST:
 	case TCODE_WRITE_BLOCK_REQUEST:
-		printf("got write request, offset=0x%012llx, length=%d\n",
-		       offset, (int)length);
-
 		type = RAW1394_ARM_WRITE;
 		in_length = length;
 		response.rcode  = RCODE_COMPLETE;
@@ -775,9 +772,6 @@ handle_arm_request(raw1394handle_t handle, struct address_closure *ac,
 
 	case TCODE_READ_QUADLET_REQUEST:
 	case TCODE_READ_BLOCK_REQUEST:
-		printf("got read request, offset=0x%012llx, length=%d\n",
-		       offset, (int)length);
-
 		type = RAW1394_ARM_READ;
 		in_length = 0;
 		response.rcode = RCODE_COMPLETE;
