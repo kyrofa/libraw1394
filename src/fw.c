@@ -426,6 +426,7 @@ handle_inotify(raw1394handle_t handle, struct epoll_closure *ec,
 	ep.data.ptr = &fwhandle->devices[i].closure;
 	if (epoll_ctl(fwhandle->epoll_fd, EPOLL_CTL_ADD, fd, &ep) < 0) {
 		close(fd);
+		fwhandle->devices[i].fd = -1;
 		return -1;
 	}
 
