@@ -360,21 +360,16 @@ handle_device_event(raw1394handle_t handle,
 }
 
 static int
-handle_inotify(raw1394handle_t handle, struct epoll_closure *ec,
-	       __uint32_t events)
+process_inotify_event(fw_handle_t fwhandle, struct inotify_event *event)
 {
-	fw_handle_t fwhandle = handle->mode.fw;
-	struct inotify_event *event;
 	char filename[32];
 	struct fw_cdev_get_info info;
 	struct fw_cdev_event_bus_reset reset;
 	struct epoll_event ep;
-	int i, len, fd, phy_id, fname_str_sz;
+	int i, fd, phy_id, fname_str_sz;
 
-	event = (struct inotify_event *) fwhandle->buffer;
-	len = read(fwhandle->inotify_fd, event, BUFFER_SIZE);
 	if (!(event->mask & IN_CREATE))
-		return -1;
+		return 0;
 	if (!is_fw_device_name(event->name))
 		return 0;
 	snprintf(filename, sizeof filename, FW_DEVICE_DIR "/%s", event->name);
@@ -431,6 +426,30 @@ handle_inotify(raw1394handle_t handle, struct epoll_closure *ec,
 	}
 
 	return 0;
+}
+
+static int
+handle_inotify(raw1394handle_t handle, struct epoll_closure *ec,
+	       __uint32_t events)
+{
+	fw_handle_t fwhandle = handle->mode.fw;
+	struct inotify_event *event;
+	int len;
+	int retval = 0;
+
+	event = (struct inotify_event *) fwhandle->buffer;
+	len = read(fwhandle->inotify_fd, event, BUFFER_SIZE);
+
+	while (len >= sizeof(struct inotify_event)) {
+		retval = process_inotify_event(fwhandle, event);
+		if (retval == -1)
+			break;
+		len -= sizeof(struct inotify_event) + event->len;
+		event = (struct inotify_event *) ((char *)event +
+				(sizeof(struct inotify_event) + event->len));
+	}
+
+	return retval;
 }
 
 int fw_loop_iterate(raw1394handle_t handle)
