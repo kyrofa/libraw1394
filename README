@@ -11,10 +11,14 @@ send to and receive from other nodes without requiring a kernel driver for the
 protocol in question.
 
 	The reason for making a library the interface to the kernel is to avoid
-a program dependancy on the kernel version, which would hinder development and
+a program dependency on the kernel version, which would hinder development and
 optimization of raw1394.  If development changed the protocol and made it
 incompatible with previous versions only the libraw1394 has to be upgraded to
 match the kernel version (instead of all applications).
+
+	Since version 2, libraw1394 also works with the kernel driver
+firewire-core.  libraw1394's role has thus become that of a raw1394
+compatibility layer for existing applications when running on firewire-core.
 
 
 2. Copyleft
@@ -58,11 +62,21 @@ correctly links with libraw1394.
 
 	Send questions, suggestions, bug reports and patches to the mailing
 list linux1394-devel@lists.sourceforge.net.  This list is open for posting
-without prior subscription, and replies will usually be Cc'd to you.
+without prior subscription, and replies will usually be Cc'd to you.  Visit
+http://ieee1394.wiki.kernel.org/ for links to list subscription interfaces and
+list archives.
 
-	Maintainer of libraw1394 is currently Dan Dennedy.  See the file
+	Maintainer of libraw1394 is currently Stefan Richter.  See the file
 AUTHORS for a complete list of contributors to libraw1394.
 
-	Visit http://ieee1394.wiki.kernel.org/ for more information, including
-links to mailing list subscription interfaces, to list archives, and to the
-libraw1394 source repository.
+	Source repository:
+git://git.kernel.org/pub/scm/libs/ieee1394/libraw1394.git
+http://git.kernel.org/pub/scm/libs/ieee1394/libraw1394.git
+https://git.kernel.org/pub/scm/libs/ieee1394/libraw1394.git
+
+	Gitweb:
+http://git.kernel.org/?p=libs/ieee1394/libraw1394.git
+
+	Release tarballs:
+https://www.kernel.org/pub/linux/libs/ieee1394/
+ftp://ftp.kernel.org/pub/linux/libs/ieee1394/

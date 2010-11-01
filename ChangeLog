@@ -1,3 +1,65 @@
+2010-11-01  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * configure.ac, Changelog, NEWS etc.: update to version 2.0.6
+
+2010-10-15  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * arm on firewire-core: Remove leftover debug printfs
+
+2010-09-05  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * Be more careful when copying response payloads on firewire-core
+
+2010-08-05  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * Fix FCP and ARM source node ID on firewire-core
+
+  * Fix raw1394_iso_stop on firewire-core
+
+2010-07-14  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * Implement raw1394_(start_)phy_packet_write() on firewire-core
+
+2010-06-20  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * Filter incoming requests per card
+
+  * Rename a few kernel ABI testing helpers
+
+  * Do not use a random FW_CDEV_VERSION as our implemented ABI version
+
+2010-06-05  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * tools/dumpiso: Add write() return code checks, fix harmless format string bug
+
+  * tools/testlibraw: Fix a harmless format string bug
+
+  * Always imply iso shutdown in fw_destroy_handle
+
+  * Treat the kernel's iso context handle as opaque item
+
+  * Add missing malloc failure checks
+
+2010-04-16  Peter Hurley <phurley@charter.net>
+
+  * Fix for overlooked device HUP with 'firewire' stack
+
+2010-01-31  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * Fix documentation of return values of raw1394_start_ family of functions
+
+  * doc: let "make clean" remove generated HTML files
+
+  * Document contact address (linux1394-devel) more clearly
+
+2010-01-28  Sebastian Schueppel <sebastian.schueppel@etit.tu-chemnitz.de>
+
+  * update README: replace outdated link to wiki
+
+2010-01-09  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * Fix "make doc".
+
 2009-12-26  Dan Dennedy <dan@dennedy.org>
 
   * NEWS, configure.ac: Set to version 2.0.5. 

@@ -1,5 +1,10 @@
 libraw1394 Release Notes
 
+Version 2.0.6:
+- Bug fixes, notably for FCP and request reception on firewire-core.
+  Note, several of these updates are only built into libraw1394 if
+  linux-headers 2.6.36 or later are present at build time.
+
 Version 2.0.5:
 - Bug fixes, in particular, for isochronous transmission and FFADO project.
 
