@@ -21,6 +21,34 @@
 #include "fw.h"
 #include "raw1394_private.h"
 
+static int calculate_start_cycle(fw_handle_t handle)
+{
+	int cycle;
+	u_int32_t cycle_timer;
+	u_int64_t local_time;
+
+	cycle = handle->iso.start_on_cycle;
+	if (cycle < 0)
+		return cycle;
+
+	/* libraw1394's cycle is always mod 8000 */
+	cycle &= 0x1fff;
+
+	/* get the seconds from the current value of the cycle timer */
+	if (fw_read_cycle_timer(handle, &cycle_timer, &local_time) != 0)
+		return cycle;
+	cycle += (cycle_timer & 0xfe000000) >> 12;
+
+	/*
+	 * For compatibility with raw1394, add one second
+	 * "to give some extra time for DMA to start".
+	 * TODO: are there still races due to cycle rollover?
+	 */
+	cycle += 1 << 13;
+
+	return cycle & 0x7fff;
+}
+
 static int
 queue_packet(fw_handle_t handle,
 	     unsigned int length, unsigned int header_length,
@@ -140,7 +168,7 @@ int fw_iso_xmit_start(raw1394handle_t handle, int start_on_cycle,
 	if (fwhandle->iso.prebuffer <= fwhandle->iso.packet_count) {
 		start_iso.sync   = 0; /* unused */
 		start_iso.tags   = 0; /* unused */
-		start_iso.cycle  = start_on_cycle;
+		start_iso.cycle  = calculate_start_cycle(fwhandle);
 		start_iso.handle = fwhandle->iso.kernel_handle;
 
 		retval = ioctl(fwhandle->iso.fd,
@@ -258,7 +286,8 @@ int fw_iso_recv_start(fw_handle_t handle, int start_on_cycle,
 
 	queue_recv_packets(handle);
 
-	start_iso.cycle = start_on_cycle;
+	handle->iso.start_on_cycle = start_on_cycle;
+	start_iso.cycle = calculate_start_cycle(handle);
 	start_iso.tags =
 		tag_mask == -1 ? FW_CDEV_ISO_CONTEXT_MATCH_ALL_TAGS : tag_mask;
 	/* sync is documented as 'not used' */
@@ -353,7 +382,7 @@ int fw_iso_xmit_write(raw1394handle_t handle, unsigned char *data,
 	    fwhandle->iso.packet_count >= fwhandle->iso.prebuffer) {
 		/* Set this to 0 to indicate that we're running. */
 		fwhandle->iso.prebuffer = 0;
-		start_iso.cycle  = fwhandle->iso.start_on_cycle;
+		start_iso.cycle  = calculate_start_cycle(fwhandle);
 		start_iso.handle = fwhandle->iso.kernel_handle;
 
 		retval = ioctl(fwhandle->iso.fd,
