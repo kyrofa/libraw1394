@@ -51,10 +51,8 @@ queue_packet(fw_handle_t handle,
 	if (handle->iso.head + handle->iso.max_packet_size > handle->iso.buffer_end)
 		handle->iso.head = handle->iso.buffer;
 
-	/* Queue the packets in the kernel if we filled up the packets
-	 * array or wrapped the payload buffer. */
-	if (handle->iso.packet_index == handle->iso.irq_interval ||
-	    handle->iso.head == handle->iso.buffer) {
+	/* queue each packet individually */
+	if (1) {
 		queue_iso.packets = ptr_to_u64(handle->iso.packets);
 		queue_iso.size    = handle->iso.packet_index * sizeof handle->iso.packets[0];
 		queue_iso.data    = ptr_to_u64(handle->iso.first_payload);
