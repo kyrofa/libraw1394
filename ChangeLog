@@ -1,3 +1,15 @@
+2011-03-08  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * configure.ac, Changelog, NEWS: update to version 2.0.7
+
+2011-02-25  Clemens Ladisch <clemens@ladisch.de>
+
+  * do not delay iso packet queueing
+
+2011-02-24  Clemens Ladisch <clemens@ladisch.de>
+
+  * fix start_on_cycle on firewire-core
+
 2010-11-01  Stefan Richter <stefanr@s5r6.in-berlin.de>
 
   * configure.ac, Changelog, NEWS etc.: update to version 2.0.6

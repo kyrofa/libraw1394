@@ -1,5 +1,8 @@
 libraw1394 Release Notes
 
+Version 2.0.7:
+- Fix playback to some audio devices based on the DICE chipset.
+
 Version 2.0.6:
 - Bug fixes, notably for FCP and request reception on firewire-core.
   Note, several of these updates are only built into libraw1394 if
