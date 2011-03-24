@@ -1165,6 +1165,15 @@ const char *raw1394_get_libversion(void);
 int raw1394_update_config_rom(raw1394handle_t handle, const quadlet_t
         *new_rom, size_t size, unsigned char rom_version);
 
+int raw1394_add_config_rom_descriptor(raw1394handle_t handle,
+	const quadlet_t	immediate_key,
+	const quadlet_t	key,
+	const quadlet_t *new_rom_directory,
+	size_t size,
+	u_int32_t *out_token);
+
+int raw1394_remove_config_rom_descriptor(raw1394handle_t handle,
+	u_int32_t token);
 
 /**
  * raw1394_get_config_rom - reads the current version of the configuration ROM of a host

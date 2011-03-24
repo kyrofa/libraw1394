@@ -1543,6 +1543,41 @@ fw_update_config_rom(fw_handle_t handle, const quadlet_t *new_rom,
 }
 
 int
+fw_add_config_rom_descriptor(fw_handle_t handle,
+	const quadlet_t	immediate_key,
+	const quadlet_t	key,
+	const quadlet_t *new_rom_directory,
+	size_t size,
+	__u32 *out_token)
+{
+	struct fw_cdev_add_descriptor request;
+	int retval;
+
+	request.immediate	= immediate_key;
+	request.key		= key;
+	request.data		= ptr_to_u64(new_rom_directory);
+	request.length		= size;
+	request.handle		= 0;
+
+	retval = ioctl(handle->local_device->fd, FW_CDEV_IOC_ADD_DESCRIPTOR,
+		       &request);
+	if (retval < 0)
+		return -1;
+
+	*out_token = request.handle;
+	return 0;
+}
+
+int
+fw_remove_config_rom_descriptor(fw_handle_t handle, __u32 token)
+{
+	struct fw_cdev_remove_descriptor request = {token};
+
+	return ioctl(handle->local_device->fd, FW_CDEV_IOC_REMOVE_DESCRIPTOR,
+		     &request);
+}
+
+int
 fw_get_config_rom(fw_handle_t handle, quadlet_t *buffer,
 		       size_t buffersize, size_t *rom_size,
 		       unsigned char *rom_version)
