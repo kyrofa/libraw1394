@@ -1310,10 +1310,62 @@ send_request_sync(raw1394handle_t handle, int tcode,
 }
 
 int
+read_config_rom(fw_handle_t handle, nodeid_t node, nodeaddr_t addr,
+	     size_t length, quadlet_t *buffer)
+{
+	struct fw_cdev_get_info get_info;
+	quadlet_t rom[256];
+	int offset, fd, i, err;
+
+	if (node > handle->reset.root_node_id) {
+		handle->err = -RCODE_NO_ACK;
+		errno = fw_errcode_to_errno(handle->err);
+		return -1;
+	}
+
+	i = handle->nodes[node & 0x3f];
+	if (i == -1) {
+		handle->err = -RCODE_NO_ACK;
+		errno = fw_errcode_to_errno(handle->err);
+		return -1;
+	}
+
+	if (handle->generation != handle->devices[i].generation) {
+		handle->err = -RCODE_GENERATION;
+		errno = fw_errcode_to_errno(handle->err);
+		return -1;
+	}
+	fd = handle->devices[i].fd;
+
+	memset(&get_info, 0, sizeof(get_info));
+	memset(&rom,      0, sizeof(rom));
+	get_info.version    = IMPLEMENTED_CDEV_ABI_VERSION;
+	get_info.rom        = ptr_to_u64(rom);
+	get_info.rom_length = sizeof(rom);
+	get_info.bus_reset  = 0;
+
+	err = ioctl(fd, FW_CDEV_IOC_GET_INFO, &get_info);
+	if (err)
+		return err;
+
+	offset = (addr - CSR_REGISTER_BASE - CSR_CONFIG_ROM) / 4;
+	for (i = 0; i < length / 4; i++)
+		buffer[i] = cpu_to_be32(rom[offset + i]);
+
+	return 0;
+}
+
+int
 fw_read(raw1394handle_t handle, nodeid_t node, nodeaddr_t addr,
 	     size_t length, quadlet_t *buffer)
 {
 	int tcode;
+
+	if (addr >= CSR_REGISTER_BASE + CSR_CONFIG_ROM &&
+	    addr + length <= CSR_REGISTER_BASE + CSR_CONFIG_ROM_END &&
+	    !(addr & 3) && length > 0 && !(length & 3))
+		return read_config_rom(handle->mode.fw,
+				       node, addr, length, buffer);
 
 	if (length == 4)
 		tcode = TCODE_READ_QUADLET_REQUEST;
