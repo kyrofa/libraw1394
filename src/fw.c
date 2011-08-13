@@ -17,6 +17,7 @@
 #include <sys/ioctl.h>
 #include <sys/epoll.h>
 #include <sys/inotify.h>
+#include <time.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -1281,7 +1282,7 @@ sync_callback(raw1394handle_t handle, void *data, raw1394_errcode_t err)
 }
 
 static int
-send_request_sync(raw1394handle_t handle, int tcode,
+_send_request_sync(raw1394handle_t handle, int tcode,
 		  nodeid_t node, nodeaddr_t addr,
 		  size_t in_length, void *in, size_t out_length, void *out)
 {
@@ -1307,6 +1308,33 @@ send_request_sync(raw1394handle_t handle, int tcode,
 	errno = fw_errcode_to_errno(sd.err);
 
 	return (errno ? -1 : 0);
+}
+
+static int
+send_request_sync(raw1394handle_t handle, int tcode,
+		  nodeid_t node, nodeaddr_t addr,
+		  size_t in_length, void *in, size_t out_length, void *out)
+{
+	static const struct timespec delay = {
+		.tv_sec  = 0,
+		.tv_nsec = 10 * 1000 * 1000,
+	};
+	fw_handle_t fwhandle = handle->mode.fw;
+	int i, ret;
+
+	/*
+	 * Retry after ack-busy, but give the responder some breathing room.
+	 * 10 ms delay between retries is proper for ancient camcorders.
+	 */
+	for (i = 1; ; i++) {
+		ret = _send_request_sync(handle, tcode, node, addr,
+					 in_length, in, out_length, out);
+		if (ret == 0 || i == 10 || fwhandle->err != -RCODE_BUSY)
+			break;
+		nanosleep(&delay, NULL);
+	}
+
+	return ret;
 }
 
 int
