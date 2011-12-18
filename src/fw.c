@@ -1355,7 +1355,7 @@ send_request_sync(raw1394handle_t handle, int tcode,
 	return ret;
 }
 
-int
+static int
 read_config_rom(fw_handle_t handle, nodeid_t node, nodeaddr_t addr,
 	     size_t length, quadlet_t *buffer)
 {
