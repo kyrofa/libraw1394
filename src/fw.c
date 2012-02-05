@@ -434,16 +434,14 @@ handle_inotify(raw1394handle_t handle, struct epoll_closure *ec,
 {
 	fw_handle_t fwhandle = handle->mode.fw;
 	struct inotify_event *event;
-	int len;
+	ssize_t len;
 	int retval = 0;
 
 	event = (struct inotify_event *) fwhandle->buffer;
 	len = read(fwhandle->inotify_fd, event, BUFFER_SIZE);
 
 	while (len >= sizeof(struct inotify_event)) {
-		retval = process_inotify_event(fwhandle, event);
-		if (retval == -1)
-			break;
+		retval |= process_inotify_event(fwhandle, event);
 		len -= sizeof(struct inotify_event) + event->len;
 		event = (struct inotify_event *) ((char *)event +
 				(sizeof(struct inotify_event) + event->len));
