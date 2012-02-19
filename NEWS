@@ -1,5 +1,14 @@
 libraw1394 Release Notes
 
+Version 2.0.8:
+- Configuration ROM access via raw1394_read() is dramatically faster and
+  very robust now.  We read the kernel's Configuration ROM cache instead
+  of the actual register of the FireWire device.
+- Internally retry raw1394_read/write/lock/lock64() after ack-busy
+  response.  Most notably this fixes control of some older Panasonic and
+  Grundig camcorders.
+- small bug fixes
+
 Version 2.0.7:
 - Fix playback to some audio devices based on the DICE chipset.
 

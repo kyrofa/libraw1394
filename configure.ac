@@ -1,6 +1,6 @@
 # process this file with autoconf to get a configure script
 
-AC_INIT(libraw1394, 2.0.7)
+AC_INIT(libraw1394, 2.0.8)
 AC_CONFIG_SRCDIR(src/raw1394.h)
 AM_CONFIG_HEADER(config.h)
 
