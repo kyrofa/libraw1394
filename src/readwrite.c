@@ -33,7 +33,7 @@
 #if HAVE_VALGRIND_VALGRIND_H
 # include <valgrind/memcheck.h>
 # ifndef VALGRIND_MAKE_MEM_DEFINED_IF_ADDRESSABLE
-#  define VALGRIND_MAKE_MEM_DEFINED_IF_ADDRESSABLE(m, n) do {} while(0)
+#  define VALGRIND_MAKE_MEM_DEFINED_IF_ADDRESSABLE(m, n) do {} while(0)
 # endif
 #else
 # define VALGRIND_MAKE_MEM_DEFINED_IF_ADDRESSABLE(m, n) do {} while(0)
