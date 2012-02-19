@@ -851,7 +851,7 @@ handle_arm_request(raw1394handle_t handle, struct address_closure *ac,
 
 	rrb = malloc(sizeof *rrb + in_length + response.length);
 	if (rrb == NULL) {
-		errno == ENOMEM;
+		errno = ENOMEM;
 		return -1;
 	}
 
