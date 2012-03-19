@@ -431,9 +431,14 @@ int fw_iso_xmit_sync(raw1394handle_t handle)
 
 int fw_iso_recv_flush(fw_handle_t handle)
 {
-	/* FIXME: huh, we'll need kernel support here... */
+#ifdef FW_CDEV_IOC_FLUSH_ISO /* added in kernel 3.4 */
+	struct fw_cdev_flush_iso flush;
 
+	flush.handle = handle->iso.kernel_handle;
+	return ioctl(handle->iso.fd, FW_CDEV_IOC_FLUSH_ISO, &flush);
+#else
 	return 0;
+#endif /* defined(FW_CDEV_IOC_FLUSH_ISO) */
 }
 
 static unsigned int
