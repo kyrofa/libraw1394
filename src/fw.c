@@ -27,13 +27,9 @@
 #include "raw1394_private.h"
 
 /*
- * ABI version history is documented in linux/firewire-cdev.h.
+ * ABI version history is documented in firewire-cdev.h.
  */
-#ifdef FW_CDEV_EVENT_REQUEST2
 #define IMPLEMENTED_CDEV_ABI_VERSION	4
-#else
-#define IMPLEMENTED_CDEV_ABI_VERSION	2
-#endif
 
 int
 fw_errcode_to_errno(raw1394_errcode_t errcode)
@@ -324,7 +320,6 @@ handle_device_event(raw1394handle_t handle,
 				    u->request.handle,
 				    u->request.length, u->request.data);
 
-#ifdef FW_CDEV_EVENT_REQUEST2 /* added in kernel 2.6.36 */
 	case FW_CDEV_EVENT_REQUEST2:
 		ac = u64_to_ptr(u->request.closure);
 		return ac->callback(handle, ac, u->request2.tcode,
@@ -333,17 +328,13 @@ handle_device_event(raw1394handle_t handle,
 				    u->request2.card,
 				    u->request2.handle,
 				    u->request2.length, u->request2.data);
-#endif
 
-#ifdef FW_CDEV_EVENT_ISO_RESOURCE_ALLOCATED /* added in kernel 2.6.30 */
 	case FW_CDEV_EVENT_ISO_RESOURCE_ALLOCATED:
 	case FW_CDEV_EVENT_ISO_RESOURCE_DEALLOCATED:
 		memcpy(u64_to_ptr(u->iso_resource.closure), u,
 		       sizeof u->iso_resource);
 		return 0;
-#endif
 
-#ifdef FW_CDEV_EVENT_PHY_PACKET_SENT /* added in kernel 2.6.36 */
 	case FW_CDEV_EVENT_PHY_PACKET_SENT:
 		rc = u64_to_ptr(u->phy_packet.closure);
 		errcode = fw_to_raw1394_errcode(u->phy_packet.rcode);
@@ -351,7 +342,7 @@ handle_device_event(raw1394handle_t handle,
 		free(rc);
 
 		return fwhandle->tag_handler(handle, tag, errcode);
-#endif
+
 	default:
 	case FW_CDEV_EVENT_ISO_INTERRUPT:
 		/* Never happens. */
@@ -914,9 +905,8 @@ fw_arm_register(fw_handle_t handle, nodeaddr_t start,
 	request.offset = start;
 	request.length = length;
 	request.closure = ptr_to_u64(&allocation->closure);
-#if IMPLEMENTED_CDEV_ABI_VERSION >= 4
 	request.region_end = start + length;
-#endif
+
 	retval = ioctl(handle->ioctl_fd, FW_CDEV_IOC_ALLOCATE, &request);
 	if (retval < 0) {
 		free(allocation);
@@ -1022,24 +1012,16 @@ send_request(fw_handle_t handle, int tcode,
 	int ioctl_nr = FW_CDEV_IOC_SEND_REQUEST;
 	int fd, i, retval;
 
-#ifdef FW_CDEV_IOC_SEND_STREAM_PACKET /* added in kernel 2.6.30 */
 	if (tcode == TCODE_STREAM_DATA) {
 		ioctl_nr = FW_CDEV_IOC_SEND_STREAM_PACKET;
 		fd = handle->ioctl_fd;
 	}
-#else
-	if (tcode == TCODE_STREAM_DATA) {
-		errno = ENOSYS;
-		return -1;
-	}
-#endif
 
-#ifdef FW_CDEV_IOC_SEND_BROADCAST_REQUEST /* added in kernel 2.6.30 */
 	if (node == 0xffff) {
 		ioctl_nr = FW_CDEV_IOC_SEND_BROADCAST_REQUEST;
 		fd = handle->ioctl_fd;
 	}
-#endif
+
 	if (ioctl_nr != FW_CDEV_IOC_SEND_REQUEST)
 		goto node_id_ok;
 
@@ -1083,7 +1065,6 @@ node_id_ok:
 	request->data       = ptr_to_u64(in);
 	request->generation = handle->generation;
 
-#ifdef FW_CDEV_IOC_SEND_STREAM_PACKET
 	if (tcode == TCODE_STREAM_DATA) {
 		struct fw_cdev_send_stream_packet *p
 		    = (struct fw_cdev_send_stream_packet *) request;
@@ -1097,7 +1078,6 @@ node_id_ok:
 		p->generation = handle->generation;
 		p->speed      = (addr >> 4) & 0x7;
 	}
-#endif
 
 	retval = ioctl(fd, ioctl_nr, request);
 	if (retval < 0)
@@ -1234,7 +1214,6 @@ fw_start_async_stream(fw_handle_t handle, unsigned int channel,
 int
 fw_start_phy_packet_write(fw_handle_t handle, quadlet_t data, unsigned long tag)
 {
-#ifdef FW_CDEV_IOC_SEND_PHY_PACKET /* added in kernel 2.6.36 */
 	struct fw_cdev_send_phy_packet send_phy_packet;
 	struct request_closure *closure;
 	int retval;
@@ -1265,11 +1244,6 @@ fw_start_phy_packet_write(fw_handle_t handle, quadlet_t data, unsigned long tag)
 		free(closure);
 
 	return retval;
-#else
-	errno = ENOSYS;
-	handle->err = -errno;
-	return -1;
-#endif
 }
 
 int
@@ -1540,9 +1514,8 @@ fw_start_fcp_listen(fw_handle_t handle)
 	request.offset = CSR_REGISTER_BASE + CSR_FCP_COMMAND;
 	request.length = CSR_FCP_END - CSR_FCP_COMMAND;
 	request.closure = ptr_to_u64(closure);
-#if IMPLEMENTED_CDEV_ABI_VERSION >= 4
 	request.region_end = CSR_REGISTER_BASE + CSR_FCP_END;
-#endif
+
 	if (ioctl(handle->ioctl_fd, FW_CDEV_IOC_ALLOCATE, &request) < 0)
 		return -1;
 
@@ -1598,8 +1571,6 @@ fw_get_config_rom(fw_handle_t handle, quadlet_t *buffer,
 	return 0;
 }
 
-#ifdef FW_CDEV_IOC_ALLOCATE_ISO_RESOURCE_ONCE /* added in kernel 2.6.30 */
-
 static int
 iso_resource_modify(raw1394handle_t handle, unsigned int bandwidth,
 		    int channel, enum raw1394_modify_mode mode)
@@ -1645,32 +1616,11 @@ iso_resource_modify(raw1394handle_t handle, unsigned int bandwidth,
 	return 0;
 }
 
-static inline int abi_has_iso_resource_management(raw1394handle_t handle)
-{
-	return handle->mode.fw->abi_version >= 2;
-}
-
-#else
-
-static inline int
-iso_resource_modify(raw1394handle_t handle, unsigned int bandwidth,
-		    int channel, enum raw1394_modify_mode mode)
-{
-	return -1;
-}
-
-static inline int abi_has_iso_resource_management(raw1394handle_t handle)
-{
-	return 0;
-}
-
-#endif  /* defined(FW_CDEV_IOC_ALLOCATE_ISO_RESOURCE_ONCE) */
-
 int
 fw_bandwidth_modify(raw1394handle_t handle, unsigned int bandwidth,
 		    enum raw1394_modify_mode mode)
 {
-	if (abi_has_iso_resource_management(handle))
+	if (handle->mode.fw->abi_version >= 2)
 		return iso_resource_modify(handle, bandwidth, -1, mode);
 	else
 		return ieee1394_bandwidth_modify(handle, bandwidth, mode);
@@ -1680,7 +1630,7 @@ int
 fw_channel_modify(raw1394handle_t handle, unsigned int channel,
 		  enum raw1394_modify_mode mode)
 {
-	if (abi_has_iso_resource_management(handle))
+	if (handle->mode.fw->abi_version >= 2)
 		return iso_resource_modify(handle, 0, channel, mode);
 	else
 		return ieee1394_channel_modify(handle, channel, mode);

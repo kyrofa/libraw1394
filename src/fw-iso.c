@@ -431,14 +431,10 @@ int fw_iso_xmit_sync(raw1394handle_t handle)
 
 int fw_iso_recv_flush(fw_handle_t handle)
 {
-#ifdef FW_CDEV_IOC_FLUSH_ISO /* added in kernel 3.4 */
 	struct fw_cdev_flush_iso flush;
 
 	flush.handle = handle->iso.kernel_handle;
 	return ioctl(handle->iso.fd, FW_CDEV_IOC_FLUSH_ISO, &flush);
-#else
-	return 0;
-#endif /* defined(FW_CDEV_IOC_FLUSH_ISO) */
 }
 
 static unsigned int
@@ -655,7 +651,6 @@ void fw_iso_shutdown(fw_handle_t handle)
 int fw_read_cycle_timer(fw_handle_t handle,
 			u_int32_t *cycle_timer, u_int64_t *local_time)
 {
-#ifdef FW_CDEV_IOC_GET_CYCLE_TIMER /* added in kernel 2.6.24 */
 	int err;
 	struct fw_cdev_get_cycle_timer ctr = { 0 };
 
@@ -665,8 +660,4 @@ int fw_read_cycle_timer(fw_handle_t handle,
 		*local_time  = ctr.local_time;
 	}
 	return err;
-#else
-	errno = ENOSYS;
-	return -1;
-#endif /* defined(FW_CDEV_IOC_GET_CYCLE_TIMER) */
 }
