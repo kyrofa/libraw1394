@@ -14,7 +14,9 @@
 
 #include <stdlib.h>
 #include <byteswap.h>
-#include <linux/firewire-cdev.h>
+
+#include "firewire-constants.h"
+#include "firewire-cdev.h"
 #include "raw1394.h"
 #include "csr.h"
 #include "config.h"

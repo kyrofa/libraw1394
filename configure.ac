@@ -30,13 +30,6 @@ if test x$with_valgrind = xyes ; then
     AC_CHECK_HEADERS(valgrind/valgrind.h)
 fi
 
-AC_ARG_WITH(fw-dir,[  --with-fw-dir=<dir>  Path to kernel firewire headers])
-if ! test -z "$with_fw_dir" ; then
-   FW_DIR="$with_fw_dir"
-   AC_SUBST(FW_DIR)
-fi
-AM_CONDITIONAL([WITH_FW_DIR], [! test -z "$with_fw_dir"])
-
 AC_ARG_WITH(fw-device-prefix,
 	[  --with-fw-device-prefix=<prefix>  Prefix of firewire device file names (default "fw").],
 	[FW_DEVICE_PREFIX="\"$withval\""], [FW_DEVICE_PREFIX="\"fw\""])

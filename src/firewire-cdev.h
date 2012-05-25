@@ -28,7 +28,6 @@
 
 #include <linux/ioctl.h>
 #include <linux/types.h>
-#include <linux/firewire-constants.h>
 
 /* available since kernel version 2.6.22 */
 #define FW_CDEV_EVENT_BUS_RESET				0x00

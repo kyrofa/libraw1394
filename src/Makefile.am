@@ -6,12 +6,6 @@ lib_LTLIBRARIES = libraw1394.la
 
 libraw1394_la_LDFLAGS = -version-info @lt_major@:@lt_revision@:@lt_age@
 
-if WITH_FW_DIR
-INCLUDES = -I$(FW_DIR)
-else
-INCLUDES =
-endif
-
 libraw1394_la_SOURCES =   \
 	main.c            \
 	eventloop.c       \
@@ -27,8 +21,9 @@ libraw1394_la_SOURCES =   \
 	dispatch.c        \
 	fw.c              \
 	fw-iso.c          \
-	fw.h
-
+	fw.h              \
+	firewire-cdev.h   \
+	firewire-constants.h
 
 # headers to be installed
 pkginclude_HEADERS = raw1394.h csr.h ieee1394.h
