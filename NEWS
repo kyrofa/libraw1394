@@ -1,5 +1,15 @@
 libraw1394 Release Notes
 
+Version 2.0.9:
+- Fix that raw1394_iso_recv_flush() did not have any effect when running
+  on firewire-core alias juju kernel drivers.  Requires kernel 3.4 or
+  later.
+- Remove build-time dependency on linux-headers.  Before, if too old
+  kernel headers were present on the build system, features and fixes
+  would be silently omitted from the build.
+- Remove --with-fw-dir configure switch which is no longer useful.
+- Janitorial fixes.
+
 Version 2.0.8:
 - Configuration ROM access via raw1394_read() is dramatically faster and
   very robust now.  We read the kernel's Configuration ROM cache instead
