@@ -1160,18 +1160,69 @@ const char *raw1394_get_libversion(void);
  * Returns: -1 (failure) if the version is incorrect, 
  * -2 (failure) if the new rom version is too big, or
  * 0 for success
+ *
+ * This function always fails on current kernels.
  **/
 
 int raw1394_update_config_rom(raw1394handle_t handle, const quadlet_t
         *new_rom, size_t size, unsigned char rom_version);
 
-int raw1394_add_config_rom_descriptor(raw1394handle_t handle,
-	const quadlet_t	immediate_key,
-	const quadlet_t	key,
-	const quadlet_t *new_rom_directory,
-	size_t size,
-	u_int32_t *out_token);
+/**
+ * raw1394_add_config_rom_descriptor - add contents to local Configuration ROM
+ * @handle: libraw1394 handle
+ * @token: handle of the Configuration ROM contents, written by libraw1394
+ * @immediate_key: if non-zero, immediate key to insert before pointer
+ * @key: upper 8 bits of root directory pointer
+ * @data: pointer to contents of descriptor block
+ * @size: size of descriptor block data, in bytes
+ *
+ * Add a directory, descriptor, or leaf block and optionally a preceding
+ * immediate key to the local node's Configuration ROM.  If successful, the
+ * kernel adds the descriptor and generates a bus reset to signal the change of
+ * the Configuration ROM to other nodes.  Note, on a system with multiple cards
+ * (multiple libraw1394 ports), the Configuration ROM of all local nodes is
+ * changed, not just the one which corresponds to the @handle.
+ *
+ * The changes to the Configuration ROM will be reverted when the client exits,
+ * or by raw1394_destroy_handle(), or by raw1394_remove_config_rom_descriptor().
+ * In order to be able to call the latter, the client needs to provide @token as
+ * pointer to an u_int32_t variable; otherwise @token may be NULL.
+ *
+ * @key specifies the upper 8 bits of the descriptor root directory pointer and
+ * @data and @size specify the contents.  The @key should be of the form
+ * 0xXX000000.  The offset part of the root directory entry will be filled in by
+ * the kernel.
+ *
+ * If not 0, @immediate_key specifies an immediate key which will be inserted
+ * before the root directory pointer.
+ *
+ * A directory can be added together with further subdirectories or descriptors
+ * or other leaves; just provide all data concatenated in @data and set the
+ * respective offsets in your directory entries.
+ *
+ * The CRC in the first quadlet of any directory, subdirectory, leaf or
+ * descriptor may be left blank.  The kernel will compute and fill in these
+ * CRCs.
+ *
+ * @immediate_key, @key, and @data array elements are host-endian quadlets.
+ *
+ * Returns: 0 on success or -1 on failure (sets errno)
+ *
+ * History: New function in libraw1394 v2.1.0.
+ **/
+int raw1394_add_config_rom_descriptor(raw1394handle_t handle, u_int32_t *token,
+	quadlet_t immediate_key, quadlet_t key,
+	const quadlet_t *data, size_t size);
 
+/**
+ * raw1394_remove_config_rom_descriptor - remove contents from Configuration ROM
+ * @handle: libraw1394 handle
+ * @token: handle of the Configuration ROM contents
+ *
+ * Returns: 0 on success or -1 on failure (sets errno)
+ *
+ * History: New function in libraw1394 v2.1.0.
+ **/
 int raw1394_remove_config_rom_descriptor(raw1394handle_t handle,
 	u_int32_t token);
 

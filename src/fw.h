@@ -202,13 +202,10 @@ int fw_start_fcp_listen(fw_handle_t handle);
 int fw_stop_fcp_listen(fw_handle_t handle);
 int fw_update_config_rom(fw_handle_t handle, const quadlet_t *new_rom,
 		   size_t size, unsigned char rom_version);
-int fw_add_config_rom_descriptor(fw_handle_t handle,
-	const quadlet_t	immediate_key,
-	const quadlet_t	key,
-	const quadlet_t *new_rom_directory,
-	size_t size,
-	__u32 *out_token);
-int fw_remove_config_rom_descriptor(fw_handle_t handle, __u32 token);
+int fw_add_config_rom_descriptor(fw_handle_t handle, u_int32_t *token,
+		   quadlet_t immediate_key, quadlet_t key,
+		   const quadlet_t *data, size_t size);
+int fw_remove_config_rom_descriptor(fw_handle_t handle, u_int32_t token);
 int fw_get_config_rom(fw_handle_t handle, quadlet_t *buffer,
 		   size_t buffersize, size_t *rom_size,
 		   unsigned char *rom_version);

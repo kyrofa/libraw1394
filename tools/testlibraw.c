@@ -15,6 +15,7 @@
 #include <sys/poll.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 #include <arpa/inet.h>
 
 #include "../src/raw1394.h"
@@ -117,10 +118,36 @@ read_topology_map(raw1394handle_t handle)
 		printf("    0x%08x\n", ntohl(map[3 + i]));
 }
 
+static const quadlet_t unit_directory_data[] = {
+	0x00060000,	/* directory_length (CRC left blank)	*/
+	0x1258595a,	/* a bogus unit_specifier_id: XYZ	*/
+	0x13616263,	/* unit_sw_version: abc			*/
+	0x036c7277,	/* a bogus vendor OUI: lrw		*/
+	0x81000003,	/* textual descriptor offset		*/
+	0x17000001,	/* model: 1				*/
+	0x81000007,	/* textual descriptor offset		*/
+
+	0x00050000,	/* descriptor_length (CRC left blank)	*/
+	0x00000000,	/* descriptor_type: text		*/
+	0x00000000,	/* minimal ASCII, English		*/
+	0x6c696272,	/* "libr"				*/
+	0x61773133,	/* "aw13"				*/
+	0x39340000,	/* "94"					*/
+
+	0x00050000,	/* descriptor_length (CRC left blank)	*/
+	0x00000000,	/* descriptor_type: text		*/
+	0x00000000,	/* minimal ASCII, English		*/
+	0x74657374,	/* "test"				*/
+	0x6c696272,	/* "libr"				*/
+	0x61770000,	/* "aw"					*/
+};
+#define IEEE1212_KEY_UNIT_DIRECTORY 0xd1000000
+
 static void
 test_config_rom(raw1394handle_t handle)
 {
 	quadlet_t rom[0x100] = { 0, };
+	u_int32_t token;
 	size_t rom_size;
 	unsigned char rom_version;
 	int i, retval;
@@ -135,7 +162,23 @@ test_config_rom(raw1394handle_t handle)
 		printf("    0x%08x\n", rom[i]);
 
 	retval = raw1394_update_config_rom(handle, rom, rom_size, rom_version);
-	printf("    update_config_rom returned %d\n", retval);
+	perror("    raw1394_update_config_rom failed with error");
+
+	retval = raw1394_add_config_rom_descriptor(handle, &token,
+			0, IEEE1212_KEY_UNIT_DIRECTORY,
+			unit_directory_data, sizeof(unit_directory_data));
+	if (retval) {
+		printf("    raw1394_add_config_rom_descriptor failed with error");
+		return;
+	}
+
+	printf("    added unit '0x58595a:0x616263', reverting in 5 seconds\n");
+	sleep(5);
+	retval = raw1394_remove_config_rom_descriptor(handle, token);
+	if (retval)
+		printf("    raw1394_remove_config_rom_descriptor failed with error");
+	else
+		printf("    unit '0x58595a:0x616263' removed\n");
 }
 
 static void

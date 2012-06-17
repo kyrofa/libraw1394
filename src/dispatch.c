@@ -519,27 +519,24 @@ int raw1394_update_config_rom(raw1394handle_t handle, const quadlet_t
 			new_rom, size, rom_version);
 }
 
-int raw1394_add_config_rom_descriptor(raw1394handle_t handle,
-		const quadlet_t	immediate_key,
-		const quadlet_t	key,
-		const quadlet_t *new_rom_directory,
-		size_t size,
-		__u32 *out_token)
+int raw1394_add_config_rom_descriptor(raw1394handle_t handle, u_int32_t *token,
+		quadlet_t immediate_key, quadlet_t key,
+		const quadlet_t *data, size_t size)
 {
 	if (!handle) {
 		errno = EINVAL;
 		return -1;
 	}
 	if (handle->is_fw)
-		return fw_add_config_rom_descriptor(handle->mode.fw,
-			immediate_key, key, new_rom_directory, size, out_token);
+		return fw_add_config_rom_descriptor(handle->mode.fw, token,
+			immediate_key, key, data, size);
 	else {
-		errno = EINVAL;
+		errno = ENOSYS;
 		return -1;
 	}
 }
 
-int raw1394_remove_config_rom_descriptor(raw1394handle_t handle, __u32 token)
+int raw1394_remove_config_rom_descriptor(raw1394handle_t handle, u_int32_t token)
 {
 	if (!handle) {
 		errno = EINVAL;
@@ -548,7 +545,7 @@ int raw1394_remove_config_rom_descriptor(raw1394handle_t handle, __u32 token)
 	if (handle->is_fw)
 		return fw_remove_config_rom_descriptor(handle->mode.fw, token);
 	else {
-		errno = EINVAL;
+		errno = ENOSYS;
 		return -1;
 	}
 }
