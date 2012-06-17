@@ -251,7 +251,9 @@ int fw_iso_recv_unlisten_channel(fw_handle_t handle,
 int fw_iso_recv_set_channel_mask(fw_handle_t handle, u_int64_t mask);
 void fw_iso_stop(fw_handle_t handle);
 void fw_iso_shutdown(fw_handle_t handle);
-int fw_read_cycle_timer(fw_handle_t handle,
-			u_int32_t *cycle_timer, u_int64_t *local_time);
+int fw_read_cycle_timer(fw_handle_t handle, u_int32_t *cycle_timer,
+			  u_int64_t *local_time);
+int fw_read_cycle_timer_and_clock(fw_handle_t handle, u_int32_t *cycle_timer,
+			  u_int64_t *local_time, clockid_t clk_id);
 
 #endif

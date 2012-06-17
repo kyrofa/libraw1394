@@ -194,12 +194,33 @@ read_cycle_timer(raw1394handle_t handle)
 		perror("\n  - raw1394_read_cycle_timer failed with error");
 		return;
 	}
-
 	printf("\n  - cycle timer: %d seconds, %d cycles, %d sub-cycles\n",
 	       ct >> 25, (ct >> 12) & 0x1fff, ct & 0xfff);
 	seconds = local_time / 1000000;
-	printf("    local time: %lld us = %s",
+	printf("    local time from CLOCK_REALTIME: %lld us = %s",
 	       (unsigned long long)local_time, ctime(&seconds));
+
+	retval = raw1394_read_cycle_timer_and_clock(handle, &ct, &local_time,
+						    CLOCK_MONOTONIC);
+	if (retval < 0) {
+		perror("\n    raw1394_read_cycle_timer_and_clock failed with error");
+		return;
+	}
+	printf("    cycle timer: %d seconds, %d cycles, %d sub-cycles\n",
+	       ct >> 25, (ct >> 12) & 0x1fff, ct & 0xfff);
+	printf("    local time from CLOCK_MONOTONIC: %lld us\n",
+	       (unsigned long long)local_time);
+
+	retval = raw1394_read_cycle_timer_and_clock(handle, &ct, &local_time,
+						    CLOCK_MONOTONIC_RAW);
+	if (retval < 0) {
+		perror("\n    raw1394_read_cycle_timer_and_clock failed with error");
+		return;
+	}
+	printf("    cycle timer: %d seconds, %d cycles, %d sub-cycles\n",
+	       ct >> 25, (ct >> 12) & 0x1fff, ct & 0xfff);
+	printf("    local time from CLOCK_MONOTONIC_RAW: %lld us\n",
+	       (unsigned long long)local_time);
 }
 
 int test_card(int card)

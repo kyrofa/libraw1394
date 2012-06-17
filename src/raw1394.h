@@ -14,6 +14,7 @@
 #define _LIBRAW1394_RAW1394_H
 
 #include <sys/types.h>
+#include <time.h> /* for clockid_t */
 
 #define RAW1394_ARM_READ  1
 #define RAW1394_ARM_WRITE 2
@@ -334,7 +335,22 @@ void raw1394_iso_shutdown(raw1394handle_t handle);
  * @cycle_timer: buffer for Isochronous Cycle Timer
  * @local_time: buffer for local system time in microseconds since Epoch
  *
- * Simultaneously reads the cycle timer register together with the system clock.
+ * Same as raw1394_read_cycle_timer_and_clock() with clk_id = CLOCK_REALTIME,
+ * i.e. the non-monotonic system-wide clock.
+ *
+ * History: New function in libraw1394 v1.3.0.
+ **/
+int raw1394_read_cycle_timer(raw1394handle_t handle,
+			     u_int32_t *cycle_timer, u_int64_t *local_time);
+
+/**
+ * raw1394_read_cycle_timer_and_clock - get the current value of the cycle timer
+ * @handle: libraw1394 handle
+ * @cycle_timer: buffer for Isochronous Cycle Timer
+ * @local_time: buffer for local system time in microseconds
+ * @clk_id: clock from which to get the system time
+ *
+ * Simultaneously reads the cycle timer register together with a system clock.
  *
  * Format of @cycle_timer, from MSB to LSB: 7 bits cycleSeconds (seconds, or
  * number of cycleCount rollovers), 13 bits cycleCount (isochronous cycles, or
@@ -342,10 +358,20 @@ void raw1394_iso_shutdown(raw1394handle_t handle);
  * provided on some hardware). The union of cycleSeconds and cycleCount is the
  * current cycle number. The nominal duration of a cycle is 125 microseconds.
  *
+ * @clk_id chooses the system clock as in the clock_gettime() function.
+ * At least the clocks CLOCK_REALTIME, CLOCK_MONOTONIC, and CLOCK_MONOTONIC_RAW
+ * are supported by the underlying kernel call.
+ *
+ * In case of CLOCK_REALTIME, @local_time are microseconds since the Epoch.
+ * CLOCK_REALTIME is subject to resets; CLOCK_MONOTONIC is subject to gradual
+ * adjustments; CLOCK_MONOTONIC_RAW is the bare hardware clock.
+ *
  * Returns: the error code of the ioctl, or 0 if successful.
+ *
+ * History: New function in libraw1394 v2.1.0.
  **/
-int raw1394_read_cycle_timer(raw1394handle_t handle,
-                             u_int32_t *cycle_timer, u_int64_t *local_time);
+int raw1394_read_cycle_timer_and_clock(raw1394handle_t handle,
+	u_int32_t *cycle_timer, u_int64_t *local_time, clockid_t clk_id);
 
 typedef int raw1394_errcode_t;
 #define raw1394_make_errcode(ack, rcode) (((ack) << 16) | rcode)

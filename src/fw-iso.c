@@ -648,8 +648,8 @@ void fw_iso_shutdown(fw_handle_t handle)
 	handle->iso.fd = -1;
 }
 
-int fw_read_cycle_timer(fw_handle_t handle,
-			u_int32_t *cycle_timer, u_int64_t *local_time)
+int fw_read_cycle_timer(fw_handle_t handle, u_int32_t *cycle_timer,
+			  u_int64_t *local_time)
 {
 	int err;
 	struct fw_cdev_get_cycle_timer ctr = { 0 };
@@ -658,6 +658,21 @@ int fw_read_cycle_timer(fw_handle_t handle,
 	if (!err) {
 		*cycle_timer = ctr.cycle_timer;
 		*local_time  = ctr.local_time;
+	}
+	return err;
+}
+
+int fw_read_cycle_timer_and_clock(fw_handle_t handle, u_int32_t *cycle_timer,
+			  u_int64_t *local_time, clockid_t clk_id)
+{
+	int err;
+	struct fw_cdev_get_cycle_timer2 ctr = {.clk_id = clk_id};
+
+	err = ioctl(handle->ioctl_fd, FW_CDEV_IOC_GET_CYCLE_TIMER2, &ctr);
+	if (!err) {
+		*cycle_timer = ctr.cycle_timer;
+		*local_time  = ctr.tv_sec * 1000000ULL +
+			       ctr.tv_nsec / 1000;
 	}
 	return err;
 }

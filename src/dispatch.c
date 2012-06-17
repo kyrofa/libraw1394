@@ -791,3 +791,19 @@ int raw1394_read_cycle_timer(raw1394handle_t handle,
 		return ieee1394_read_cycle_timer(handle->mode.ieee1394,
 			cycle_timer, local_time);
 }
+
+int raw1394_read_cycle_timer_and_clock(raw1394handle_t handle,
+	u_int32_t *cycle_timer, u_int64_t *local_time, clockid_t clk_id)
+{
+	if (!handle) {
+		errno = EINVAL;
+		return -1;
+	}
+	if (handle->is_fw)
+		return fw_read_cycle_timer_and_clock(handle->mode.fw,
+			cycle_timer, local_time, clk_id);
+	else {
+		errno = ENOSYS;
+		return -1;
+	}
+}
