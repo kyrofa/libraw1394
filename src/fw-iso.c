@@ -473,7 +473,7 @@ iso_init(fw_handle_t handle, int type,
 		prot = PROT_READ | PROT_WRITE;
 		break;
 	case FW_CDEV_ISO_CONTEXT_RECEIVE:
-		prot = PROT_READ;
+		prot = PROT_READ | PROT_WRITE;
 		break;
 	default:
 		errno = EINVAL;
