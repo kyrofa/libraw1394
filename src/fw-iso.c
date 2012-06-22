@@ -491,7 +491,7 @@ iso_init(fw_handle_t handle, int type,
 	handle->iso.xmit_handler = xmit_handler;
 	handle->iso.recv_handler = recv_handler;
 	handle->iso.buf_packets = buf_packets;
-	handle->iso.max_packet_size = round_to_power_of_two(max_packet_size);
+	handle->iso.max_packet_size = max_packet_size;
 	handle->iso.packet_phase = 0;
 	handle->iso.packet_count = 0;
 	handle->iso.packets =
