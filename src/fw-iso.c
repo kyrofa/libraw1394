@@ -437,18 +437,6 @@ int fw_iso_recv_flush(fw_handle_t handle)
 	return ioctl(handle->iso.fd, FW_CDEV_IOC_FLUSH_ISO, &flush);
 }
 
-static unsigned int
-round_to_power_of_two(unsigned int value)
-{
-	unsigned int pot;
-
-	pot = 1;
-	while (pot < value)
-		pot <<= 1;
-
-	return pot;
-}
-
 static int
 iso_init(fw_handle_t handle, int type,
 	 raw1394_iso_xmit_handler_t xmit_handler,
@@ -461,22 +449,10 @@ iso_init(fw_handle_t handle, int type,
 {
 	struct fw_cdev_create_iso_context create;
 	struct epoll_event ep;
-	int retval, prot;
+	int retval;
 
 	if (handle->iso.fd != -1) {
 		errno = EBUSY;
-		return -1;
-	}
-
-	switch (type) {
-	case FW_CDEV_ISO_CONTEXT_TRANSMIT:
-		prot = PROT_READ | PROT_WRITE;
-		break;
-	case FW_CDEV_ISO_CONTEXT_RECEIVE:
-		prot = PROT_READ | PROT_WRITE;
-		break;
-	default:
-		errno = EINVAL;
 		return -1;
 	}
 
@@ -538,7 +514,7 @@ iso_init(fw_handle_t handle, int type,
 
 	handle->iso.buffer =
 		mmap(NULL, buf_packets * handle->iso.max_packet_size,
-		     prot, MAP_SHARED, handle->iso.fd, 0);
+		     PROT_READ | PROT_WRITE, MAP_SHARED, handle->iso.fd, 0);
 
 	if (handle->iso.buffer == MAP_FAILED) {
 		close(handle->iso.fd);
