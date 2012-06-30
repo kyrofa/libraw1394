@@ -200,7 +200,6 @@ int raw1394_iso_recv_init(raw1394handle_t handle,
  * @buf_packets: number of isochronous packets to buffer
  * @max_packet_size: largest packet you need to handle, in bytes (not including
  * the isochronous header)
- * @speed: speed at which to receive
  * @irq_interval: maximum latency of wake-ups, in packets (-1 if you don't care)
  *
  * Allocates all user and kernel resources necessary for isochronous reception.
