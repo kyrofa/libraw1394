@@ -226,10 +226,14 @@ read_cycle_timer(raw1394handle_t handle)
 int test_card(int card)
 {
 	raw1394handle_t handle;
-	struct raw1394_portinfo pinf;
+	struct raw1394_portinfo *portinfo;
 	tag_handler_t std_handler;
 	struct pollfd pfd;
 	int i, l, n, numcards, retval, s;
+
+	portinfo = malloc(sizeof(*portinfo) * (card + 1));
+	if (!portinfo)
+		return -1;
 
 	handle = raw1394_new_handle();
 
@@ -240,6 +244,7 @@ int test_card(int card)
 			perror("couldn't get handle");
 			printf(not_loaded);
 		}
+		free(portinfo);
 		return -1;
 	}
 
@@ -249,7 +254,7 @@ int test_card(int card)
 		       raw1394_get_generation(handle));
 	}
 
-	numcards = raw1394_get_port_info(handle, &pinf, 1);
+	numcards = raw1394_get_port_info(handle, portinfo, card + 1);
 	if (numcards < card)
 		perror("couldn't get card info");
 	else if (card == 0)
@@ -259,7 +264,7 @@ int test_card(int card)
 	if (numcards <= card)
 		goto out;
 
-	printf("\ncard %d, name: %s\n", card, pinf.name);
+	printf("\ncard %d, name: %s\n", card, portinfo[card].name);
 
 	if (raw1394_set_port(handle, card) < 0) {
 		perror("couldn't set port");
@@ -344,6 +349,7 @@ int test_card(int card)
 		perror("poll failed");
 out:
 	raw1394_destroy_handle(handle);
+	free(portinfo);
 	return numcards;
 }
 
