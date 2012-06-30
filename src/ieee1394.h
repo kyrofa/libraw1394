@@ -13,11 +13,11 @@
 #define L1394_ACK_BUSY_A               0x5
 #define L1394_ACK_BUSY_B               0x6
 #define L1394_ACK_DATA_ERROR           0xd
-#define L1394_ACK_TYPE_ERROR           0xe 
+#define L1394_ACK_TYPE_ERROR           0xe
 
 #define L1394_SPEED_100                0x0
 #define L1394_SPEED_200                0x1
-#define L1394_SPEED_400                0x2 
+#define L1394_SPEED_400                0x2
 /* added in libraw1394 v2.1.0: */
 #define L1394_SPEED_BETA               0x3
 #define L1394_SPEED_800                0x3
@@ -36,6 +36,6 @@
 #define L1394_SELFID_PORT_CHILD        0x3
 #define L1394_SELFID_PORT_PARENT       0x2
 #define L1394_SELFID_PORT_NCONN        0x1
-#define L1394_SELFID_PORT_NONE         0x0   
+#define L1394_SELFID_PORT_NONE         0x0
 
 #endif /* _LIBRAW1394_IEEE1394_H */
