@@ -543,6 +543,22 @@ nodeid_t raw1394_get_irm_id(raw1394handle_t handle);
  **/
 int raw1394_get_nodecount(raw1394handle_t handle);
 
+/**
+ * raw1394_get_speed - get maximum speed between a node and local node
+ * @handle: libraw1394 handle
+ * @node: node ID
+ *
+ * Returns: The speed code of the maximum possible transmission speed between
+ * the node and the local node, taking both link speeds and all intermediate
+ * phy speeds into account.  On error, returns -1 and sets errno.
+ *
+ * Bugs: Like much of the rest of the libraw1394 API, this call is prone to
+ * races with bus resets.
+ *
+ * History: New function in libraw1394 v2.1.0.
+ **/
+int raw1394_get_speed(raw1394handle_t handle, nodeid_t node);
+
 struct raw1394_portinfo {
 	int nodes;
 	char name[32];

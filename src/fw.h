@@ -144,6 +144,7 @@ int fw_get_fd(fw_handle_t handle);
 nodeid_t fw_get_local_id(fw_handle_t handle);
 nodeid_t fw_get_irm_id(fw_handle_t handle);
 int fw_get_nodecount(fw_handle_t handle);
+int fw_get_speed(fw_handle_t handle, nodeid_t node);
 int fw_get_port_info(fw_handle_t handle, struct raw1394_portinfo *pinf,
 		   int maxports);
 int fw_set_port(fw_handle_t handle, int port);

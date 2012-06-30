@@ -155,6 +155,20 @@ int raw1394_get_nodecount(raw1394handle_t handle)
 		return ieee1394_get_nodecount(handle->mode.ieee1394);
 }
 
+int raw1394_get_speed(raw1394handle_t handle, nodeid_t node)
+{
+	if (!handle) {
+		errno = EINVAL;
+		return -1;
+	}
+	if (handle->is_fw)
+		return fw_get_speed(handle->mode.fw, node);
+	else {
+		errno = ENOSYS;
+		return -1;
+	}
+}
+
 int raw1394_get_port_info(raw1394handle_t handle, struct raw1394_portinfo *pinf,
                           int maxports)
 {

@@ -229,7 +229,7 @@ int test_card(int card)
 	struct raw1394_portinfo pinf;
 	tag_handler_t std_handler;
 	struct pollfd pfd;
-	int i, n, numcards, retval;
+	int i, l, n, numcards, retval, s;
 
 	handle = raw1394_new_handle();
 
@@ -267,10 +267,22 @@ int test_card(int card)
 	}
 
 	n = raw1394_get_nodecount(handle);
-	printf("%d nodes on bus, local ID is %d, IRM is %d\n",
-	       n,
-	       raw1394_get_local_id(handle) & 0x3f,
-	       raw1394_get_irm_id(handle) & 0x3f);
+	l = raw1394_get_local_id(handle) & 0x3f;
+	i = raw1394_get_irm_id(handle) & 0x3f;
+	printf("%d nodes on bus, local ID is %d, IRM is %d\n", n, l, i);
+
+	if (n > 0)
+		printf("\n  - getting speeds between between nodes and local node\n");
+	for (i = 0; i < n; i++) {
+		printf("    node %d: ", i);
+		fflush(stdout);
+		s = raw1394_get_speed(handle, 0xffc0 | i);
+		if (s >= 0)
+			printf("S%d00%s\n", 1 << s,
+			       i == l ? " (local node)" : "");
+		else
+			perror("unknown");
+	}
 
 	if (n > 0) {
 		printf("\n  - doing transactions with custom tag handler\n");

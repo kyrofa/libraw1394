@@ -602,6 +602,34 @@ int fw_get_nodecount(fw_handle_t handle)
 	return (handle->reset.root_node_id & 0x3f) + 1;
 }
 
+int fw_get_speed(fw_handle_t handle, nodeid_t node)
+{
+	int i;
+
+	if ((node & ~0x3f) != 0xffc0) {
+		errno = ENOSYS;
+		return -1;
+	}
+
+	if (node > handle->reset.root_node_id) {
+		errno = fw_errcode_to_errno(-RCODE_NO_ACK);
+		return -1;
+	}
+
+	i = handle->nodes[node & 0x3f];
+	if (i == -1) {
+		errno = fw_errcode_to_errno(-RCODE_NO_ACK);
+		return -1;
+	}
+
+	if (handle->generation != handle->devices[i].generation) {
+		errno = fw_errcode_to_errno(-RCODE_GENERATION);
+		return -1;
+	}
+
+	return ioctl(handle->devices[i].fd, FW_CDEV_IOC_GET_SPEED);
+}
+
 int fw_get_port_info(fw_handle_t handle,
 			  struct raw1394_portinfo *pinf,
 			  int maxports)
