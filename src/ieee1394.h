@@ -18,6 +18,11 @@
 #define L1394_SPEED_100                0x0
 #define L1394_SPEED_200                0x1
 #define L1394_SPEED_400                0x2 
+/* added in libraw1394 v2.1.0: */
+#define L1394_SPEED_BETA               0x3
+#define L1394_SPEED_800                0x3
+#define L1394_SPEED_1600               0x4
+#define L1394_SPEED_3200               0x5
 
 #define L1394_SELFID_PWRCL_NO_POWER    0x0
 #define L1394_SELFID_PWRCL_PROVIDE_15W 0x1

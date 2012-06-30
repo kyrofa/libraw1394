@@ -79,9 +79,13 @@ typedef struct raw1394_arm_request_response {
 /* new ISO API */
 
 enum raw1394_iso_speed {
-	RAW1394_ISO_SPEED_100 = 0,
-	RAW1394_ISO_SPEED_200 = 1,
-	RAW1394_ISO_SPEED_400 = 2,
+	RAW1394_ISO_SPEED_100	= 0,
+	RAW1394_ISO_SPEED_200	= 1,
+	RAW1394_ISO_SPEED_400	= 2,
+	/* added in libraw1394 v2.1.0: */
+	RAW1394_ISO_SPEED_800	= 3,
+	RAW1394_ISO_SPEED_1600	= 4,
+	RAW1394_ISO_SPEED_3200	= 5,
 };
 
 /* The dma mode when receiving iso data. Must be supported by chipset */
