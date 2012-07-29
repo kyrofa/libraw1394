@@ -1,3 +1,43 @@
+2012-07-29  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * Changelog, NEWS: update to version 2.1.0
+
+2012-06-30  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * Add raw1394_get_speed() API
+
+  * Trivial whitespace normalization in ieee1394.h and raw1394.h
+
+  * Add 1394b speed codes to <libraw1394/{ieee,raw}1394.h>
+
+  * Fix documentation of raw1394_iso_multichannel_recv_init()
+
+2012-06-24  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * Remove now unused code
+
+2012-06-22  Igor Kuzmin <parafin@ximea.com>
+
+  * Disable power-of-2 alignment of isochronous I/O buffers
+
+  * Enable write access to isochronous reception buffer
+
+2012-06-18  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * Increase libtool version to 2.1.0
+
+  * Add raw1394_read_cycle_timer_and_clock() API
+
+  * Tweak raw1394_add_config_rom_descriptor() API, add documentation and test case
+
+2011-03-24  B.J. Buchalter <bj@mhlabs.com>
+
+  * Add raw1394_add_config_rom_descriptor() and raw1394_remove_config_rom_descriptor() API
+
+2012-06-02  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * configure.ac, Changelog, NEWS etc.: update to version 2.0.9
+
 2012-05-25  Stefan Richter <stefanr@s5r6.in-berlin.de>
 
   * Remove unused code
