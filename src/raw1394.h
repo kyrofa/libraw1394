@@ -369,7 +369,7 @@ int raw1394_read_cycle_timer(raw1394handle_t handle,
  * CLOCK_REALTIME is subject to resets; CLOCK_MONOTONIC is subject to gradual
  * adjustments; CLOCK_MONOTONIC_RAW is the bare hardware clock.
  *
- * Returns: the error code of the ioctl, or 0 if successful.
+ * Returns: 0 on success or -1 on failure (sets errno)
  *
  * History: New function in libraw1394 v2.1.0.
  **/
