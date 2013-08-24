@@ -28,10 +28,13 @@ raw1394handle_t raw1394_new_handle(void)
 	fw_handle_t fw_handle;
 	raw1394handle_t handle;
 	struct raw1394_portinfo port;
+	int errno_bak;
 
 	handle = (raw1394handle_t) malloc(sizeof(struct raw1394_handle));
 	if (!handle)
 		return NULL;
+
+	errno_bak = errno; /* workaround for faulty legacy applications */
 
 	ieee1394_handle = ieee1394_new_handle();
 	if (!ieee1394_handle)
@@ -44,6 +47,8 @@ raw1394handle_t raw1394_new_handle(void)
 	}
 	ieee1394_destroy_handle(ieee1394_handle);
 try_fw:
+	errno = errno_bak;
+
 	fw_handle = fw_new_handle();
 	if (fw_handle) {
 		handle->is_fw = 1;
@@ -72,10 +77,13 @@ raw1394handle_t raw1394_new_handle_on_port(int port)
 	ieee1394handle_t ieee1394_handle;
 	fw_handle_t fw_handle;
 	raw1394handle_t handle;
+	int errno_bak;
 
 	handle = (raw1394handle_t) malloc(sizeof(struct raw1394_handle));
 	if (!handle)
 		return NULL;
+
+	errno_bak = errno; /* workaround for faulty legacy applications */
 
 	ieee1394_handle = ieee1394_new_handle_on_port(port);
 	if (ieee1394_handle) {
@@ -83,6 +91,8 @@ raw1394handle_t raw1394_new_handle_on_port(int port)
 		handle->mode.ieee1394 = ieee1394_handle;
 		return handle;
 	}
+
+	errno = errno_bak;
 
 	fw_handle = fw_new_handle_on_port(port);
 	if (fw_handle) {
