@@ -212,7 +212,7 @@ iso_handler(raw1394handle_t handle, unsigned char *data,
 int main(int argc, char **argv)
 {
         raw1394handle_t handle;
-        int i;
+        int i, ret;
 
         parse_args(argc, argv);
 
@@ -236,10 +236,10 @@ int main(int argc, char **argv)
                         exit(1);
                 }
 
-                raw1394_set_port(handle, which_port);
-        } while (errno == ESTALE);
+                ret = raw1394_set_port(handle, which_port);
+        } while (ret < 0 && errno == ESTALE);
 
-        if (errno) {
+        if (ret < 0) {
                 perror("raw1394_set_port");
                 exit(1);
         }
