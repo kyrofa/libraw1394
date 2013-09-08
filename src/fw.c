@@ -793,7 +793,7 @@ handle_arm_request(raw1394handle_t handle, struct address_closure *ac,
 	struct fw_cdev_send_response response;
 	arm_options_t type;
 	size_t in_length;
-	int pos;
+	int pos, retval;
 
 	pos = offset - allocation->offset;
 	response.handle = kernel_handle;
@@ -898,8 +898,10 @@ handle_arm_request(raw1394handle_t handle, struct address_closure *ac,
 	rrb->response.buffer = rrb->data + in_length;
 	memcpy(rrb->response.buffer, allocation->data + pos, response.length);
 
-	return fwhandle->arm_tag_handler(handle, allocation->tag, type,
-					 length, &rrb->request_response);
+	retval = fwhandle->arm_tag_handler(handle, allocation->tag, type,
+					   length, &rrb->request_response);
+	free(rrb);
+	return retval;
 }
 
 int
