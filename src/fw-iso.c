@@ -322,10 +322,9 @@ static int handle_iso_event(raw1394handle_t handle,
 	{
 		int cycle;
 
-		fwhandle->iso.packet_count -= fwhandle->iso.irq_interval;
-
 		/* Check whether the ABI version provides iso tx timestamps. */
 		if (interrupt->header_length) {
+			fwhandle->iso.packet_count -= interrupt->header_length/4;
 			/*
 			 * Take the cycle of the last packet transmitted, add
 			 * the number of packets currently queued, plus one, and
@@ -335,6 +334,7 @@ static int handle_iso_event(raw1394handle_t handle,
 			cycle = be32_to_cpu(interrupt->header[interrupt->header_length/4 - 1]);
 			cycle &= 0x1fff;
 		} else {
+			fwhandle->iso.packet_count -= fwhandle->iso.irq_interval;
 			/*
 			 * Bogusly faking it again.  Assume that the last packet
 			 * transmitted was transmitted on interrupt->cycle.
