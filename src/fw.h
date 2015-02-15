@@ -131,7 +131,7 @@ struct fw_handle {
 		struct fw_cdev_iso_packet *packets;
 	} iso;
 
-	char buffer[BUFFER_SIZE];
+	__u64 buffer[BUFFER_SIZE / sizeof(__u64)];
 };
 typedef struct fw_handle *fw_handle_t;
 
