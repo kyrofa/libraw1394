@@ -1,3 +1,29 @@
+2015-04-28  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * configure.ac, Changelog, NEWS: update to version 2.1.1
+
+2015-02-15  Aaro Koskinen <aaro.koskinen@iki.fi>
+
+  * Align fw_handle buffer for 64-bit access
+
+2014-06-10  Jonathan Woithe <jwoithe@just42.net>
+
+  * Prevent requests for previously provided iso tx packets
+
+2013-09-08  Lee Cewd <chasewind_5@hotmail.com>
+
+  * Fix memory leak in response handler
+
+2013-08-24  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * Save and restore errno in raw1394_new_handle{,_on_port} for legacy applications
+
+  * tools: Fix startup of dumpiso and sendiso on juju
+
+2012-07-31  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * Documentation improvement: return code of raw1394_read_cycle_timer{,_and_clock}
+
 2012-07-29  Stefan Richter <stefanr@s5r6.in-berlin.de>
 
   * Changelog, NEWS: update to version 2.1.0

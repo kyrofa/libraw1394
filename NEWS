@@ -1,5 +1,15 @@
 libraw1394 Release Notes
 
+Version 2.1.1:
+- Fix backwards moving cycle timer in isochronous transmit.
+  The problem has been observed with audio I/O on different systems.
+- Fix crash with SIGBUS on SPARC and similar architectures.
+- Fix memory leak in address range mapping response handler.
+- Fix errno reporting to applications which relied on behavior of
+  libraw1394 1.x.
+- Fix errno checking in the dumpiso and sendiso example programs.
+- Minor documentation improvement.
+
 Version 2.1.0:
 - Behavior changes of the backend to firewire-core:
     - The isochronous reception buffer is now mapped read/writable
