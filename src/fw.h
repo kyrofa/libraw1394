@@ -12,6 +12,7 @@
 #ifndef LIBRAW1394_FW_H
 #define LIBRAW1394_FW_H
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <byteswap.h>
 
@@ -48,7 +49,7 @@ struct fw_handle;
 
 struct epoll_closure {
 	int (*func)(raw1394handle_t handle,
-		    struct epoll_closure *closure, __uint32_t events);
+		    struct epoll_closure *closure, uint32_t events);
 };
 
 struct port {

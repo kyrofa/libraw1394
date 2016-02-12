@@ -187,7 +187,7 @@ scan_devices(fw_handle_t handle)
 
 static int
 handle_echo_pipe(raw1394handle_t handle,
-		 struct epoll_closure *ec, __uint32_t events)
+		 struct epoll_closure *ec, uint32_t events)
 {
 	quadlet_t value;
 
@@ -258,7 +258,7 @@ handle_fcp_request(raw1394handle_t handle, struct address_closure *ac,
 
 static int
 handle_device_event(raw1394handle_t handle,
-		    struct epoll_closure *ec, __uint32_t events)
+		    struct epoll_closure *ec, uint32_t events)
 {
 	fw_handle_t fwhandle = handle->mode.fw;
 	union fw_cdev_event *u;
@@ -421,7 +421,7 @@ process_inotify_event(fw_handle_t fwhandle, struct inotify_event *event)
 
 static int
 handle_inotify(raw1394handle_t handle, struct epoll_closure *ec,
-	       __uint32_t events)
+	       uint32_t events)
 {
 	fw_handle_t fwhandle = handle->mode.fw;
 	struct inotify_event *event;

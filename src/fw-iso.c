@@ -303,7 +303,7 @@ int fw_iso_recv_start(fw_handle_t handle, int start_on_cycle,
 }
 
 static int handle_iso_event(raw1394handle_t handle,
-			    struct epoll_closure *closure, __uint32_t events)
+			    struct epoll_closure *closure, uint32_t events)
 {
 	fw_handle_t fwhandle = handle->mode.fw;
 	struct fw_cdev_event_iso_interrupt *interrupt;
