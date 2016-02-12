@@ -211,6 +211,7 @@ read_cycle_timer(raw1394handle_t handle)
 	printf("    local time from CLOCK_MONOTONIC: %lld us\n",
 	       (unsigned long long)local_time);
 
+#if defined(CLOCK_MONOTONIC_RAW)
 	retval = raw1394_read_cycle_timer_and_clock(handle, &ct, &local_time,
 						    CLOCK_MONOTONIC_RAW);
 	if (retval < 0) {
@@ -221,6 +222,7 @@ read_cycle_timer(raw1394handle_t handle)
 	       ct >> 25, (ct >> 12) & 0x1fff, ct & 0xfff);
 	printf("    local time from CLOCK_MONOTONIC_RAW: %lld us\n",
 	       (unsigned long long)local_time);
+#endif
 }
 
 int test_card(int card)
