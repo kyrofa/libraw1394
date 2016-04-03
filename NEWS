@@ -1,5 +1,9 @@
 libraw1394 Release Notes
 
+Version 2.1.2:
+- Fix build with some alternative C libraries and with some older
+  build environments.  No functional changes.
+
 Version 2.1.1:
 - Fix backwards moving cycle timer in isochronous transmit.
   The problem has been observed with audio I/O on different systems.

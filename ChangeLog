@@ -1,3 +1,13 @@
+2016-04-03  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * configure.ac, Changelog, NEWS: update to version 2.1.2
+
+2016-02-12  Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+
+  * testlibraw: build the CLOCK_MONOTONIC_RAW test conditionally
+
+  * Use <stdint.h> types instead of non-standard types
+
 2015-04-28  Stefan Richter <stefanr@s5r6.in-berlin.de>
 
   * configure.ac, Changelog, NEWS: update to version 2.1.1
@@ -29,6 +39,8 @@
   * Changelog, NEWS: update to version 2.1.0
 
 2012-06-30  Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+  * testlibraw: Fix printing of card name
 
   * Add raw1394_get_speed() API
 
