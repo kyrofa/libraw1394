@@ -39,6 +39,14 @@ cpu_to_be32(__u32 q)
   return be32_to_cpu(q);
 }
 
+static inline __u32
+le32_to_cpu(__u32 q)
+{
+  union { char c[4]; __u32 q; } u = { { 1, 0, 0, 0 } };
+
+  return u.q == 0 ? bswap_32(q) : q;
+}
+
 #define ARRAY_LENGTH(a) (sizeof (a) / sizeof (a)[0])
 
 #define BUFFER_SIZE	(16 * 1024)
@@ -128,6 +136,10 @@ struct fw_handle {
 		raw1394_iso_recv_handler_t recv_handler;
 		unsigned char *buffer, *buffer_end, *head;
 		unsigned char *tail, *first_payload;
+		unsigned char *valid_data_end;
+		unsigned char *current_buffer_section;
+		unsigned char *split_packet_buffer;
+		enum { PACKET_NOT_SPLIT, PACKET_IS_SPLIT } packet_split_state;
 
 		struct fw_cdev_iso_packet *packets;
 	} iso;

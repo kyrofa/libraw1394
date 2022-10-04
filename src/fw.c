@@ -447,6 +447,20 @@ int fw_loop_iterate(raw1394handle_t handle)
 	struct epoll_closure *closure;
 	struct epoll_event ep[32];
 
+	// Before starting a blocking wait on data, check to see if we have any deferred
+	// data already in the queue waiting to be handled.
+	if (handle->mode.fw->iso.type == FW_CDEV_ISO_CONTEXT_RECEIVE_MULTICHANNEL) {
+		unsigned char *section_end = handle->mode.fw->iso.current_buffer_section + handle->mode.fw->iso.max_packet_size;
+		if (section_end > handle->mode.fw->iso.buffer_end)
+			section_end = handle->mode.fw->iso.buffer_end;
+
+		if (handle->mode.fw->iso.tail < section_end && handle->mode.fw->iso.tail < handle->mode.fw->iso.valid_data_end) {
+			struct fw_cdev_event_iso_interrupt_mc *interrupt = (struct fw_cdev_event_iso_interrupt_mc *) handle->mode.fw->buffer;
+			interrupt->type = FW_CDEV_EVENT_ISO_INTERRUPT_MULTICHANNEL;
+			return handle->mode.fw->iso.closure.func(handle, NULL, 0);
+		}
+	}
+
 	count = epoll_wait(handle->mode.fw->epoll_fd, ep, ARRAY_LENGTH(ep), -1);
 	if (count < 0)
 		return -1;
